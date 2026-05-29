@@ -24,3 +24,12 @@ xcuserdata/
 
 # Swift Package Manager
 .swiftpm/
+
+# Recovery backups & editor/script backup files (never commit)
+_RECOVERY_BACKUP_*/
+*.bak
+*.bak.*
+*.collision.bak.*
+*.compfix.bak.*
+*.final.bak.*
+*.uiapp.bak
