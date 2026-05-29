@@ -1,0 +1,13 @@
+SUBSCRIPTION GROUP
+Reference Name: Sacred Bill Tracker Pro
+Group ID: 22047990
+
+PRODUCT IDs
+com.sacredbilltracker.app.pro.monthly
+com.sacredbilltracker.app.pro.yearly
+
+These product IDs are hardcoded in:
+SacredBillTracker/Services/StoreKit/ProductIdentifiers.swift
+SacredBillTracker/Configuration.storekit
+
+They MUST match exactly in App Store Connect → Monetization → Subscriptions.

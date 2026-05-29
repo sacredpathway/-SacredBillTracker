@@ -1,0 +1,91 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>SacredBillTracker — Premium Polish Preview</title>
+<style>
+  :root{
+    --gold:#D4AF37; --goldTextLight:#8A6A12; --goldTextDark:#E6C25C; --onGold:#1C1C1E;
+    --hair:rgba(212,175,55,.30); --redLight:#D70015; --redDark:#FF453A; --redTextDark:#FF6961;
+  }
+  body{margin:0;background:#1d1d1f;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#eee;padding:24px}
+  h1{font-size:20px;margin:0 0 4px} .note{color:#9a9a9a;font-size:13px;margin:0 0 18px;max-width:760px}
+  .label{font-size:11px;color:#9a9a9a;margin:24px 0 8px;text-transform:uppercase;letter-spacing:.1em}
+  .grid{display:flex;flex-wrap:wrap;gap:20px}
+  .phone{width:280px;border-radius:28px;overflow:hidden;border:1px solid #333;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  /* LIGHT (system grouped) */
+  .scr{min-height:500px;padding:16px 14px 60px;position:relative;background:#F2F2F7;color:#111}
+  .card{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:14px;margin-bottom:12px;
+        box-shadow:0 4px 14px rgba(0,0,0,.06)}
+  .muted{color:#6b6b70;font-size:12px}
+  /* DARK (system grouped) */
+  .scr.dark{background:#000;color:#fff}
+  .scr.dark .card{background:#1C1C1E;border-color:var(--hair);box-shadow:0 4px 14px rgba(0,0,0,.5)}
+  .scr.dark .muted{color:#9a9aa0}
+  .nav{font-size:22px;font-weight:800;margin:6px 2px 14px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:7px 0}
+  .big{font-size:22px;font-weight:800}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;color:var(--goldTextLight)}
+  .dark .eyebrow{color:var(--goldTextDark)}
+  .btn{display:block;text-align:center;background:var(--gold);color:var(--onGold);font-weight:800;border-radius:12px;padding:12px;margin-top:10px}
+  .btn2{display:block;text-align:center;background:rgba(212,175,55,.12);color:var(--goldTextLight);
+        border:1px solid rgba(212,175,55,.55);font-weight:800;border-radius:12px;padding:11px;margin-top:8px}
+  .dark .btn2{color:var(--goldTextDark)}
+  .ico{width:30px;height:30px;border-radius:8px;background:var(--gold);display:inline-flex;align-items:center;justify-content:center;color:var(--onGold);font-weight:800;font-size:13px}
+  /* status badges */
+  .bOver{color:#fff;background:var(--redLight);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800}
+  .dark .bOver{background:var(--redDark)}
+  .bPaid{color:#1b7a2e;background:rgba(40,170,70,.16);border:1px solid rgba(40,170,70,.4);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700}
+  .pillGold{color:var(--goldTextLight);background:rgba(212,175,55,.16);border:1px solid var(--hair);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700}
+  .dark .pillGold{color:var(--goldTextDark)}
+  .overTxt{color:var(--redLight);font-weight:700;font-size:12px} .dark .overTxt{color:var(--redTextDark)}
+  .tabbar{position:absolute;left:0;right:0;bottom:0;height:50px;background:#F2F2F7;border-top:1px solid #ddd;display:flex;justify-content:space-around;align-items:center;font-size:10px;color:#8a8a8e}
+  .dark .tabbar{background:#000;border-top-color:#222;color:#8a8a8e}
+  .tabbar .on{color:var(--goldTextLight)} .dark .tabbar .on{color:var(--goldTextDark)}
+</style>
+
+<h1>SacredBillTracker — Premium Polish</h1>
+<p class="note">Same layout, neutral system surfaces — upgraded to premium gold (<b>#D4AF37</b>) with stronger true-red statuses (<b>#D70015</b> / <b>#FF453A</b>), a subtle gold card hairline, and softer shadows. Accurate design preview, not a simulator screenshot — final on-device shots need an Xcode build.</p>
+
+<div class="label">Light mode</div>
+<div class="grid">
+  <div class="phone"><div class="scr">
+    <div class="nav">Dashboard</div>
+    <div class="card"><p class="eyebrow">Financial Overview</p>
+      <div class="row"><span class="muted">Personal Bills</span><span class="big">$5,766.91</span></div>
+      <div class="row"><span class="muted">Business Bills</span><span class="big">$27,209.30</span></div></div>
+    <div class="card"><div class="row"><span><b>76</b> <span class="muted">score</span></span><span class="bOver">Needs attention</span></div></div>
+    <a class="btn">+ Add Bill</a>
+    <div class="tabbar"><span class="on">▦ Dashboard</span><span>≣ Bills</span><span>▤ Cal</span><span>◔ Reports</span><span>⚙</span></div>
+  </div></div>
+
+  <div class="phone"><div class="scr">
+    <div class="nav">Bills</div>
+    <div class="card"><div class="row"><span><span class="ico">⚡</span> <b>AT&amp;T</b></span><span class="big">$600</span></div>
+      <div class="row"><span class="muted">Business · Utilities</span><span class="bPaid">Paid</span></div></div>
+    <div class="card"><div class="row"><span><span class="ico">🚚</span> <b>Truck Note</b></span><span class="big">$1,450</span></div>
+      <div class="row"><span class="overTxt">3 days overdue</span><span class="bOver">Overdue</span></div></div>
+    <a class="btn2">Filter: Overdue</a>
+    <div class="tabbar"><span>▦</span><span class="on">≣ Bills</span><span>▤ Cal</span><span>◔ Reports</span><span>⚙</span></div>
+  </div></div>
+</div>
+
+<div class="label">Dark mode</div>
+<div class="grid">
+  <div class="phone"><div class="scr dark">
+    <div class="nav">Reports</div>
+    <div class="card"><div class="row"><span class="muted">Household</span><span class="big">$5,766.91</span></div>
+      <div class="row"><span class="muted">Business</span><span class="big">$27,209.30</span></div></div>
+    <div class="card"><p class="eyebrow">Category totals</p>
+      <div class="row"><span>Pending</span><span class="pillGold">$285.02</span></div>
+      <div class="row"><span>Overdue</span><span class="bOver">$1,450.00</span></div></div>
+    <div class="tabbar"><span>▦</span><span>≣</span><span>▤</span><span class="on">◔ Reports</span><span>⚙</span></div>
+  </div></div>
+
+  <div class="phone"><div class="scr dark">
+    <div class="nav">Sacred Focus+</div>
+    <div class="card"><p class="eyebrow">Pro</p>
+      <div class="muted">Unlock CPA export, insights &amp; cash-flow forecasts.</div>
+      <a class="btn">Start 7-day free trial</a><a class="btn2">Restore Purchase</a></div>
+    <div class="card"><div class="row"><span><span class="ico">💼</span> Income (This Month)</span><span class="big">$24,714</span></div></div>
+    <div class="tabbar"><span>▦</span><span>≣</span><span>▤</span><span>◔</span><span class="on">⚙</span></div>
+  </div></div>
+</div>

@@ -1,0 +1,35 @@
+=== xcodebuild build (Debug, simulator) ===
+Debug exit: 0
+
+=== xcodebuild build (Release, simulator) ===
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Services/BillsRealtimeService.swift:48:30: warning: 'postgresChange(_:schema:table:filter:)' is deprecated: Use the new filter syntax instead.
+        let stream = channel.postgresChange(
+                             ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Services/BillsRealtimeService.swift:55:23: warning: 'subscribe()' is deprecated: Use `subscribeWithError` instead
+        await channel.subscribe()
+                      ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift:42:52: warning: 'timeSensitive' was deprecated in iOS 15.0: Use time-sensitive entitlement
+                options: [.alert, .badge, .sound, .timeSensitive]
+                                                   ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift:261:43: warning: reference to captured var 'payload' in concurrently-executing code; this is an error in the Swift 6 language mode
+            self.pendingDeepLinkPayload = payload
+                                          ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/NotificationSettingsView.swift:164:10: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead.
+        .onChange(of: prefs.enabledCategories) { _ in
+         ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift:61:13: warning: variable 'didFetch' was never mutated; consider changing to 'let' constant
+        var didFetch = false
+        ~~~ ^
+        let
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift:91:28: warning: will never be executed
+        return didFetch ? .newData : .noData
+                           ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift:91:16: note: condition always evaluates to false
+        return didFetch ? .newData : .noData
+               ^
+Release exit: 0
+
+=== Summary ===
+Debug:   PASS
+Release: PASS
+[Done]

@@ -1,0 +1,63 @@
+================================================================
+SUBSCRIPTION GROUP: Sacred Bill Tracker Pro  (group ID 22047990)
+================================================================
+Reference Name (internal): Sacred Bill Tracker Pro
+Customer-facing Display Name: Sacred Bill Tracker Pro
+Customer-facing Description:  Sacred Bill Tracker Pro
+
+----------------------------------------------------------------
+SUBSCRIPTION 1 — Pro Monthly
+----------------------------------------------------------------
+Reference Name:           Pro Monthly
+Product ID:               com.sacredbilltracker.app.pro.monthly
+Subscription Duration:    1 Month  (P1M)
+Price:                    $4.99 USD
+Family Sharable:          OFF
+Group Number / Rank:      1
+
+Introductory Offer
+  Type:                   Free
+  Duration:               7 days (P1W)
+  Payment Mode:           free
+  Internal ID:            21627546
+
+Localization (en_US)
+  Display Name:           Pro Monthly
+  Description:            Sacred Bill Tracker Pro — billed monthly.
+  Customer-facing copy:   Unlimited bills, business tracking, reports, and cloud sync. 7-day free trial, then $4.99/month.
+
+Review Screenshot:        FINAL_SUBMISSION/Screenshots/iPhone_6_9/06_Paywall.png  (1320×2868)
+
+----------------------------------------------------------------
+SUBSCRIPTION 2 — Pro Yearly
+----------------------------------------------------------------
+Reference Name:           Pro Yearly
+Product ID:               com.sacredbilltracker.app.pro.yearly
+Subscription Duration:    1 Year  (P1Y)
+Price:                    $39.99 USD  (saves 33% vs monthly)
+Family Sharable:          OFF
+Group Number / Rank:      2
+
+Introductory Offer
+  Type:                   Free
+  Duration:               7 days (P1W)
+  Payment Mode:           free
+  Internal ID:            21627547
+
+Localization (en_US)
+  Display Name:           Pro Yearly
+  Description:            Sacred Bill Tracker Pro — billed yearly. Best value.
+  Customer-facing copy:   Unlimited bills, business tracking, reports, and cloud sync. 7-day free trial, then $39.99/year (save 33%).
+
+Review Screenshot:        FINAL_SUBMISSION/Screenshots/iPhone_6_9/06_Paywall.png  (1320×2868)
+
+----------------------------------------------------------------
+DISCLOSURES (must appear in paywall before purchase — already in PaywallView.swift)
+----------------------------------------------------------------
+- Title of subscription
+- Length of subscription
+- Price + currency
+- "Auto-renews unless cancelled at least 24h before period end"
+- Restore Purchases button (PaywallView.swift line 261)
+- Terms of Use link (Apple stdEULA — PaywallView.swift line 268)
+- Privacy Policy link (PaywallView.swift line 270)

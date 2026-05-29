@@ -1,0 +1,21 @@
+LOCALE: en_US (English — U.S.)
+
+================================================================
+Pro Monthly
+================================================================
+Display Name: Pro Monthly
+Description:
+Unlimited bills, business tracking, reports, and cloud sync. 7-day free trial, then $4.99/month.
+
+================================================================
+Pro Yearly
+================================================================
+Display Name: Pro Yearly
+Description:
+Unlimited bills, business tracking, reports, and cloud sync. 7-day free trial, then $39.99/year (save 33%).
+
+================================================================
+Subscription Group ("Sacred Bill Tracker Pro")
+================================================================
+Display Name (customer-facing): Sacred Bill Tracker Pro
+Description: Sacred Bill Tracker Pro

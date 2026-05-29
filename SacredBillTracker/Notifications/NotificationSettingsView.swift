@@ -1,0 +1,208 @@
+//
+//  NotificationSettingsView.swift
+//  Sacred Pathway Driver Hub — P5
+//
+//  Settings screen: enable/disable per category, lock-screen privacy, quiet hours,
+//  weekly/monthly summary reminders, plus system-permissions deep-link.
+//
+
+import SwiftUI
+import UserNotifications
+
+struct NotificationSettingsView: View {
+
+    @StateObject private var prefs = NotificationPreferences.shared
+    @StateObject private var manager = PushNotificationManager.shared
+
+    @State private var showingPermissionSheet = false
+    @State private var systemSettingsURL = URL(string: UIApplication.openSettingsURLString)
+
+    var body: some View {
+        Form {
+            // MARK: System permission status
+            Section {
+                if manager.systemAuthorizationGranted {
+                    HStack {
+                        Image(systemName: "bell.badge.fill")
+                            .foregroundColor(.green)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Notifications Enabled")
+                                .font(.subheadline.weight(.semibold))
+                            Text("You'll receive alerts based on your preferences below.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                } else {
+                    Button {
+                        Task {
+                            await manager.requestAuthorization()
+                            if manager.systemAuthorizationGranted {
+                                manager.registerForRemotePush()
+                            } else if let url = systemSettingsURL {
+                                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "bell.slash.fill")
+                                .foregroundColor(.orange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Turn On Notifications")
+                                    .font(.subheadline.weight(.semibold))
+                                Text("Get alerted to new settlements, sync activity, and share-link expirations.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.leading)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                Text("System Permission")
+            }
+
+            // MARK: Categories
+            Section {
+                ForEach(NotificationCategory.allCases) { category in
+                    Toggle(isOn: bindingFor(category)) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(category.title)
+                                .font(.subheadline.weight(.medium))
+                            Text(category.description)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .disabled(!manager.systemAuthorizationGranted)
+                }
+            } header: {
+                Text("Notification Types")
+            } footer: {
+                Text("You can fine-tune which alerts you receive. Disabled categories will not produce banners or sounds.")
+            }
+
+            // MARK: Privacy
+            Section {
+                Toggle(isOn: $prefs.lockScreenPrivacy) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Hide Amounts on Lock Screen")
+                            .font(.subheadline.weight(.medium))
+                        Text("Notifications with dollar amounts will show a generic message until you unlock your device.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } header: {
+                Text("Privacy")
+            }
+
+            // MARK: Quiet hours
+            Section {
+                Toggle("Quiet Hours", isOn: $prefs.quietHoursEnabled)
+
+                if prefs.quietHoursEnabled {
+                    Picker("Start", selection: $prefs.quietHoursStartHour) {
+                        ForEach(0..<24, id: \.self) { h in
+                            Text(formatHour(h)).tag(h)
+                        }
+                    }
+                    Picker("End", selection: $prefs.quietHoursEndHour) {
+                        ForEach(0..<24, id: \.self) { h in
+                            Text(formatHour(h)).tag(h)
+                        }
+                    }
+                }
+            } header: {
+                Text("Quiet Hours")
+            } footer: {
+                Text("Non-urgent notifications will not be delivered during this window. Time-sensitive alerts (like sync issues) are still delivered.")
+            }
+
+            // MARK: Summaries
+            Section {
+                Toggle(isOn: bindingFor(.earningsSummaryWeekly)) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Weekly Summary Reminder")
+                            .font(.subheadline.weight(.medium))
+                        Text("Friday at 5:00 PM local time.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                Toggle(isOn: bindingFor(.earningsSummaryMonthly)) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Monthly Summary Reminder")
+                            .font(.subheadline.weight(.medium))
+                        Text("First of every month at 9:00 AM local time.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } header: {
+                Text("Earnings Summaries")
+            }
+
+            // MARK: System settings
+            Section {
+                Button {
+                    if let url = systemSettingsURL { UIApplication.shared.open(url) }
+                } label: {
+                    HStack {
+                        Image(systemName: "gear")
+                        Text("Open iOS Notification Settings")
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Notifications")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await manager.refreshAuthorization() }
+        .onChange(of: prefs.enabledCategories) { _ in
+            Task { await syncSummaryReminders() }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func bindingFor(_ category: NotificationCategory) -> Binding<Bool> {
+        Binding(
+            get: { prefs.isEnabled(category) },
+            set: { newValue in prefs.set(category, enabled: newValue) }
+        )
+    }
+
+    private func formatHour(_ hour: Int) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "h a"
+        let cal = Calendar.current
+        let date = cal.date(bySettingHour: hour, minute: 0, second: 0, of: Date()) ?? Date()
+        return f.string(from: date)
+    }
+
+    /// When the user toggles weekly/monthly summary reminders, schedule/cancel the recurring local notifs.
+    private func syncSummaryReminders() async {
+        if prefs.isEnabled(.earningsSummaryWeekly) {
+            await manager.enableWeeklySummaryReminder()
+        } else {
+            manager.disableWeeklySummaryReminder()
+        }
+        if prefs.isEnabled(.earningsSummaryMonthly) {
+            await manager.enableMonthlySummaryReminder()
+        } else {
+            manager.disableMonthlySummaryReminder()
+        }
+    }
+}
+
+
+#if DEBUG
+struct NotificationSettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack { NotificationSettingsView() }
+    }
+}
+#endif

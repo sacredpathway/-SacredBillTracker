@@ -1,0 +1,27 @@
+Sacred Bill Tracker is a personal-finance utility for tracking household and business bills.
+
+DEMO ACCOUNT
+Sign in with Apple is supported. For review convenience, you can also tap "Continue with Email" and use:
+  Email: appreview@sacredbilltracker.com
+  Password: ReviewPass2026!
+This account has 5 sample bills pre-loaded.
+
+SUBSCRIPTIONS
+Pro features (unlimited bills, business tracking, reports, cloud sync) are gated behind an auto-renewable subscription.
+- Pro Monthly: $4.99/mo, 7-day free trial
+- Pro Yearly: $39.99/yr, 7-day free trial
+Free tier supports up to 5 household bills, no business tracking, no reports.
+Paywall is reachable from Settings → Upgrade to Pro and from any locked feature.
+
+PRIVACY
+Privacy policy: https://www.sacredpathway.org/sacred-bill-tracker-privacy
+EULA: standard Apple EULA — https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+
+DATA STORAGE
+Bills are stored locally by default; cloud sync (Supabase) is opt-in via Settings and only enabled for Pro subscribers.
+
+NO ENCRYPTION beyond Apple's defaults — uses_non_exempt_encryption = NO in Info.plist.
+
+CONTACT
+Demarquis Hinton
+demarquishinton@gmail.com

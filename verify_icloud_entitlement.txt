@@ -1,0 +1,11 @@
+Searching: /Users/demarquishinton/Library/Developer/Xcode/Archives
+Latest archive: /Users/demarquishinton/Library/Developer/Xcode/Archives/2026-05-22/SacredBillTracker 5-22-26, 9.17 PM.xcarchive
+App bundle:    /Users/demarquishinton/Library/Developer/Xcode/Archives/2026-05-22/SacredBillTracker 5-22-26, 9.17 PM.xcarchive/Products/Applications/SacredBillTracker.app
+
+=== codesign --display --entitlements - ===
+Executable=/Users/demarquishinton/Library/Developer/Xcode/Archives/2026-05-22/SacredBillTracker 5-22-26, 9.17 PM.xcarchive/Products/Applications/SacredBillTracker.app/SacredBillTracker
+warning: Specifying ':' in the path is deprecated and will not work in a future release
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>application-identifier</key><string>DCCSGYD5A4.com.sacredbilltracker.app</string><key>com.apple.developer.applesignin</key><array><string>Default</string></array><key>com.apple.developer.team-identifier</key><string>DCCSGYD5A4</string><key>com.apple.developer.ubiquity-kvstore-identifier</key><string>DCCSGYD5A4.com.sacredbilltracker.app</string><key>get-task-allow</key><true/></dict></plist>
+
+
+PASS: iCloud key-value store entitlement present

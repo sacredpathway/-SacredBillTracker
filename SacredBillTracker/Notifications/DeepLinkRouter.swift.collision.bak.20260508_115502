@@ -1,0 +1,166 @@
+//
+//  DeepLinkRouter.swift
+//  Sacred Pathway Driver Hub — P5
+//
+//  Single source of truth for in-app navigation.
+//  Notifications publish a NotificationDeepLink → router resolves to the
+//  correct tab + NavigationPath stack.
+//
+//  Designed for SwiftUI NavigationStack with @Published path.
+//  Works whether the user is on the Home, History, Summary, or Shares tab —
+//  router switches the selected tab THEN pushes the destination.
+//
+
+import Foundation
+import SwiftUI
+import Combine
+
+@MainActor
+final class DeepLinkRouter: ObservableObject {
+
+    static let shared = DeepLinkRouter()
+
+    // MARK: - Tabs (matches your existing TabView selection)
+    enum Tab: Hashable { case home, history, summary, shares, settings }
+
+    @Published var selectedTab: Tab = .home
+
+    // MARK: - Per-tab navigation paths
+    @Published var homePath: NavigationPath = NavigationPath()
+    @Published var historyPath: NavigationPath = NavigationPath()
+    @Published var summaryPath: NavigationPath = NavigationPath()
+    @Published var sharesPath: NavigationPath = NavigationPath()
+    @Published var settingsPath: NavigationPath = NavigationPath()
+
+    /// Set by views that own a settlement detail context, so the router can
+    /// resolve a settlementId payload into a real SettlementRecord push.
+    var settlementResolver: ((UUID) -> Void)?
+
+    private init() {}
+
+    // MARK: - Entry point
+
+    /// Routes a notification deep-link + optional payload into the app's nav stacks.
+    /// Safe to call from anywhere. No-op for unknown destinations.
+    func route(to link: NotificationDeepLink, payload: [String: String]) {
+
+        switch link {
+
+        case .settlementHistory:
+            selectedTab = .history
+            historyPath = NavigationPath()    // pop to root
+
+        case .settlementDetail:
+            selectedTab = .history
+            historyPath = NavigationPath()
+            // If a settlementId was passed, push the detail screen.
+            if let idString = payload["settlementId"],
+               let id = UUID(uuidString: idString) {
+                settlementResolver?(id)
+                historyPath.append(SettlementRoute.detail(id))
+            }
+
+        case .earningsSummary:
+            selectedTab = .summary
+            summaryPath = NavigationPath()
+
+        case .shareLinks:
+            selectedTab = .shares
+            sharesPath = NavigationPath()
+            if let idString = payload["shareId"],
+               let id = UUID(uuidString: idString) {
+                sharesPath.append(ShareRoute.detail(id))
+            }
+        }
+    }
+
+    /// Convenience for the Settings tab → Notifications subscreen.
+    func openNotificationSettings() {
+        selectedTab = .settings
+        settingsPath = NavigationPath()
+        settingsPath.append(SettingsRoute.notifications)
+    }
+}
+
+// MARK: - Route enums (drop these into your app or merge with existing routes)
+
+/// Used in History tab's NavigationStack(.path: $router.historyPath)
+enum SettlementRoute: Hashable {
+    case detail(UUID)
+}
+
+/// Used in Shares tab's NavigationStack
+enum ShareRoute: Hashable {
+    case detail(UUID)   // share id
+}
+
+/// Used in Settings tab
+enum SettingsRoute: Hashable {
+    case notifications
+    case about
+    case privacy
+}
+
+/*
+ Wire-up reference (RootView):
+
+     struct RootView: View {
+         @StateObject private var router = DeepLinkRouter.shared
+         @StateObject private var notif  = NotificationManager.shared
+
+         var body: some View {
+             TabView(selection: $router.selectedTab) {
+                 NavigationStack(path: $router.homePath)    { HomeView() }
+                     .tabItem { Label("Home", systemImage: "house") }
+                     .tag(DeepLinkRouter.Tab.home)
+
+                 NavigationStack(path: $router.historyPath) {
+                     SettlementHistoryView()
+                         .navigationDestination(for: SettlementRoute.self) { route in
+                             switch route {
+                             case .detail(let r): SettlementDetailView(record: r)
+                             }
+                         }
+                 }
+                 .tabItem { Label("History", systemImage: "list.bullet.rectangle") }
+                 .tag(DeepLinkRouter.Tab.history)
+
+                 NavigationStack(path: $router.summaryPath) { EarningsSummaryView() }
+                     .tabItem { Label("Summary", systemImage: "chart.bar") }
+                     .tag(DeepLinkRouter.Tab.summary)
+
+                 NavigationStack(path: $router.sharesPath) {
+                     ShareLinksHistoryView()
+                         .navigationDestination(for: ShareRoute.self) { route in
+                             switch route {
+                             case .detail(let id): ShareLinkDetailView(shareId: id)
+                             }
+                         }
+                 }
+                 .tabItem { Label("Shares", systemImage: "link") }
+                 .tag(DeepLinkRouter.Tab.shares)
+
+                 NavigationStack(path: $router.settingsPath) {
+                     SettingsView()
+                         .navigationDestination(for: SettingsRoute.self) { route in
+                             switch route {
+                             case .notifications: NotificationSettingsView()
+                             case .about:         AboutView()
+                             case .privacy:       PrivacyView()
+                             }
+                         }
+                 }
+                 .tabItem { Label("Settings", systemImage: "gearshape") }
+                 .tag(DeepLinkRouter.Tab.settings)
+             }
+             .onReceive(notif.$pendingDeepLink.compactMap { $0 }) { link in
+                 router.route(to: link, payload: notif.pendingDeepLinkPayload)
+                 notif.pendingDeepLink = nil
+             }
+             .task {
+                 // Provide settlement resolver so deep-links can hydrate detail view.
+                 router.settlementResolver = { _ in /* host: prefetch / log */ }
+             }
+         }
+     }
+ */

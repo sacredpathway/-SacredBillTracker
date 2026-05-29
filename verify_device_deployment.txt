@@ -1,0 +1,133 @@
+
+============================================================
+1. xcodebuild + Xcode version
+============================================================
+Xcode 26.4.1
+Build version 17E202
+
+============================================================
+2. Connected iOS devices (xctrace)
+============================================================
+== Devices ==
+Demarquis’s MacBook (4DC06244-5598-567E-82E9-56C4CB747CED)
+8894 (26.2.1) (00008130-000A55E83601001C)
+== Devices Offline ==
+Demarquis’s Apple Watch (11.6.1) (00008310-0008E3401A41A01E)
+iPad (18.1) (00008132-001E455A21C3001C)
+
+============================================================
+3. Connected iOS devices (devicectl, if available)
+============================================================
+Failed to load provisioning paramter list due to error: Error Domain=com.apple.dt.CoreDeviceError Code=1002 "No provider was found." UserInfo={NSLocalizedDescription=No provider was found.}.
+`devicectl manage create` may support a reduced set of arguments.
+Name                      Hostname                                 Identifier                             State         Model                           
+-----------------------   --------------------------------------   ------------------------------------   -----------   --------------------------------
+8894                      8894.coredevice.local                    CD278DD0-7EC4-57F5-8B22-648A2DFDE341   connected     iPhone 15 Pro (iPhone16,1)      
+Demarquis’s Apple Watch   Demarquiss-AppleWatch.coredevice.local   5C87C4C2-C941-55CA-A64A-DF788916F49D   unavailable   Apple Watch Series 9 (Watch7,4) 
+iPad                      iPad.coredevice.local                    261081B5-D020-527A-86A9-A7571467A3B3   unavailable   iPad Pro 13-inch (M4) (iPad16,6)
+
+============================================================
+4. Build settings — signing + entitlements (Debug, iOS device)
+============================================================
+    CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements
+    CODE_SIGN_IDENTITY = Apple Development
+    CODE_SIGN_STYLE = Automatic
+    CURRENT_PROJECT_VERSION = 23
+    DEPLOYMENT_TARGET_SETTING_NAME = IPHONEOS_DEPLOYMENT_TARGET
+    DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO
+    DEVELOPMENT_TEAM = DCCSGYD5A4
+    IPHONEOS_DEPLOYMENT_TARGET = 17.0
+    MARKETING_VERSION = 1.0.7
+    PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app
+    PROVISIONING_PROFILE_REQUIRED = YES
+    PROVISIONING_PROFILE_REQUIRED_YES_YES = YES
+    PROVISIONING_PROFILE_SUPPORTED = YES
+    RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET = 15.0
+    TARGETED_DEVICE_FAMILY = 1,2
+
+============================================================
+5. Debug build for simulator (sanity)
+============================================================
+                                          ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/NotificationSettingsView.swift:164:10: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead.
+        .onChange(of: prefs.enabledCategories) { _ in
+         ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift:61:13: warning: variable 'didFetch' was never mutated; consider changing to 'let' constant
+        var didFetch = false
+        ~~~ ^
+        let
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift:91:28: warning: will never be executed
+        return didFetch ? .newData : .noData
+                           ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift:91:16: note: condition always evaluates to false
+        return didFetch ? .newData : .noData
+               ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Services/BillsRealtimeService.swift:48:30: warning: 'postgresChange(_:schema:table:filter:)' is deprecated: Use the new filter syntax instead.
+        let stream = channel.postgresChange(
+                             ^
+/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Services/BillsRealtimeService.swift:55:23: warning: 'subscribe()' is deprecated: Use `subscribeWithError` instead
+        await channel.subscribe()
+                      ^
+Debug-simulator exit: 0
+
+============================================================
+6. Release build for simulator
+============================================================
+Release-simulator exit: 0
+
+============================================================
+7. Debug build for generic iOS device (signing test)
+============================================================
+    cd /Users/demarquishinton/Documents/Claude/Projects/SACRED\ BILL\ TRACKER
+    
+    Signing Identity:     "Apple Development: Demarquis Hinton (U6669FS2HX)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.sacredbilltracker.app"
+                          (204062ea-ea4e-463d-9788-d63ddd5feda3)
+    
+    /usr/bin/codesign --force --sign DADE0434D72899DAC36F4132F3A16958DB7F9787 --timestamp\=none --generate-entitlement-der /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app/SacredBillTracker.debug.dylib
+
+CodeSign /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app/__preview.dylib (in target 'SacredBillTracker' from project 'SacredBillTracker')
+    cd /Users/demarquishinton/Documents/Claude/Projects/SACRED\ BILL\ TRACKER
+    
+    Signing Identity:     "Apple Development: Demarquis Hinton (U6669FS2HX)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.sacredbilltracker.app"
+                          (204062ea-ea4e-463d-9788-d63ddd5feda3)
+    
+    /usr/bin/codesign --force --sign DADE0434D72899DAC36F4132F3A16958DB7F9787 --timestamp\=none --generate-entitlement-der /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app/__preview.dylib
+
+CodeSign /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app (in target 'SacredBillTracker' from project 'SacredBillTracker')
+    cd /Users/demarquishinton/Documents/Claude/Projects/SACRED\ BILL\ TRACKER
+    
+    Signing Identity:     "Apple Development: Demarquis Hinton (U6669FS2HX)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.sacredbilltracker.app"
+                          (204062ea-ea4e-463d-9788-d63ddd5feda3)
+    
+    /usr/bin/codesign --force --sign DADE0434D72899DAC36F4132F3A16958DB7F9787 --entitlements /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Intermediates.noindex/SacredBillTracker.build/Debug-iphoneos/SacredBillTracker.build/SacredBillTracker.app.xcent --timestamp\=none --generate-entitlement-der /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app
+
+RegisterExecutionPolicyException /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app (in target 'SacredBillTracker' from project 'SacredBillTracker')
+    cd /Users/demarquishinton/Documents/Claude/Projects/SACRED\ BILL\ TRACKER
+    builtin-RegisterExecutionPolicyException /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app
+
+Validate /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app (in target 'SacredBillTracker' from project 'SacredBillTracker')
+    cd /Users/demarquishinton/Documents/Claude/Projects/SACRED\ BILL\ TRACKER
+    builtin-validationUtility /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app (in target 'SacredBillTracker' from project 'SacredBillTracker')
+    cd /Users/demarquishinton/Documents/Claude/Projects/SACRED\ BILL\ TRACKER
+    /usr/bin/touch -c /Users/demarquishinton/Library/Developer/Xcode/DerivedData/SacredBillTracker-bzzpjnuvxgsrrgbhlldayhozoicb/Build/Products/Debug-iphoneos/SacredBillTracker.app
+
+** BUILD SUCCEEDED **
+
+Device-Debug exit: 0
+
+============================================================
+8. Summary
+============================================================
+Debug   (simulator): PASS
+Release (simulator): PASS
+Debug   (iOS device): PASS
+Bundle ID: com.sacredbilltracker.app
+Team:      DCCSGYD5A4
+Deployment: iOS 17.0
+
+[Done]

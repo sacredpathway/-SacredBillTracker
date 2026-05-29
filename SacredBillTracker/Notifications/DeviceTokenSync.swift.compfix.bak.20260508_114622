@@ -1,0 +1,141 @@
+//
+//  DeviceTokenSync.swift
+//  Sacred Pathway Driver Hub — P5
+//
+//  Persists the device's APNs token to Supabase (table: device_tokens — see 20_*.sql).
+//  Idempotent. Cheap. Survives token rotation.
+//
+//  Usage: AppDelegate calls register(tokenHex:) every time iOS hands us a token.
+//  This class:
+//    1. compares to the locally cached token
+//    2. if changed (or never uploaded), upserts to Supabase
+//    3. logs success/failure quietly
+//
+
+import Foundation
+import UIKit
+
+@MainActor
+final class DeviceTokenSync {
+
+    static let shared = DeviceTokenSync()
+
+    private let cacheKey = "sph.push.lastUploadedToken.v1"
+    private let userIdKey = "sph.push.userId.v1"
+
+    private init() {}
+
+    /// Called from AppDelegate after APNs registration succeeds.
+    func register(tokenHex: String) async {
+        let cached = UserDefaults.standard.string(forKey: cacheKey)
+        let deviceId = installationId()
+        let userId   = currentUserId()
+
+        // Skip the network roundtrip if nothing has changed.
+        if cached == tokenHex {
+            #if DEBUG
+            print("[push] Device token unchanged — skipping upload.")
+            #endif
+            return
+        }
+
+        do {
+            try await upsertToSupabase(
+                userId: userId,
+                deviceId: deviceId,
+                tokenHex: tokenHex
+            )
+            UserDefaults.standard.set(tokenHex, forKey: cacheKey)
+            #if DEBUG
+            print("[push] Device token uploaded.")
+            #endif
+        } catch {
+            // Non-fatal. We'll retry on next app launch.
+            #if DEBUG
+            print("[push] Device token upload failed: \(error.localizedDescription)")
+            #endif
+        }
+    }
+
+    /// Wipe the local cache (e.g. on logout) so next launch re-uploads.
+    func clearCache() {
+        UserDefaults.standard.removeObject(forKey: cacheKey)
+    }
+
+    /// Mark this device's token inactive (e.g. user disabled notifications in iOS settings).
+    func deactivate() async {
+        let deviceId = installationId()
+        try? await SupabaseClient.shared
+            .from("device_tokens")
+            .update(["active": false, "updated_at": ISO8601DateFormatter().string(from: Date())])
+            .eq("device_id", value: deviceId)
+            .execute()
+        clearCache()
+    }
+
+    // MARK: - Private
+
+    private func upsertToSupabase(userId: String?, deviceId: String, tokenHex: String) async throws {
+        struct Payload: Encodable {
+            let user_id: String?
+            let device_id: String
+            let apns_token: String
+            let platform: String
+            let app_version: String
+            let os_version: String
+            let active: Bool
+        }
+
+        let payload = Payload(
+            user_id: userId,
+            device_id: deviceId,
+            apns_token: tokenHex,
+            platform: "ios",
+            app_version: appVersion(),
+            os_version: UIDevice.current.systemVersion,
+            active: true
+        )
+
+        // PostgREST upsert keyed on device_id (unique constraint defined in schema).
+        try await SupabaseClient.shared
+            .from("device_tokens")
+            .upsert(payload, onConflict: "device_id")
+            .execute()
+    }
+
+    /// Stable per-installation UUID (NOT the IDFV — survives device migrations,
+    /// resets on app reinstall, which is what we want).
+    private func installationId() -> String {
+        let key = "sph.installation.id.v1"
+        if let existing = UserDefaults.standard.string(forKey: key) { return existing }
+        let new = UUID().uuidString
+        UserDefaults.standard.set(new, forKey: key)
+        return new
+    }
+
+    private func currentUserId() -> String? {
+        UserDefaults.standard.string(forKey: userIdKey)
+    }
+
+    private func appVersion() -> String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return "\(v) (\(b))"
+    }
+}
+
+// MARK: - Lightweight SupabaseClient placeholder
+// If your project already has a real SupabaseClient (likely from P1/P2), DELETE this
+// section and the existing client will be used. This stub is only here so
+// DeviceTokenSync compiles standalone for review.
+
+#if SPH_STANDALONE_BUILD
+final class SupabaseClient {
+    static let shared = SupabaseClient()
+    func from(_ table: String) -> Self { self }
+    func upsert<T: Encodable>(_ payload: T, onConflict: String) -> Self { self }
+    func update(_ payload: [String: Any]) -> Self { self }
+    func eq(_ column: String, value: Any) -> Self { self }
+    func execute() async throws {}
+}
+#endif

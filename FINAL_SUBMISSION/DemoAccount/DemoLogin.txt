@@ -1,0 +1,10 @@
+APP REVIEW DEMO ACCOUNT
+
+Email:    appreview@sacredbilltracker.com
+Password: ReviewPass2026!
+
+Sign-in path in app:  Welcome → "Continue with Email" → enter the credentials above.
+(Sign in with Apple is also supported — reviewers may use either.)
+
+This account ships pre-seeded with 5 sample bills (mix of household + business)
+so reviewers see real data immediately on the Dashboard / Bills / Calendar / Reports tabs.

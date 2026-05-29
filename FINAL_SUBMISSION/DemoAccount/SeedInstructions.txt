@@ -1,0 +1,30 @@
+SUPABASE SEED INSTRUCTIONS — APP REVIEW DEMO ACCOUNT
+
+1. Supabase Dashboard → Authentication → Users → "Add user"
+   - Email:    appreview@sacredbilltracker.com
+   - Password: ReviewPass2026!
+   - Auto Confirm User: ON
+   - Click "Create user".
+
+2. Copy the new user's UUID from the Users table.
+
+3. Supabase Dashboard → SQL Editor → run the seed file:
+   File path in repo:   supabase/seeds/app_review_demo_seed.sql
+   Before running, replace the placeholder user UUID in the SQL with the
+   UUID from step 2.
+
+4. Verify in Table Editor → public.bills:
+   Five rows (mix of household + business categories) tied to the demo user.
+
+5. (Optional) Supabase Dashboard → Authentication → Policies:
+   Confirm RLS policy on public.bills allows the user to SELECT/INSERT/UPDATE/DELETE
+   only their own rows (auth.uid() = user_id).
+
+6. Account-deletion RPC must be deployed:
+   File: supabase/migrations/20260423120000_delete_user_account.sql
+   Run via SQL Editor (or `supabase db push` if Supabase CLI is set up).
+   Required for App Store guideline 5.1.1(v) — Settings → Delete Account
+   in-app calls public.delete_user_account().
+
+After seeding, log in once with the demo account on a real device or simulator
+to confirm: Dashboard shows 5 bills, Bills tab lists them, Calendar shows due-date dots.

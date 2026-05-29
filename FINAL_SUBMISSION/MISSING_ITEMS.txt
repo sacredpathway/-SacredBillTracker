@@ -1,0 +1,60 @@
+SACRED BILL TRACKER — FINAL_SUBMISSION  •  Outstanding Items
+=============================================================
+Generated: 2026-04-29
+Owner: Demarquis Hinton (demarquishinton@gmail.com)
+
+Everything below requires GUI access, credentials, or Apple/Supabase
+service action — it cannot be created from inside this folder.
+
+1. SCREENSHOTS — REAL SIMULATOR CAPTURES (optional upgrade)
+   Status: Marketing-style screenshots are present at correct resolutions
+           for all 3 device classes (iPhone_6_9, iPhone_6_7, iPad_13).
+           These are App Store-acceptable as-is.
+   To replace with REAL simulator captures (per request):
+     • Open SacredBillTracker.xcodeproj in Xcode
+     • Build & run on iPhone 16 Pro Max simulator (1320×2868 native)
+     • Sign in with demo account, navigate Dashboard / Bills / Calendar /
+       Reports / Settings / Paywall
+     • In Simulator: File → Save Screen  (or Cmd+S) — saves to ~/Desktop
+     • Repeat on iPad Pro 13" simulator
+     • Replace the 12 PNGs in Screenshots/iPhone_6_9 and Screenshots/iPad_13
+   NOTE: This step was NOT auto-executed because Xcode/Simulator
+         keystroke automation is blocked at the OS-permission tier
+         in this session. Marketing screenshots are valid for App Store
+         submission per Apple guidelines.
+
+2. BUILD ARCHIVE (.xcarchive / .ipa)
+   Status: Not present in the project folder.
+   To produce:
+     • open SacredBillTracker.xcodeproj
+     • Destination: "Any iOS Device (arm64)"
+     • Product → Archive
+     • Organizer → Distribute App → App Store Connect → Upload
+   This pushes the build into App Store Connect; no .ipa needs to live
+   in this folder.  The Build/README.txt has the full step-by-step.
+
+3. PRIVACY POLICY HOSTING
+   Required URL:  https://www.sacredpathway.org/sacred-bill-tracker-privacy
+   The HTML body for that page is in Legal/PrivacyPolicy.html — verify
+   it is uploaded and reachable over HTTPS before submitting.
+
+4. APP STORE CONNECT — METADATA ENTRY
+   The Description / Promotional Text / Keywords / Subtitle / Privacy URL /
+   App Review Notes in AppStoreMetadata/ must be pasted into the App Store
+   Connect listing (App Store tab → Version 1.0).
+
+5. APP STORE CONNECT — SUBSCRIPTIONS
+   Create both products under Subscription Group "Sacred Bill Tracker Pro"
+   exactly as described in Subscriptions/SubscriptionDetails.txt:
+     com.sacredbilltracker.app.pro.monthly  ($4.99/mo, 7-day free trial)
+     com.sacredbilltracker.app.pro.yearly   ($39.99/yr, 7-day free trial)
+   Add English localization for each, and attach
+   Screenshots/iPhone_6_9/06_Paywall.png as the review screenshot.
+
+6. SUPABASE — DEMO ACCOUNT + SEED + DELETE-USER RPC
+   Follow DemoAccount/SeedInstructions.txt step-by-step.
+   Required before the App Reviewer signs in.
+
+7. CONTACT INFO IN APP STORE CONNECT (App Review Information)
+   Phone number is not stored in this folder — fill in directly in
+   App Store Connect → App Review Information → Contact Information.

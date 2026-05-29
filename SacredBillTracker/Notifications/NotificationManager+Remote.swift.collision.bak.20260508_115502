@@ -1,0 +1,120 @@
+//
+//  NotificationManager+Remote.swift
+//  Sacred Pathway Driver Hub — P5
+//
+//  Extension on NotificationManager:
+//    • Handles silent / background remote pushes (content-available: 1)
+//    • Handles cold-start payloads from launchOptions
+//    • Adds the `setEnabled` / `isEnabled` helpers if you didn't merge them into
+//      NotificationPreferences.
+//
+//  Drop alongside 23_NotificationManager.swift — same target, same actor.
+//
+
+import Foundation
+import UIKit
+import UserNotifications
+
+extension NotificationManager {
+
+    // MARK: - Cold-start payload (app launched from a notification tap)
+
+    nonisolated func handleColdStartPayload(_ userInfo: [AnyHashable: Any]) {
+        guard
+            let raw = userInfo["deepLink"] as? String,
+            let link = NotificationDeepLink(rawValue: raw)
+        else { return }
+
+        var payload: [String: String] = [:]
+        for (k, v) in userInfo {
+            guard let key = k as? String, key != "deepLink" else { continue }
+            if let s = v as? String { payload[key] = s }
+        }
+
+        Task { @MainActor in
+            self.pendingDeepLink = link
+            self.pendingDeepLinkPayload = payload
+        }
+    }
+
+    // MARK: - Silent push handler
+
+    /// The cloud sends `content-available: 1` pushes when something has changed
+    /// (new settlement uploaded from another device, share link revoked, etc.)
+    /// We pull fresh data and, if appropriate, fire a local notification.
+    ///
+    /// Expected payload shape:
+    ///   {
+    ///     "aps": { "content-available": 1 },
+    ///     "event": "settlement.synced" | "settlement.created" | "share.expired" | …
+    ///     "settlementId": "<uuid>"   // optional
+    ///     "shareId": "<uuid>"        // optional
+    ///     "amount": "1234.56"        // optional, used in body when allowed
+    ///   }
+    @MainActor
+    func handleRemotePayload(_ userInfo: [AnyHashable: Any]) async -> UIBackgroundFetchResult {
+        guard let event = userInfo["event"] as? String,
+              let category = NotificationCategory(rawValue: event)
+        else { return .noData }
+
+        // Always pull fresh data first — this is the whole point of a silent push.
+        var didFetch = false
+        switch category {
+        case .settlementCreated, .settlementSynced:
+            // Trigger your settlement repository pull. Wrap in try? so push handler can't crash.
+            #if !SPH_STANDALONE_BUILD
+            try? await SettlementRepository.shared.refreshFromCloud()
+            didFetch = true
+            #endif
+        case .shareLinkExpired, .shareLinkExpiringSoon:
+            #if !SPH_STANDALONE_BUILD
+            try? await ShareLinkManager.shared.refresh()
+            didFetch = true
+            #endif
+        default:
+            break
+        }
+
+        // Surface a local notification ONLY if the user hasn't disabled this category
+        // and we're not in quiet hours (for non-urgent events).
+        let body = userInfo["body"] as? String ?? defaultBody(for: category, userInfo: userInfo)
+        let privacyBody = userInfo["privacyBody"] as? String
+
+        var deepLinkPayload: [String: String] = [:]
+        if let s = userInfo["settlementId"] as? String { deepLinkPayload["settlementId"] = s }
+        if let s = userInfo["shareId"] as? String      { deepLinkPayload["shareId"] = s }
+
+        await notify(
+            category: category,
+            body: body,
+            privacyBody: privacyBody,
+            payload: deepLinkPayload
+        )
+
+        return didFetch ? .newData : .noData
+    }
+
+    private func defaultBody(for category: NotificationCategory, userInfo: [AnyHashable: Any]) -> String {
+        switch category {
+        case .settlementCreated:
+            if let amount = userInfo["amount"] as? String {
+                return "A new settlement of $\(amount) is ready to view."
+            }
+            return "A new settlement is ready to view."
+        case .settlementSynced:
+            return "Your settlements have been updated from the cloud."
+        case .syncFailed:
+            return "We couldn't reach the cloud. Your data is safe locally and will sync when reconnected."
+        case .shareLinkExpiringSoon:
+            return "A lender share link expires in 24 hours."
+        case .shareLinkExpired:
+            return "A lender share link has expired."
+        case .exportCompleted:
+            return "Your export is ready in the Files app."
+        case .earningsSummaryWeekly:
+            return "Your weekly earnings summary is ready."
+        case .earningsSummaryMonthly:
+            return "Your monthly earnings summary is ready."
+        }
+    }
+}
