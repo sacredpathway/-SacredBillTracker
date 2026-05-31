@@ -13,6 +13,7 @@ struct ScheduleItem: Identifiable, Codable, Hashable {
     var title: String
     var startTime: Date
     var endTime: Date
+    var location: String
     var notes: String
 
     var repeatRule: FocusRepeatRule
@@ -32,6 +33,7 @@ struct ScheduleItem: Identifiable, Codable, Hashable {
         title: String,
         startTime: Date,
         endTime: Date,
+        location: String = "",
         notes: String = "",
         repeatRule: FocusRepeatRule = .oneTime,
         customWeekdays: Set<Int> = [],
@@ -44,6 +46,7 @@ struct ScheduleItem: Identifiable, Codable, Hashable {
         self.title = title
         self.startTime = startTime
         self.endTime = endTime
+        self.location = location
         self.notes = notes
         self.repeatRule = repeatRule
         self.customWeekdays = customWeekdays
@@ -51,6 +54,42 @@ struct ScheduleItem: Identifiable, Codable, Hashable {
         self.isComplete = isComplete
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, startTime, endTime, location, notes, repeatRule, customWeekdays, reminderMinutesBefore, isComplete, createdAt, updatedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = (try? c.decode(UUID.self, forKey: .id)) ?? UUID()
+        self.title = (try? c.decode(String.self, forKey: .title)) ?? ""
+        self.startTime = (try? c.decode(Date.self, forKey: .startTime)) ?? Date()
+        self.endTime = (try? c.decode(Date.self, forKey: .endTime)) ?? self.startTime
+        self.location = (try? c.decode(String.self, forKey: .location)) ?? ""
+        self.notes = (try? c.decode(String.self, forKey: .notes)) ?? ""
+        self.repeatRule = (try? c.decode(FocusRepeatRule.self, forKey: .repeatRule)) ?? .oneTime
+        self.customWeekdays = (try? c.decode(Set<Int>.self, forKey: .customWeekdays)) ?? []
+        self.reminderMinutesBefore = try? c.decode(Int.self, forKey: .reminderMinutesBefore)
+        self.isComplete = (try? c.decode(Bool.self, forKey: .isComplete)) ?? false
+        self.createdAt = (try? c.decode(Date.self, forKey: .createdAt)) ?? Date()
+        self.updatedAt = (try? c.decode(Date.self, forKey: .updatedAt)) ?? Date()
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(title, forKey: .title)
+        try c.encode(startTime, forKey: .startTime)
+        try c.encode(endTime, forKey: .endTime)
+        try c.encode(location, forKey: .location)
+        try c.encode(notes, forKey: .notes)
+        try c.encode(repeatRule, forKey: .repeatRule)
+        try c.encode(customWeekdays, forKey: .customWeekdays)
+        try c.encodeIfPresent(reminderMinutesBefore, forKey: .reminderMinutesBefore)
+        try c.encode(isComplete, forKey: .isComplete)
+        try c.encode(createdAt, forKey: .createdAt)
+        try c.encode(updatedAt, forKey: .updatedAt)
     }
 
     var duration: TimeInterval {

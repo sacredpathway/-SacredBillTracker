@@ -9,6 +9,89 @@
 import Foundation
 import SwiftUI
 
+struct FocusNote: Identifiable, Codable, Hashable {
+    var id: UUID
+    var title: String
+    var body: String
+    var createdAt: Date
+    var updatedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        body: String = "",
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
+        self.title = title
+        self.body = body
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
+@MainActor
+final class NoteStore: ObservableObject {
+
+    @Published private(set) var items: [FocusNote] = []
+
+    private let key = "sbt.focus.notes.v1"
+    private let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        load()
+    }
+
+    private func load() {
+        guard let data = defaults.data(forKey: key) else { return }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        items = (try? decoder.decode([FocusNote].self, from: data)) ?? []
+        sort()
+    }
+
+    private func persist() {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        if let data = try? encoder.encode(items) {
+            defaults.set(data, forKey: key)
+        }
+    }
+
+    private func sort() {
+        items.sort { $0.updatedAt > $1.updatedAt }
+    }
+
+    func add(_ item: FocusNote) {
+        var new = item
+        new.createdAt = Date()
+        new.updatedAt = Date()
+        items.insert(new, at: 0)
+        sort()
+        persist()
+    }
+
+    func update(_ item: FocusNote) {
+        guard let idx = items.firstIndex(where: { $0.id == item.id }) else { return }
+        var updated = item
+        updated.updatedAt = Date()
+        items[idx] = updated
+        sort()
+        persist()
+    }
+
+    func delete(_ item: FocusNote) {
+        items.removeAll { $0.id == item.id }
+        persist()
+    }
+
+    var mostRecent: FocusNote? {
+        items.max { $0.updatedAt < $1.updatedAt }
+    }
+}
+
 @MainActor
 final class ScheduleStore: ObservableObject {
 
@@ -20,6 +103,7 @@ final class ScheduleStore: ObservableObject {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         load()
+        rescheduleReminders()
     }
 
     private func load() {
@@ -49,6 +133,7 @@ final class ScheduleStore: ObservableObject {
         items.append(new)
         sort()
         persist()
+        syncReminder(for: new)
     }
 
     func update(_ item: ScheduleItem) {
@@ -58,11 +143,13 @@ final class ScheduleStore: ObservableObject {
         items[idx] = u
         sort()
         persist()
+        syncReminder(for: u)
     }
 
     func delete(_ item: ScheduleItem) {
         items.removeAll { $0.id == item.id }
         persist()
+        Task { await NotificationManager.shared.cancelScheduleReminders(for: item.id) }
     }
 
     func toggleComplete(_ item: ScheduleItem) {
@@ -70,6 +157,7 @@ final class ScheduleStore: ObservableObject {
         items[idx].isComplete.toggle()
         items[idx].updatedAt = Date()
         persist()
+        syncReminder(for: items[idx])
     }
 
     // MARK: - Queries
@@ -87,6 +175,18 @@ final class ScheduleStore: ObservableObject {
                 return lh < rh
             }
     }
+
+    private func rescheduleReminders() {
+        let snapshot = items
+        Task { await NotificationManager.shared.rescheduleScheduleReminders(for: snapshot) }
+    }
+
+    private func syncReminder(for item: ScheduleItem) {
+        Task {
+            await NotificationManager.shared.cancelScheduleReminders(for: item.id)
+            await NotificationManager.shared.scheduleReminder(for: item)
+        }
+    }
 }
 
 @MainActor
@@ -101,6 +201,7 @@ final class TodoStore: ObservableObject {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         load()
+        rescheduleReminders()
     }
 
     private func load() {
@@ -145,6 +246,7 @@ final class TodoStore: ObservableObject {
         items.insert(new, at: 0)
         sort()
         persist()
+        syncReminder(for: new)
     }
 
     func update(_ item: FocusTodo) {
@@ -154,11 +256,13 @@ final class TodoStore: ObservableObject {
         items[idx] = u
         sort()
         persist()
+        syncReminder(for: u)
     }
 
     func delete(_ item: FocusTodo) {
         items.removeAll { $0.id == item.id }
         persist()
+        Task { await NotificationManager.shared.cancelTodoReminder(for: item.id) }
     }
 
     func toggleComplete(_ item: FocusTodo) {
@@ -167,11 +271,24 @@ final class TodoStore: ObservableObject {
         items[idx].updatedAt = Date()
         sort()
         persist()
+        syncReminder(for: items[idx])
     }
 
     // MARK: - Queries
 
     func items(for date: Date, calendar: Calendar = .current) -> [FocusTodo] {
         items.filter { $0.appearsOn(date, calendar: calendar) }
+    }
+
+    private func rescheduleReminders() {
+        let snapshot = items
+        Task { await NotificationManager.shared.rescheduleTodoReminders(for: snapshot) }
+    }
+
+    private func syncReminder(for item: FocusTodo) {
+        Task {
+            await NotificationManager.shared.cancelTodoReminder(for: item.id)
+            await NotificationManager.shared.scheduleReminder(for: item)
+        }
     }
 }

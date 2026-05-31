@@ -25,6 +25,7 @@ struct FocusTodo: Identifiable, Codable, Hashable {
     var priority: TodoPriority
     var repeatRule: FocusRepeatRule
     var customWeekdays: Set<Int>
+    var reminderDate: Date?
 
     var isComplete: Bool
     var createdAt: Date
@@ -39,6 +40,7 @@ struct FocusTodo: Identifiable, Codable, Hashable {
         priority: TodoPriority = .medium,
         repeatRule: FocusRepeatRule = .oneTime,
         customWeekdays: Set<Int> = [],
+        reminderDate: Date? = nil,
         isComplete: Bool = false,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -51,6 +53,7 @@ struct FocusTodo: Identifiable, Codable, Hashable {
         self.priority = priority
         self.repeatRule = repeatRule
         self.customWeekdays = customWeekdays
+        self.reminderDate = reminderDate
         self.isComplete = isComplete
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -62,7 +65,7 @@ struct FocusTodo: Identifiable, Codable, Hashable {
     /// (`{ id, text, done }`) so users who already added quick to-dos
     /// don't lose them when the model upgrades.
     private enum CodingKeys: String, CodingKey {
-        case id, title, notes, dueDate, hasTime, priority, repeatRule, customWeekdays, isComplete, createdAt, updatedAt
+        case id, title, notes, dueDate, hasTime, priority, repeatRule, customWeekdays, reminderDate, isComplete, createdAt, updatedAt
         // Legacy keys
         case text, done
     }
@@ -81,6 +84,7 @@ struct FocusTodo: Identifiable, Codable, Hashable {
         self.priority  = (try? c.decode(TodoPriority.self, forKey: .priority)) ?? .medium
         self.repeatRule = (try? c.decode(FocusRepeatRule.self, forKey: .repeatRule)) ?? .oneTime
         self.customWeekdays = (try? c.decode(Set<Int>.self, forKey: .customWeekdays)) ?? []
+        self.reminderDate = try? c.decode(Date.self, forKey: .reminderDate)
         if let complete = try? c.decode(Bool.self, forKey: .isComplete) {
             self.isComplete = complete
         } else {
@@ -102,6 +106,7 @@ struct FocusTodo: Identifiable, Codable, Hashable {
         try c.encode(priority, forKey: .priority)
         try c.encode(repeatRule, forKey: .repeatRule)
         try c.encode(customWeekdays, forKey: .customWeekdays)
+        try c.encodeIfPresent(reminderDate, forKey: .reminderDate)
         try c.encode(isComplete, forKey: .isComplete)
         try c.encode(createdAt, forKey: .createdAt)
         try c.encode(updatedAt, forKey: .updatedAt)

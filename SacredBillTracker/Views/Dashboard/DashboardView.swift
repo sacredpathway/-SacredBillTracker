@@ -87,11 +87,8 @@ struct DashboardView: View {
                     SacredDailyFocusCard(quote: quotes.quote)
                         .padding(.horizontal)
 
-                    // v1.0.11 — Schedule & To-Do moved OUT of the dashboard.
-                    // They now live exclusively inside Sacred Focus: tapping
-                    // the SacredDailyFocusCard above opens DailyFocusCenterView,
-                    // which already hosts Today's Schedule + To-Do. This keeps
-                    // the dashboard focused on finances.
+                    ProductivityPreviewSection()
+                        .padding(.horizontal)
 
                     if store.bills.isEmpty {
                         // First-launch / empty-state: no bills exist at all.
@@ -1025,6 +1022,207 @@ struct DashboardView: View {
     }
 }
 
+// MARK: - Classic productivity previews
+
+private enum ProductivityDestination: String, Identifiable {
+    case notes, schedule, todo
+
+    var id: String { rawValue }
+}
+
+private struct ProductivityPreviewSection: View {
+
+    @EnvironmentObject private var noteStore: NoteStore
+    @EnvironmentObject private var scheduleStore: ScheduleStore
+    @EnvironmentObject private var todoStore: TodoStore
+    @State private var destination: ProductivityDestination?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Productivity")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Color.appSubtleText)
+                Spacer()
+            }
+
+            HStack(spacing: 10) {
+                previewButton(
+                    destination: .notes,
+                    title: "Notes",
+                    systemImage: "note.text",
+                    value: notesValue,
+                    detail: notesDetail
+                )
+                previewButton(
+                    destination: .schedule,
+                    title: "Schedule",
+                    systemImage: "calendar.badge.clock",
+                    value: scheduleValue,
+                    detail: scheduleDetail
+                )
+                previewButton(
+                    destination: .todo,
+                    title: "To-Do",
+                    systemImage: "checklist",
+                    value: todoValue,
+                    detail: todoDetail
+                )
+            }
+        }
+        .sheet(item: $destination) { destination in
+            NavigationStack {
+                switch destination {
+                case .notes:
+                    NotesListView()
+                        .environmentObject(noteStore)
+                case .schedule:
+                    ScheduleAllListView()
+                        .environmentObject(scheduleStore)
+                case .todo:
+                    TodoAllListView()
+                        .environmentObject(todoStore)
+                }
+            }
+        }
+    }
+
+    private func previewButton(
+        destination: ProductivityDestination,
+        title: String,
+        systemImage: String,
+        value: String,
+        detail: String
+    ) -> some View {
+        Button {
+            self.destination = destination
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: systemImage)
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Color.appAccentText)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(Color.appSubtleText.opacity(0.7))
+                }
+
+                Text(title)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+
+                Text(value)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.appAccentText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+
+                Text(detail)
+                    .font(.caption2)
+                    .foregroundStyle(Color.appSubtleText)
+                    .lineLimit(2)
+                    .frame(minHeight: 28, alignment: .topLeading)
+            }
+            .frame(maxWidth: .infinity, minHeight: 124, alignment: .topLeading)
+            .padding(12)
+            .background(Color.appCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.appAccent.opacity(0.16), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(title). \(value). \(detail)")
+    }
+
+    private var notesValue: String {
+        noteStore.items.isEmpty ? "No notes yet" : "\(noteStore.items.count) note\(noteStore.items.count == 1 ? "" : "s")"
+    }
+
+    private var notesDetail: String {
+        noteStore.mostRecent?.title.nilIfBlank ?? "Tap to write one"
+    }
+
+    private var scheduleValue: String {
+        guard let next = nextSchedule else { return "No schedule yet" }
+        return shortDateFormatter.string(from: next.date)
+    }
+
+    private var scheduleDetail: String {
+        guard let next = nextSchedule else { return "Tap to add an event" }
+        return "\(timeFormatter.string(from: next.date)) · \(next.item.title)"
+    }
+
+    private var todoValue: String {
+        let open = todoStore.items.filter { !$0.isComplete }
+        return open.isEmpty ? "No tasks yet" : "\(open.count) open"
+    }
+
+    private var todoDetail: String {
+        guard let next = todoStore.items.filter({ !$0.isComplete }).sorted(by: { $0.dueDate < $1.dueDate }).first else {
+            return "Tap to add a task"
+        }
+        return "\(shortDateFormatter.string(from: next.dueDate)) · \(next.title)"
+    }
+
+    private var nextSchedule: (item: ScheduleItem, date: Date)? {
+        let calendar = Calendar.current
+        let now = Date()
+        let today = calendar.startOfDay(for: now)
+        var matches: [(ScheduleItem, Date)] = []
+
+        for offset in 0..<366 {
+            guard let day = calendar.date(byAdding: .day, value: offset, to: today) else { continue }
+            for item in scheduleStore.items(on: day, calendar: calendar) where !item.isComplete {
+                let start = occurrenceStart(for: item, on: day, calendar: calendar)
+                if start >= now {
+                    matches.append((item, start))
+                }
+            }
+            if !matches.isEmpty {
+                if let match = matches.min(by: { $0.1 < $1.1 }) {
+                    return (item: match.0, date: match.1)
+                }
+            }
+        }
+
+        return nil
+    }
+
+    private func occurrenceStart(for item: ScheduleItem, on day: Date, calendar: Calendar) -> Date {
+        let time = calendar.dateComponents([.hour, .minute, .second], from: item.startTime)
+        return calendar.date(
+            bySettingHour: time.hour ?? 0,
+            minute: time.minute ?? 0,
+            second: time.second ?? 0,
+            of: day
+        ) ?? item.startTime
+    }
+
+    private var shortDateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("MMM d")
+        return formatter
+    }
+
+    private var timeFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter
+    }
+}
+
+private extension String {
+    var nilIfBlank: String? {
+        let value = trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
+    }
+}
+
 // MARK: - Dashboard widget catalog + customize editor (v1.0.11)
 
 enum DashboardWidget: String, CaseIterable, Identifiable, Codable {
@@ -1151,4 +1349,8 @@ struct DashboardCustomizeSheet: View {
         .environmentObject(BillStore())
         .environmentObject(IncomeStore())
         .environmentObject(NotificationManager.shared)
+        .environmentObject(SubscriptionManager())
+        .environmentObject(NoteStore())
+        .environmentObject(ScheduleStore())
+        .environmentObject(TodoStore())
 }

@@ -123,6 +123,7 @@ struct SacredBillTrackerApp: App {
     @StateObject private var reviewPrompt = ReviewPromptService.shared
     @StateObject private var versionGate = VersionGateService.shared
     /// v1.0.9.x — Sacred Focus productivity system stores.
+    @StateObject private var noteStore = NoteStore()
     @StateObject private var scheduleStore = ScheduleStore()
     @StateObject private var todoStore = TodoStore()
 
@@ -152,6 +153,7 @@ struct SacredBillTrackerApp: App {
                 .environmentObject(subscriptions)
                 .environmentObject(reviewPrompt)
                 .environmentObject(versionGate)
+                .environmentObject(noteStore)
                 .environmentObject(scheduleStore)
                 .environmentObject(todoStore)
                 .tint(.appAccentText)

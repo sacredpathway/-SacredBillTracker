@@ -19,6 +19,7 @@ struct ScheduleItemEditView: View {
     @State private var title: String
     @State private var startTime: Date
     @State private var endTime: Date
+    @State private var location: String
     @State private var notes: String
     @State private var repeatRule: FocusRepeatRule
     @State private var customWeekdays: Set<Int>
@@ -33,6 +34,7 @@ struct ScheduleItemEditView: View {
             _title          = State(initialValue: e.title)
             _startTime      = State(initialValue: e.startTime)
             _endTime        = State(initialValue: e.endTime)
+            _location       = State(initialValue: e.location)
             _notes          = State(initialValue: e.notes)
             _repeatRule     = State(initialValue: e.repeatRule)
             _customWeekdays = State(initialValue: e.customWeekdays)
@@ -52,6 +54,7 @@ struct ScheduleItemEditView: View {
             _title          = State(initialValue: "")
             _startTime      = State(initialValue: start)
             _endTime        = State(initialValue: end)
+            _location       = State(initialValue: "")
             _notes          = State(initialValue: "")
             _repeatRule     = State(initialValue: .oneTime)
             _customWeekdays = State(initialValue: [])
@@ -68,6 +71,8 @@ struct ScheduleItemEditView: View {
                         .textInputAutocapitalization(.sentences)
                     DatePicker("Start", selection: $startTime)
                     DatePicker("End", selection: $endTime, in: startTime...)
+                    TextField("Location (optional)", text: $location)
+                        .textInputAutocapitalization(.words)
                     HStack {
                         Text("Duration")
                         Spacer()
@@ -189,6 +194,7 @@ struct ScheduleItemEditView: View {
 
     private func save() {
         let cleanTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanLocation = location.trimmingCharacters(in: .whitespacesAndNewlines)
         let cleanNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
         let reminder: Int? = reminderEnabled ? reminderMinutesBefore : nil
 
@@ -196,6 +202,7 @@ struct ScheduleItemEditView: View {
             e.title = cleanTitle
             e.startTime = startTime
             e.endTime = endTime
+            e.location = cleanLocation
             e.notes = cleanNotes
             e.repeatRule = repeatRule
             e.customWeekdays = customWeekdays
@@ -206,6 +213,7 @@ struct ScheduleItemEditView: View {
                 title: cleanTitle,
                 startTime: startTime,
                 endTime: endTime,
+                location: cleanLocation,
                 notes: cleanNotes,
                 repeatRule: repeatRule,
                 customWeekdays: customWeekdays,

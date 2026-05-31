@@ -405,6 +405,182 @@ struct DailyFocusCenterView: View {
     }
 }
 
+// MARK: - Notes list
+
+struct NotesListView: View {
+
+    @EnvironmentObject private var store: NoteStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var newNote = false
+    @State private var editing: FocusNote?
+
+    var body: some View {
+        Group {
+            if store.items.isEmpty {
+                EmptyStateView(
+                    systemImage: "note.text",
+                    title: "No notes yet",
+                    message: "Tap + to save an idea, reminder, or business note."
+                )
+                .padding(.top, 40)
+            } else {
+                List {
+                    ForEach(store.items) { note in
+                        Button { editing = note } label: {
+                            noteRow(note)
+                        }
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                store.delete(note)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Notes")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { newNote = true } label: {
+                    Image(systemName: "plus.circle.fill")
+                }
+                .accessibilityLabel("Add note")
+            }
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Done") { dismiss() }
+            }
+        }
+        .sheet(isPresented: $newNote) {
+            NoteEditView().environmentObject(store)
+        }
+        .sheet(item: $editing) { note in
+            NoteEditView(existing: note).environmentObject(store)
+        }
+    }
+
+    private func noteRow(_ note: FocusNote) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(note.title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+            if !note.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Text(note.body)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            Text(updatedLabel(note.updatedAt))
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.vertical, 4)
+        .contentShape(Rectangle())
+    }
+
+    private func updatedLabel(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+        return "Updated \(formatter.localizedString(for: date, relativeTo: Date()))"
+    }
+}
+
+struct NoteEditView: View {
+
+    @EnvironmentObject private var store: NoteStore
+    @Environment(\.dismiss) private var dismiss
+
+    private let existing: FocusNote?
+
+    @State private var title: String
+    @State private var noteBody: String
+    @State private var showDelete = false
+
+    init(existing: FocusNote? = nil) {
+        self.existing = existing
+        _title = State(initialValue: existing?.title ?? "")
+        _noteBody = State(initialValue: existing?.body ?? "")
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Note") {
+                    TextField("Title", text: $title)
+                        .textInputAutocapitalization(.sentences)
+                    TextEditor(text: $noteBody)
+                        .frame(minHeight: 180)
+                }
+
+                if existing != nil {
+                    Section {
+                        Button(role: .destructive) {
+                            showDelete = true
+                        } label: {
+                            Label("Delete note", systemImage: "trash")
+                        }
+                    }
+                }
+            }
+            .navigationTitle(existing == nil ? "New Note" : "Edit Note")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(existing == nil ? "Add" : "Save") { save() }
+                        .disabled(!isValid)
+                }
+            }
+            .confirmationDialog(
+                "Delete this note?",
+                isPresented: $showDelete,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) {
+                    if let existing { store.delete(existing) }
+                    dismiss()
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+        }
+    }
+
+    private var isValid: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !noteBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func save() {
+        let cleanBody = noteBody.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanTitle = title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? fallbackTitle(from: cleanBody)
+            : title.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if var existing {
+            existing.title = cleanTitle
+            existing.body = cleanBody
+            store.update(existing)
+        } else {
+            store.add(FocusNote(title: cleanTitle, body: cleanBody))
+        }
+        dismiss()
+    }
+
+    private func fallbackTitle(from body: String) -> String {
+        let firstLine = body
+            .components(separatedBy: .newlines)
+            .first?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return firstLine.isEmpty ? "Untitled Note" : firstLine
+    }
+}
+
 // MARK: - All-schedule list (View all sheet)
 
 struct ScheduleAllListView: View {
@@ -428,16 +604,7 @@ struct ScheduleAllListView: View {
                     ForEach(store.items) { item in
                         Button { editing = item } label: {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(item.title)
-                                    .font(.subheadline.weight(.semibold))
-                                Text(item.timeRangeLabel)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                if item.repeatRule != .oneTime {
-                                    Text(item.repeatRule.title)
-                                        .font(.caption2)
-                                        .foregroundStyle(.tertiary)
-                                }
+                                scheduleSummary(item)
                             }
                             .contentShape(Rectangle())
                         }
@@ -453,7 +620,7 @@ struct ScheduleAllListView: View {
                 }
             }
         }
-        .navigationTitle("All Schedule")
+        .navigationTitle("Schedule")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -471,6 +638,37 @@ struct ScheduleAllListView: View {
         .sheet(item: $editing) { item in
             ScheduleItemEditView(existing: item).environmentObject(store)
         }
+    }
+
+    private func scheduleSummary(_ item: ScheduleItem) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(item.title)
+                .font(.subheadline.weight(.semibold))
+            Text("\(dateLabel(item.startTime)) · \(item.timeRangeLabel)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if !item.location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Label(item.location, systemImage: "mappin.and.ellipse")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            HStack(spacing: 6) {
+                if item.repeatRule != .oneTime {
+                    Text(item.repeatRule.title)
+                }
+                if item.reminderMinutesBefore != nil {
+                    Label("Alert", systemImage: "bell.fill")
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.tertiary)
+        }
+    }
+
+    private func dateLabel(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("MMM d")
+        return formatter.string(from: date)
     }
 }
 
@@ -494,44 +692,24 @@ struct TodoAllListView: View {
                 .padding(.top, 40)
             } else {
                 List {
-                    ForEach(store.items) { item in
-                        Button { editing = item } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: item.priority.systemImage)
-                                    .foregroundStyle(item.priority.color)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(item.title)
-                                        .font(.subheadline.weight(.semibold))
-                                        .strikethrough(item.isComplete, color: .secondary)
-                                        .foregroundStyle(item.isComplete ? .secondary : .primary)
-                                    Text(item.repeatRule.title)
-                                        .font(.caption2)
-                                        .foregroundStyle(.tertiary)
-                                }
-                                Spacer()
+                    if !openItems.isEmpty {
+                        Section("Open") {
+                            ForEach(openItems) { item in
+                                todoButton(item)
                             }
-                            .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                store.delete(item)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                    }
+                    if !completedItems.isEmpty {
+                        Section("Completed") {
+                            ForEach(completedItems) { item in
+                                todoButton(item)
                             }
-                            Button {
-                                store.toggleComplete(item)
-                            } label: {
-                                Label(item.isComplete ? "Mark Undone" : "Mark Done",
-                                      systemImage: item.isComplete ? "arrow.uturn.backward" : "checkmark")
-                            }
-                            .tint(.green)
                         }
                     }
                 }
             }
         }
-        .navigationTitle("All Tasks")
+        .navigationTitle("To-Do List")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -550,6 +728,74 @@ struct TodoAllListView: View {
             TodoItemEditView(existing: item).environmentObject(store)
         }
     }
+
+    private var openItems: [FocusTodo] {
+        store.items.filter { !$0.isComplete }
+    }
+
+    private var completedItems: [FocusTodo] {
+        store.items.filter { $0.isComplete }
+    }
+
+    private func todoButton(_ item: FocusTodo) -> some View {
+        Button { editing = item } label: {
+            HStack(spacing: 10) {
+                Button { store.toggleComplete(item) } label: {
+                    Image(systemName: item.isComplete ? "checkmark.circle.fill" : "circle")
+                        .font(.title3)
+                        .foregroundStyle(item.isComplete ? Color.appHouseholdText : .secondary)
+                }
+                .buttonStyle(.plain)
+
+                Image(systemName: item.priority.systemImage)
+                    .foregroundStyle(item.priority.color)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.title)
+                        .font(.subheadline.weight(.semibold))
+                        .strikethrough(item.isComplete, color: .secondary)
+                        .foregroundStyle(item.isComplete ? .secondary : .primary)
+                    HStack(spacing: 6) {
+                        Text(item.priority.title)
+                        Text("·")
+                        Text(dateLabel(item.dueDate, includeTime: item.hasTime))
+                        if item.repeatRule != .oneTime {
+                            Text("· \(item.repeatRule.title)")
+                        }
+                        if item.reminderDate != nil {
+                            Image(systemName: "bell.fill")
+                        }
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                }
+                Spacer()
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                store.delete(item)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+            Button {
+                store.toggleComplete(item)
+            } label: {
+                Label(item.isComplete ? "Mark Undone" : "Mark Done",
+                      systemImage: item.isComplete ? "arrow.uturn.backward" : "checkmark")
+            }
+            .tint(.green)
+        }
+    }
+
+    private func dateLabel(_ date: Date, includeTime: Bool) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = includeTime ? .short : .none
+        return formatter.string(from: date)
+    }
 }
 
 #Preview {
@@ -557,6 +803,7 @@ struct TodoAllListView: View {
         DailyFocusCenterView()
             .environmentObject(SubscriptionManager())
             .environmentObject(BillStore())
+            .environmentObject(NoteStore())
             .environmentObject(ScheduleStore())
             .environmentObject(TodoStore())
     }
