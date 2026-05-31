@@ -45,39 +45,47 @@ struct SacredDailyFocusCard: View {
     @State private var showFocusCenter = false
     @State private var showPaywall = false
     @State private var destination: SacredFocusDestination?
+    @State private var quickNoteText = ""
+    @AppStorage("sbt.dashboard.sacredFocusExpanded") private var isExpanded = false
 
     private static let appStoreURL: String =
         "https://apps.apple.com/us/app/sacred-bill-tracker/id6762890363"
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: isExpanded ? 14 : 0) {
             focusHeader
 
-            VStack(spacing: 8) {
-                previewButton(
-                    destination: .notes,
-                    title: "Notes Preview",
-                    systemImage: "note.text",
-                    primary: notesPrimary,
-                    secondary: notesSecondary,
-                    detail: notesDetail
-                )
-                previewButton(
-                    destination: .schedule,
-                    title: "Schedule Preview",
-                    systemImage: "calendar.badge.clock",
-                    primary: schedulePrimary,
-                    secondary: scheduleSecondary,
-                    detail: scheduleDetail
-                )
-                previewButton(
-                    destination: .todo,
-                    title: "To-Do Preview",
-                    systemImage: "checklist",
-                    primary: todoPrimary,
-                    secondary: todoSecondary,
-                    detail: todoDetail
-                )
+            if isExpanded {
+                VStack(spacing: 8) {
+                    previewButton(
+                        destination: .notes,
+                        title: "Notes Preview",
+                        systemImage: "note.text",
+                        primary: notesPrimary,
+                        secondary: notesSecondary,
+                        detail: notesDetail
+                    )
+
+                    quickNoteInput
+
+                    previewButton(
+                        destination: .schedule,
+                        title: "Schedule Preview",
+                        systemImage: "calendar.badge.clock",
+                        primary: schedulePrimary,
+                        secondary: scheduleSecondary,
+                        detail: scheduleDetail
+                    )
+                    previewButton(
+                        destination: .todo,
+                        title: "To-Do Preview",
+                        systemImage: "checklist",
+                        primary: todoPrimary,
+                        secondary: todoSecondary,
+                        detail: todoDetail
+                    )
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .padding(16)
@@ -133,7 +141,7 @@ struct SacredDailyFocusCard: View {
     private var focusHeader: some View {
         HStack(alignment: .center, spacing: 14) {
             Button {
-                openFocus()
+                toggleExpanded()
             } label: {
                 HStack(alignment: .center, spacing: 14) {
                     logo
@@ -160,7 +168,7 @@ struct SacredDailyFocusCard: View {
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
 
-                        if !quote.author.trimmingCharacters(in: .whitespaces).isEmpty {
+                        if isExpanded, !quote.author.trimmingCharacters(in: .whitespaces).isEmpty {
                             Text("— \(quote.author)")
                                 .font(.caption2)
                                 .foregroundStyle(.white.opacity(0.75))
@@ -172,28 +180,93 @@ struct SacredDailyFocusCard: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Sacred Focus. \(quote.text).")
-            .accessibilityHint(subs.hasFocusPlus
-                ? "Opens Sacred Focus Plus — daily planning, quotes, to-dos, and Schedule Buddy."
-                : "Opens the Sacred Focus Plus upgrade screen.")
+            .accessibilityHint(isExpanded ? "Collapses Sacred Focus." : "Expands Sacred Focus.")
 
             Spacer(minLength: 6)
 
-            ShareLink(
-                item: shareText,
-                subject: Text("Quote from Sacred Bill Tracker")
-            ) {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.subheadline.weight(.semibold))
+            if isExpanded {
+                ShareLink(
+                    item: shareText,
+                    subject: Text("Quote from Sacred Bill Tracker")
+                ) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.appAccent)
+                        .frame(width: 38, height: 38)
+                        .background(
+                            Circle().fill(Color.appAccent.opacity(0.15))
+                        )
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Share today's quote")
+            }
+
+            Button {
+                toggleExpanded()
+            } label: {
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    .font(.subheadline.weight(.bold))
                     .foregroundStyle(Color.appAccent)
-                    .frame(width: 38, height: 38)
-                    .background(
-                        Circle().fill(Color.appAccent.opacity(0.15))
-                    )
+                    .frame(width: 34, height: 34)
+                    .background(Circle().fill(Color.appAccent.opacity(0.12)))
                     .contentShape(Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Share today's quote")
+            .accessibilityLabel(isExpanded ? "Collapse Sacred Focus" : "Expand Sacred Focus")
         }
+    }
+
+    private var quickNoteInput: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Quick Note", systemImage: "square.and.pencil")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color.appAccent.opacity(0.92))
+
+            HStack(alignment: .bottom, spacing: 8) {
+                TextField("Write a quick note...", text: $quickNoteText, axis: .vertical)
+                    .textInputAutocapitalization(.sentences)
+                    .lineLimit(1...3)
+                    .font(.subheadline)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 9)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white.opacity(0.07))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(Color.appAccent.opacity(0.18), lineWidth: 0.5)
+                    )
+                    .submitLabel(.done)
+
+                Button {
+                    saveQuickNote()
+                } label: {
+                    Text("Add")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color.appSacredBlack)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(
+                            Capsule().fill(canSaveQuickNote ? Color.appAccent : Color.appAccent.opacity(0.35))
+                        )
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSaveQuickNote)
+                .accessibilityLabel("Add quick note")
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.white.opacity(0.045))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.appAccent.opacity(0.14), lineWidth: 0.5)
+        )
     }
 
     private func previewButton(
@@ -266,6 +339,33 @@ struct SacredDailyFocusCard: View {
             showFocusCenter = true
         } else {
             showPaywall = true
+        }
+    }
+
+    private func toggleExpanded() {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            isExpanded.toggle()
+        }
+    }
+
+    private var canSaveQuickNote: Bool {
+        !quickNoteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func saveQuickNote() {
+        let cleanText = quickNoteText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanText.isEmpty else { return }
+
+        let lines = cleanText
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        let title = lines.first ?? "Untitled Note"
+        let body = lines.dropFirst().joined(separator: "\n")
+
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            noteStore.add(FocusNote(title: title, body: body))
+            quickNoteText = ""
         }
     }
 
