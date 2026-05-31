@@ -113,9 +113,7 @@ struct FocusPlusPaywallView: View {
                 }
             }
             .task {
-                if subs.products[ProductID.focusPlusMonthly] == nil {
-                    await subs.loadProducts()
-                }
+                await subs.prepareForPaywall()
             }
             .onChange(of: subs.hasFocusPlus) { _, newValue in
                 if newValue { dismiss() }
@@ -254,7 +252,7 @@ struct FocusPlusPaywallView: View {
 
     private func tapSubscribe() async {
         guard let product = subs.focusPlusProduct else {
-            await subs.loadProducts()
+            await subs.prepareForPaywall()
             return
         }
         purchaseInFlight = true

@@ -71,16 +71,7 @@ final class SubscriptionManager: ObservableObject {
 
     // MARK: - Init
 
-    init() {
-        // Start the long-running listener BEFORE the first product load
-        // so nothing (e.g. interrupted purchases from a prior launch) slips by.
-        transactionListener = listenForTransactions()
-
-        Task {
-            await loadProducts()
-            await refreshEntitlements()
-        }
-    }
+    init() {}
 
     // Note: no `deinit` cancel — under Swift 6 strict concurrency, reading
     // a @MainActor-isolated stored property from a nonisolated `deinit` is
@@ -90,10 +81,22 @@ final class SubscriptionManager: ObservableObject {
 
     // MARK: - Products
 
+    /// Called only from paywall/subscription surfaces or explicit upgrade
+    /// actions. Keeping StoreKit lazy prevents the dashboard from showing
+    /// Apple's account prompt during normal app launch.
+    func prepareForPaywall() async {
+        startTransactionListenerIfNeeded()
+        await loadProducts()
+        await refreshEntitlements()
+    }
+
     /// Pull the current product catalog from StoreKit. Safe to call
     /// multiple times — the paywall calls this on appear to recover
     /// from transient network errors.
     func loadProducts() async {
+        startTransactionListenerIfNeeded()
+        guard products.isEmpty, !isLoadingProducts else { return }
+
         isLoadingProducts = true
         defer { isLoadingProducts = false }
 
@@ -120,6 +123,7 @@ final class SubscriptionManager: ObservableObject {
     /// (user cancelled, pending parental approval, etc.).
     @discardableResult
     func purchase(_ product: Product) async -> Bool {
+        startTransactionListenerIfNeeded()
         lastError = nil
         do {
             let result = try await product.purchase()
@@ -152,6 +156,7 @@ final class SubscriptionManager: ObservableObject {
     /// Re-check all current entitlements. Called from the paywall's
     /// "Restore Purchases" button.
     func restorePurchases() async {
+        startTransactionListenerIfNeeded()
         lastError = nil
         do {
             try await AppStore.sync()
@@ -169,6 +174,7 @@ final class SubscriptionManager: ObservableObject {
     /// Walks `Transaction.currentEntitlements` and derives the current tier.
     /// Yearly wins over Monthly if both somehow present.
     func refreshEntitlements() async {
+        startTransactionListenerIfNeeded()
         var activeIDs: Set<String> = []
         var tier: SubscriptionTier = .free
         var focusPlus = false
@@ -221,10 +227,26 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// Clear local entitlement presentation state on sign-out without
+    /// touching StoreKit. A future paywall/restore action will re-check
+    /// Apple's receipt stream intentionally.
+    func clearForSignedOutUser() {
+        currentTier = .free
+        purchasedProductIDs = []
+        hasFocusPlus = false
+        lastPurchaseSucceeded = false
+        lastError = nil
+    }
+
     // MARK: - Transaction listener
 
     /// Long-running task that delivers transactions arriving outside of a
     /// direct purchase call — renewals, family sharing, interrupted flows.
+    private func startTransactionListenerIfNeeded() {
+        guard transactionListener == nil else { return }
+        transactionListener = listenForTransactions()
+    }
+
     private func listenForTransactions() -> Task<Void, Never> {
         Task.detached { [weak self] in
             for await result in StoreKit.Transaction.updates {

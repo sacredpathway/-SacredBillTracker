@@ -60,6 +60,7 @@ final class IncomeStore: ObservableObject {
     private func load() {
         guard let data = storage.data(forKey: defaultsKey) else {
             entries = []
+            IncomeWidgetBridge.update(from: entries)
             return
         }
         let decoder = JSONDecoder()
@@ -68,8 +69,10 @@ final class IncomeStore: ObservableObject {
             let decoded = try decoder.decode([WeeklyIncome].self, from: data)
             // Newest weeks first.
             entries = decoded.sorted { $0.weekStart > $1.weekStart }
+            IncomeWidgetBridge.update(from: entries)
         } catch {
             entries = []
+            IncomeWidgetBridge.update(from: entries)
         }
     }
 
@@ -78,6 +81,7 @@ final class IncomeStore: ObservableObject {
         encoder.dateEncodingStrategy = .iso8601
         guard let data = try? encoder.encode(entries) else { return }
         storage.set(data, forKey: defaultsKey)
+        IncomeWidgetBridge.update(from: entries)
     }
 
     // MARK: - CRUD
@@ -114,6 +118,7 @@ final class IncomeStore: ObservableObject {
     func wipeAll() {
         entries = []
         storage.remove(forKey: defaultsKey)
+        BillWidgetBridge.clearSnapshotAndReloadTimelines()
     }
 
     private func sort() {

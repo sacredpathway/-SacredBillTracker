@@ -341,3 +341,314 @@ private struct StatTile: View {
         )
     }
 }
+
+// MARK: - Dedicated Home Screen widgets
+
+private enum SacredHomeWidgetMode {
+    case billsDueToday
+    case upcomingBills
+    case billHealthScore
+    case monthlySpending
+    case incomeTracker
+
+    var title: String {
+        switch self {
+        case .billsDueToday: return "Bills Due Today"
+        case .upcomingBills: return "Upcoming Bills"
+        case .billHealthScore: return "Bill Health Score"
+        case .monthlySpending: return "Monthly Spending"
+        case .incomeTracker: return "Income Tracker"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .billsDueToday: return "clock.fill"
+        case .upcomingBills: return "calendar.badge.clock"
+        case .billHealthScore: return "gauge.with.dots.needle.67percent"
+        case .monthlySpending: return "creditcard.fill"
+        case .incomeTracker: return "banknote.fill"
+        }
+    }
+}
+
+struct BillsDueTodayWidget: Widget {
+    let kind = "SacredBillsDueTodayWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: SacredBillTimelineProvider()) { entry in
+            SacredHomeWidgetView(mode: .billsDueToday, snapshot: entry.snapshot)
+                .containerBackground(for: .widget) { SacredWidgetPalette.card }
+        }
+        .configurationDisplayName("Bills Due Today")
+        .description("Bills that need attention today.")
+        .supportedFamilies([.systemSmall, .systemMedium])
+        .contentMarginsDisabled()
+    }
+}
+
+struct UpcomingBillsWidget: Widget {
+    let kind = "SacredUpcomingBillsWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: SacredBillTimelineProvider()) { entry in
+            SacredHomeWidgetView(mode: .upcomingBills, snapshot: entry.snapshot)
+                .containerBackground(for: .widget) { SacredWidgetPalette.card }
+        }
+        .configurationDisplayName("Upcoming Bills")
+        .description("Your next unpaid bills.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .contentMarginsDisabled()
+    }
+}
+
+struct BillHealthScoreHomeWidget: Widget {
+    let kind = "SacredBillHealthScoreWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: SacredBillTimelineProvider()) { entry in
+            SacredHomeWidgetView(mode: .billHealthScore, snapshot: entry.snapshot)
+                .containerBackground(for: .widget) { SacredWidgetPalette.card }
+        }
+        .configurationDisplayName("Bill Health Score")
+        .description("A quick score for your bill readiness.")
+        .supportedFamilies([.systemSmall, .systemMedium])
+        .contentMarginsDisabled()
+    }
+}
+
+struct MonthlySpendingWidget: Widget {
+    let kind = "SacredMonthlySpendingWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: SacredBillTimelineProvider()) { entry in
+            SacredHomeWidgetView(mode: .monthlySpending, snapshot: entry.snapshot)
+                .containerBackground(for: .widget) { SacredWidgetPalette.card }
+        }
+        .configurationDisplayName("Monthly Spending")
+        .description("Bills due this month.")
+        .supportedFamilies([.systemSmall, .systemMedium])
+        .contentMarginsDisabled()
+    }
+}
+
+struct IncomeTrackerWidget: Widget {
+    let kind = "SacredIncomeTrackerWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: SacredBillTimelineProvider()) { entry in
+            SacredHomeWidgetView(mode: .incomeTracker, snapshot: entry.snapshot)
+                .containerBackground(for: .widget) { SacredWidgetPalette.card }
+        }
+        .configurationDisplayName("Income Tracker")
+        .description("Weekly and monthly income at a glance.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .contentMarginsDisabled()
+    }
+}
+
+private struct SacredHomeWidgetView: View {
+    @Environment(\.widgetFamily) private var family
+    let mode: SacredHomeWidgetMode
+    let snapshot: WidgetBillSnapshot
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: family == .systemSmall ? 8 : 10) {
+            header
+            switch mode {
+            case .billsDueToday:
+                dueTodayContent
+            case .upcomingBills:
+                upcomingContent
+            case .billHealthScore:
+                healthContent
+            case .monthlySpending:
+                monthlySpendingContent
+            case .incomeTracker:
+                incomeContent
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var header: some View {
+        HStack(spacing: 6) {
+            LeafBadge()
+            Label(mode.title, systemImage: mode.icon)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(SacredWidgetPalette.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var dueTodayContent: some View {
+        let dueToday = snapshot.upcoming.filter { Calendar.current.isDateInToday($0.dueDate) }
+        let total = dueToday.reduce(0) { $0 + $1.amount }
+
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("\(snapshot.dueTodayCount)")
+                .font(.system(family == .systemSmall ? .largeTitle : .title, design: .rounded).weight(.heavy))
+                .foregroundStyle(snapshot.dueTodayCount > 0 ? SacredWidgetPalette.accentGold : SacredWidgetPalette.accentGreen)
+                .monospacedDigit()
+            Text(formatMoney(total))
+                .font(.system(.headline, design: .rounded).weight(.bold))
+            if dueToday.isEmpty {
+                Text("Nothing due today.")
+                    .font(.caption2)
+                    .foregroundStyle(SacredWidgetPalette.secondary)
+            } else if family != .systemSmall {
+                billRows(Array(dueToday.prefix(3)))
+            }
+        }
+    }
+
+    private var upcomingContent: some View {
+        let items = Array(snapshot.upcoming.prefix(family == .systemLarge ? 6 : 3))
+
+        return VStack(alignment: .leading, spacing: 8) {
+            if items.isEmpty {
+                EmptyHint()
+            } else {
+                if family == .systemSmall, let first = items.first {
+                    Text(first.name)
+                        .font(.system(.headline, design: .rounded).weight(.semibold))
+                        .lineLimit(1)
+                    Text(formatMoney(first.amount))
+                        .font(.system(.title3, design: .rounded).weight(.bold))
+                        .foregroundStyle(SacredWidgetPalette.accentGreen)
+                    Text(relativeDue(first.dueDate))
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(first.isOverdue ? SacredWidgetPalette.danger : SacredWidgetPalette.secondary)
+                } else {
+                    billRows(items)
+                }
+            }
+        }
+    }
+
+    private var healthContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("\(snapshot.healthScore)")
+                    .font(.system(.largeTitle, design: .rounded).weight(.heavy))
+                    .foregroundStyle(healthTint(snapshot.healthScore))
+                    .monospacedDigit()
+                Text("/100")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(SacredWidgetPalette.secondary)
+            }
+            ProgressView(value: Double(snapshot.healthScore), total: 100)
+                .tint(healthTint(snapshot.healthScore))
+            if family != .systemSmall {
+                HStack {
+                    Text("\(snapshot.overdueCount) overdue")
+                    Spacer()
+                    Text("\(snapshot.dueTodayCount) today")
+                    Spacer()
+                    Text("\(snapshot.dueThisWeekCount) week")
+                }
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(SacredWidgetPalette.secondary)
+            }
+        }
+    }
+
+    private var monthlySpendingContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(formatMoney(snapshot.monthlyTotal))
+                .font(.system(family == .systemSmall ? .title2 : .title, design: .rounded).weight(.heavy))
+                .foregroundStyle(SacredWidgetPalette.accentGreen)
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+            Text("Bills due this month")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(SacredWidgetPalette.secondary)
+            if family != .systemSmall {
+                StatTile(label: "This week",
+                         value: "\(snapshot.dueThisWeekCount)",
+                         systemImage: "calendar",
+                         tint: SacredWidgetPalette.accentGold)
+            }
+        }
+    }
+
+    private var incomeContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(formatMoney(snapshot.thisWeekIncomeTotal))
+                .font(.system(family == .systemSmall ? .title2 : .title, design: .rounded).weight(.heavy))
+                .foregroundStyle(SacredWidgetPalette.accentGreen)
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+            Text("This week • \(formatMoney(snapshot.monthlyIncomeTotal)) month")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(SacredWidgetPalette.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if family != .systemSmall, !snapshot.recentIncome.isEmpty {
+                incomeRows(Array(snapshot.recentIncome.prefix(family == .systemLarge ? 5 : 3)))
+            }
+        }
+    }
+
+    private func billRows(_ bills: [WidgetBillSummary]) -> some View {
+        VStack(spacing: 6) {
+            ForEach(bills) { bill in
+                HStack(spacing: 8) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(bill.isOverdue ? SacredWidgetPalette.danger : SacredWidgetPalette.accentGreen)
+                        .frame(width: 3)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(bill.name)
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(1)
+                        Text(relativeDue(bill.dueDate))
+                            .font(.caption2)
+                            .foregroundStyle(bill.isOverdue ? SacredWidgetPalette.danger : SacredWidgetPalette.secondary)
+                    }
+                    Spacer(minLength: 0)
+                    Text(formatMoney(bill.amount))
+                        .font(.caption.weight(.bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                }
+            }
+        }
+    }
+
+    private func incomeRows(_ entries: [WidgetIncomeSummary]) -> some View {
+        VStack(spacing: 6) {
+            ForEach(entries) { entry in
+                HStack(spacing: 8) {
+                    Image(systemName: "banknote.fill")
+                        .font(.caption2)
+                        .foregroundStyle(SacredWidgetPalette.accentGreen)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(entry.name)
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(1)
+                        Text(entry.entryDate, format: .dateTime.month(.abbreviated).day())
+                            .font(.caption2)
+                            .foregroundStyle(SacredWidgetPalette.secondary)
+                    }
+                    Spacer(minLength: 0)
+                    Text(formatMoney(entry.amount))
+                        .font(.caption.weight(.bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                }
+            }
+        }
+    }
+
+    private func healthTint(_ score: Int) -> Color {
+        switch score {
+        case 85...100: return SacredWidgetPalette.success
+        case 65..<85: return SacredWidgetPalette.accentGold
+        default: return SacredWidgetPalette.danger
+        }
+    }
+}

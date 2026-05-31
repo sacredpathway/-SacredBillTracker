@@ -62,13 +62,39 @@ public struct WidgetBillSummary: Codable, Hashable, Identifiable {
     }
 }
 
+public struct WidgetIncomeSummary: Codable, Hashable, Identifiable {
+    public let id: String
+    public let name: String
+    public let amount: Double
+    public let entryDate: Date
+    public let typeTitle: String
+
+    public init(
+        id: String,
+        name: String,
+        amount: Double,
+        entryDate: Date,
+        typeTitle: String
+    ) {
+        self.id = id
+        self.name = name
+        self.amount = amount
+        self.entryDate = entryDate
+        self.typeTitle = typeTitle
+    }
+}
+
 public struct WidgetBillSnapshot: Codable, Hashable {
     public let generatedAt: Date
     public let overdueCount: Int
     public let dueTodayCount: Int
     public let dueThisWeekCount: Int
     public let monthlyTotal: Double
+    public let monthlyIncomeTotal: Double
+    public let thisWeekIncomeTotal: Double
+    public let healthScore: Int
     public let upcoming: [WidgetBillSummary]   // sorted ascending by dueDate, unpaid only
+    public let recentIncome: [WidgetIncomeSummary]
 
     public init(
         generatedAt: Date = Date(),
@@ -76,14 +102,41 @@ public struct WidgetBillSnapshot: Codable, Hashable {
         dueTodayCount: Int,
         dueThisWeekCount: Int,
         monthlyTotal: Double,
-        upcoming: [WidgetBillSummary]
+        monthlyIncomeTotal: Double = 0,
+        thisWeekIncomeTotal: Double = 0,
+        healthScore: Int = 100,
+        upcoming: [WidgetBillSummary],
+        recentIncome: [WidgetIncomeSummary] = []
     ) {
         self.generatedAt = generatedAt
         self.overdueCount = overdueCount
         self.dueTodayCount = dueTodayCount
         self.dueThisWeekCount = dueThisWeekCount
         self.monthlyTotal = monthlyTotal
+        self.monthlyIncomeTotal = monthlyIncomeTotal
+        self.thisWeekIncomeTotal = thisWeekIncomeTotal
+        self.healthScore = healthScore
         self.upcoming = upcoming
+        self.recentIncome = recentIncome
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case generatedAt, overdueCount, dueTodayCount, dueThisWeekCount, monthlyTotal
+        case monthlyIncomeTotal, thisWeekIncomeTotal, healthScore, upcoming, recentIncome
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.generatedAt = try c.decodeIfPresent(Date.self, forKey: .generatedAt) ?? Date()
+        self.overdueCount = try c.decodeIfPresent(Int.self, forKey: .overdueCount) ?? 0
+        self.dueTodayCount = try c.decodeIfPresent(Int.self, forKey: .dueTodayCount) ?? 0
+        self.dueThisWeekCount = try c.decodeIfPresent(Int.self, forKey: .dueThisWeekCount) ?? 0
+        self.monthlyTotal = try c.decodeIfPresent(Double.self, forKey: .monthlyTotal) ?? 0
+        self.monthlyIncomeTotal = try c.decodeIfPresent(Double.self, forKey: .monthlyIncomeTotal) ?? 0
+        self.thisWeekIncomeTotal = try c.decodeIfPresent(Double.self, forKey: .thisWeekIncomeTotal) ?? 0
+        self.healthScore = try c.decodeIfPresent(Int.self, forKey: .healthScore) ?? 100
+        self.upcoming = try c.decodeIfPresent([WidgetBillSummary].self, forKey: .upcoming) ?? []
+        self.recentIncome = try c.decodeIfPresent([WidgetIncomeSummary].self, forKey: .recentIncome) ?? []
     }
 
     /// Placeholder used by the widget when no real snapshot has been
@@ -93,6 +146,9 @@ public struct WidgetBillSnapshot: Codable, Hashable {
         dueTodayCount: 0,
         dueThisWeekCount: 0,
         monthlyTotal: 0,
+        monthlyIncomeTotal: 0,
+        thisWeekIncomeTotal: 0,
+        healthScore: 100,
         upcoming: []
     )
 }
@@ -129,6 +185,23 @@ public enum WidgetSnapshotStore {
         } catch {
             #if DEBUG
             print("[WidgetSnapshotStore] save failed:", error)
+            #endif
+            return false
+        }
+    }
+
+    /// Removes the shared snapshot so widgets fall back to their empty
+    /// placeholder instead of displaying another user's private data.
+    @discardableResult
+    public static func clear() -> Bool {
+        guard let url = WidgetAppGroup.snapshotURL else { return false }
+        guard FileManager.default.fileExists(atPath: url.path) else { return true }
+        do {
+            try FileManager.default.removeItem(at: url)
+            return true
+        } catch {
+            #if DEBUG
+            print("[WidgetSnapshotStore] clear failed:", error)
             #endif
             return false
         }

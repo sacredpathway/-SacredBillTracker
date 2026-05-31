@@ -186,13 +186,11 @@ struct SacredBillTrackerApp: App {
                     Task { await handleUserChange(newUserID) }
                 }
                 .onChange(of: auth.currentUserEmail) { _, _ in
-                    // v1.0.9 — Refresh Focus+ entitlement when the
-                    // user's email becomes known. Owner allowlist
-                    // override is applied inside refreshEntitlements.
-                    Task {
-                        await subscriptions.refreshEntitlements()
-                        subscriptions.recheckOwnerOverride()
-                    }
+                    // v1.0.9 — Re-check the owner allowlist when the
+                    // user's email becomes known. Do not touch StoreKit
+                    // here; products/receipts are loaded only from
+                    // paywall/subscription surfaces.
+                    subscriptions.recheckOwnerOverride()
                 }
         }
     }
@@ -211,6 +209,8 @@ struct SacredBillTrackerApp: App {
             // completes. (Privacy + App Store Guideline 5.1.1.)
             await realtime.stop()
             store.replace(bills: [])
+            BillWidgetBridge.clearSnapshotAndReloadTimelines()
+            subscriptions.clearForSignedOutUser()
             if let caching = Self.repo as? CachingBillRepository {
                 await caching.clearLocalCache()
             }

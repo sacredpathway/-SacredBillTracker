@@ -80,6 +80,7 @@ final class BillStore: ObservableObject {
             #else
             self.bills = []
             await notifications.rescheduleAll(for: [])
+            BillWidgetBridge.clearSnapshotAndReloadTimelines()
             #endif
             return
         }
@@ -627,6 +628,7 @@ final class BillStore: ObservableObject {
 
     func wipeAll() {
         bills = []
+        BillWidgetBridge.clearSnapshotAndReloadTimelines()
         Task {
             // CRITICAL: `saveBills([])` was a no-op on Supabase (its
             // empty-guard returned early). Wipe must use `deleteAll()`

@@ -25,8 +25,17 @@ enum BillWidgetBridge {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
+    /// Privacy cleanup for sign-out/account deletion. Unlike
+    /// `update(from: [])`, this removes both bill and income data from
+    /// the shared App Group snapshot.
+    static func clearSnapshotAndReloadTimelines() {
+        WidgetSnapshotStore.clear()
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
     /// Pure translator — exposed for tests / previews.
     static func makeSnapshot(from bills: [Bill], now: Date = Date()) -> WidgetBillSnapshot {
+        let previous = WidgetSnapshotStore.load()
         let live = bills.filter { $0.deletedAt == nil }
         let cal = Calendar.current
         let today = cal.startOfDay(for: now)
@@ -69,7 +78,72 @@ enum BillWidgetBridge {
             dueTodayCount: dueTodayCount,
             dueThisWeekCount: dueThisWeekCount,
             monthlyTotal: monthlyTotal,
-            upcoming: upcoming
+            monthlyIncomeTotal: previous.monthlyIncomeTotal,
+            thisWeekIncomeTotal: previous.thisWeekIncomeTotal,
+            healthScore: BillHealthScore.compute(from: live, now: now).score,
+            upcoming: upcoming,
+            recentIncome: previous.recentIncome
+        )
+    }
+}
+
+enum IncomeWidgetBridge {
+
+    static func update(from entries: [WeeklyIncome], now: Date = Date()) {
+        let previous = WidgetSnapshotStore.load()
+        let snapshot = makeSnapshot(from: entries, previous: previous, now: now)
+        WidgetSnapshotStore.save(snapshot)
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    static func makeSnapshot(
+        from entries: [WeeklyIncome],
+        previous: WidgetBillSnapshot = WidgetSnapshotStore.load(),
+        now: Date = Date()
+    ) -> WidgetBillSnapshot {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: now)
+        let month = cal.dateInterval(of: .month, for: today)
+        let week = cal.dateInterval(of: .weekOfYear, for: today)
+
+        let monthlyIncome = entries
+            .filter { entry in
+                guard let month else { return false }
+                return month.contains(entry.entryDate)
+            }
+            .reduce(Decimal(0)) { $0 + $1.amount }
+
+        let weeklyIncome = entries
+            .filter { entry in
+                guard let week else { return false }
+                return week.contains(entry.entryDate)
+            }
+            .reduce(Decimal(0)) { $0 + $1.amount }
+
+        let recentIncome = entries
+            .sorted { $0.entryDate > $1.entryDate }
+            .prefix(6)
+            .map { entry in
+                WidgetIncomeSummary(
+                    id: entry.id.uuidString,
+                    name: entry.sourceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Income" : entry.sourceName,
+                    amount: (entry.amount as NSDecimalNumber).doubleValue,
+                    entryDate: entry.entryDate,
+                    typeTitle: entry.type.title
+                )
+            }
+
+        return WidgetBillSnapshot(
+            generatedAt: now,
+            overdueCount: previous.overdueCount,
+            dueTodayCount: previous.dueTodayCount,
+            dueThisWeekCount: previous.dueThisWeekCount,
+            monthlyTotal: previous.monthlyTotal,
+            monthlyIncomeTotal: (monthlyIncome as NSDecimalNumber).doubleValue,
+            thisWeekIncomeTotal: (weeklyIncome as NSDecimalNumber).doubleValue,
+            healthScore: previous.healthScore,
+            upcoming: previous.upcoming,
+            recentIncome: Array(recentIncome)
         )
     }
 }

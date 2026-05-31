@@ -13,5 +13,10 @@ import WidgetKit
 struct SacredBillTrackerWidgetBundle: WidgetBundle {
     var body: some Widget {
         SacredBillTrackerWidget()
+        BillsDueTodayWidget()
+        UpcomingBillsWidget()
+        BillHealthScoreHomeWidget()
+        MonthlySpendingWidget()
+        IncomeTrackerWidget()
     }
 }

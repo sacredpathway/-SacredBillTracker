@@ -70,7 +70,7 @@ struct PaywallView: View {
             }
             .toolbarBackground(.hidden, for: .navigationBar)
             .task {
-                if subs.products.isEmpty { await subs.loadProducts() }
+                await subs.prepareForPaywall()
             }
             .alert("Hmm, that didn't work",
                    isPresented: errorBinding,
