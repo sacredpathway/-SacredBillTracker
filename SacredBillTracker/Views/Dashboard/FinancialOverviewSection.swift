@@ -88,20 +88,24 @@ struct FinancialOverviewSection: View {
     // MARK: - Compact grid (always visible)
 
     private var compactGrid: some View {
-        VStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("This Month")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(.primary)
+
             switch scope {
             case .all:
                 HStack(spacing: 10) {
-                    tile(
-                        title: "Personal Bills",
+                    billSummaryCounter(
+                        title: "Personal",
                         amount: store.totalThisMonth(for: .household),
                         tint: .appHouseholdText,
                         icon: "house.fill",
                         destination: BillsByTypeListView(type: .household)
                             .environmentObject(store)
                     )
-                    tile(
-                        title: "Business Bills",
+                    billSummaryCounter(
+                        title: "Business",
                         amount: store.totalThisMonth(for: .business),
                         tint: .appBusinessText,
                         icon: "briefcase.fill",
@@ -130,8 +134,8 @@ struct FinancialOverviewSection: View {
                 }
 
             case .household:
-                tile(
-                    title: "Personal Bills",
+                billSummaryCounter(
+                    title: "Personal",
                     amount: store.totalThisMonth(for: .household),
                     tint: .appHouseholdText,
                     icon: "house.fill",
@@ -150,8 +154,8 @@ struct FinancialOverviewSection: View {
                 )
 
             case .business:
-                tile(
-                    title: "Business Bills",
+                billSummaryCounter(
+                    title: "Business",
                     amount: store.totalThisMonth(for: .business),
                     tint: .appBusinessText,
                     icon: "briefcase.fill",
@@ -312,6 +316,52 @@ struct FinancialOverviewSection: View {
     }
 
     // MARK: - Tile builders
+
+    /// Classic dashboard bill counter matching the original light,
+    /// no-tint summary style: colored icon + label, bold amount, and a
+    /// quiet explanatory subtitle.
+    private func billSummaryCounter<Destination: View>(
+        title: String,
+        amount: Decimal,
+        tint: Color,
+        icon: String,
+        destination: Destination,
+        fullWidth: Bool = false
+    ) -> some View {
+        NavigationLink {
+            destination
+        } label: {
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(spacing: 7) {
+                    Image(systemName: icon)
+                        .font(.caption.weight(.bold))
+                    Text(title)
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .foregroundStyle(tint)
+
+                Text(currency.string(from: amount as NSDecimalNumber) ?? "$0")
+                    .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
+                    .foregroundStyle(Color(.label))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.68)
+
+                Text("Total due this month")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: fullWidth ? .infinity : nil)
+        .accessibilityHint("Open \(title.lowercased()) bill details")
+    }
 
     /// Tappable totals tile used by the compact grid. Wraps a
     /// NavigationLink so the parent NavigationStack pushes the
