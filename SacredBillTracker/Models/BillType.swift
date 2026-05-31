@@ -16,7 +16,7 @@ enum BillType: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .household: return "Household"
+        case .household: return "Personal"
         case .business:  return "Business"
         }
     }
@@ -47,7 +47,7 @@ enum BillTypeFilter: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .all:       return "All"
-        case .household: return "Household"
+        case .household: return "Personal"
         case .business:  return "Business"
         }
     }

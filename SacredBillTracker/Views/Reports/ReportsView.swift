@@ -82,7 +82,7 @@ struct ReportsView: View {
     private var totalsRow: some View {
         HStack(spacing: 12) {
             totalCard(
-                title: "Household",
+                title: "Personal",
                 total: totalForMonth(.household),
                 unpaid: unpaidForMonth(.household),
                 count: countForMonth(.household),

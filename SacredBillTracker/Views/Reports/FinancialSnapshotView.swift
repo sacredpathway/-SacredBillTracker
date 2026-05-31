@@ -146,7 +146,7 @@ struct FinancialSnapshotView: View {
             HStack {
                 Image(systemName: "chart.pie.fill")
                     .foregroundStyle(Theme.Color.accentGreen)
-                Text("Household vs Business")
+                Text("Personal vs Business")
                     .font(Theme.Font.cardTitle)
                 Spacer()
             }
@@ -156,7 +156,7 @@ struct FinancialSnapshotView: View {
 
             HStack(spacing: 16) {
                 SnapshotLegend(color: Color.appHousehold,
-                               label: "Household",
+                               label: "Personal",
                                amount: format(householdThisMonth))
                 SnapshotLegend(color: Color.appBusiness,
                                label: "Business",
@@ -165,7 +165,7 @@ struct FinancialSnapshotView: View {
             }
 
             if householdThisMonth == 0 && businessThisMonth == 0 {
-                Text("Add bills tagged Household or Business to see your split.")
+                Text("Add bills tagged Personal or Business to see your split.")
                     .font(.caption)
                     .foregroundStyle(Theme.Color.secondaryText)
             }
