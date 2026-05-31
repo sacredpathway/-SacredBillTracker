@@ -148,7 +148,7 @@ struct AddEditBillView: View {
                     }
                 } footer: {
                     if !PartnerService.isBackendReady {
-                        Text("Partner sync is coming soon — this flag is saved on your device for now.")
+                        Text("Partner sync is temporarily unavailable — this flag is saved on your device for now.")
                             .font(.footnote)
                     }
                 }

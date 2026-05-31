@@ -6,7 +6,7 @@
 //
 //  Shows:
 //    - Hero illustration
-//    - Coming-soon banner (when PartnerService.isBackendReady == false)
+//    - Availability banner (when PartnerService.isBackendReady == false)
 //    - Email + Send Invite card
 //    - Partner status section (no partner / pending / connected)
 //
@@ -76,19 +76,17 @@ struct PartnerBudgetingView: View {
         }
     }
 
-    // Always-visible banner reminding users that automatic invite emails
-    // are not deployed yet. Shipping with this banner is honest and
-    // matches our current backend state. We will remove this card the
-    // moment the Resend Edge Function is deployed.
+    // Always-visible banner explaining the current manual delivery path
+    // for invite instructions.
     private var emailPendingBanner: some View {
         HStack(alignment: .top, spacing: Theme.Spacing.m) {
             Image(systemName: "envelope.badge.fill")
                 .foregroundStyle(Theme.Color.accentGold)
                 .font(.title3)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Automatic invite emails are coming soon")
+                Text("Share invite details manually")
                     .font(.subheadline.weight(.semibold))
-                Text("Until then, share this in person or by message: ask your partner to install Sacred Bill Tracker and sign in with the email you invite. Their pending invite will appear instantly.")
+                Text("Ask your partner to install Sacred Bill Tracker and sign in with the email you invite. Their pending invite will appear instantly.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -227,14 +225,14 @@ struct PartnerBudgetingView: View {
         .padding(.horizontal, Theme.Spacing.l)
     }
 
-    // MARK: - Coming Soon Banner
+    // MARK: - Availability Banner
 
     private var comingSoonBanner: some View {
         HStack(spacing: Theme.Spacing.m) {
             Image(systemName: "clock.badge.fill")
                 .font(.title3)
                 .foregroundStyle(Theme.Color.accentGold)
-            Text("Partner invites are coming soon.")
+            Text("Partner invites are temporarily unavailable.")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(Theme.Color.primaryText)
             Spacer()
@@ -304,9 +302,8 @@ struct PartnerBudgetingView: View {
                         subtitle: service.invite.map { "Waiting for \($0.invitedEmail) to install the app and sign in with that exact email." } ?? "Waiting for partner to join."
                     )
 
-                    // Manual share fallback — until automatic emails are
-                    // wired (Resend), give the user a copy-paste / share
-                    // path so they can deliver the instructions themselves.
+                    // Manual share path so the user can deliver the
+                    // instructions through any channel they prefer.
                     if let invite = service.invite {
                         let appStoreURL = "https://apps.apple.com/app/id6762890363"
                         let shareText = """
@@ -400,16 +397,10 @@ struct PartnerBudgetingView: View {
         let target = partnerEmail
         let ok = await service.sendInvite(toEmail: target)
         if ok {
-            // Honest copy — automatic email delivery is not yet deployed
-            // (Resend Edge Function pending). The invite row is created
-            // and your partner will see it the moment they install the
-            // app and sign in with this email. Telling the user
-            // "invite sent" would be misleading because no email leaves
-            // our backend yet.
             alertMessage = """
                 Invite created for \(target).
 
-                Heads-up: automatic emails are coming soon. For now, ask \(target) to install Sacred Bill Tracker and sign in using exactly that email. The pending invite will appear in their Settings → Partner Budgeting screen.
+                Share the invite instructions with \(target). Ask them to install Sacred Bill Tracker and sign in using exactly that email. The pending invite will appear in their Settings → Partner Budgeting screen.
                 """
             partnerEmail = ""
         } else {

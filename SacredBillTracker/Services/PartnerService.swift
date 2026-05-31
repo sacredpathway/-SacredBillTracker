@@ -126,7 +126,7 @@ final class PartnerService: ObservableObject {
             return false
         }
         guard Self.isBackendReady else {
-            lastError = "Partner invites are coming soon."
+            lastError = "Partner invites are temporarily unavailable."
             return false
         }
 

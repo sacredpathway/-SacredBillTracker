@@ -124,7 +124,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
 
     private func effectiveBody(category: NotificationCategory, body: String, privacyBody: String?) -> String {
         if prefs.lockScreenPrivacy && category.canContainSensitiveData {
-            return privacyBody ?? "Open Sacred Pathway Driver Hub for details."
+            return privacyBody ?? "Open Sacred Bill Tracker for details."
         }
         return body
     }
@@ -195,7 +195,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
         let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
         let content = UNMutableNotificationContent()
         content.title = NotificationCategory.earningsSummaryWeekly.title
-        content.body = "Open Sacred Pathway Driver Hub to review this week's settlements and net pay."
+        content.body = "Open Sacred Bill Tracker to review this week's bills and income."
         content.sound = .default
         content.userInfo["deepLink"] = NotificationDeepLink.earningsSummary.rawValue
         let req = UNNotificationRequest(identifier: "weekly.summary.repeat",

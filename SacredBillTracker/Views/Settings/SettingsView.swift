@@ -136,7 +136,7 @@ struct SettingsView: View {
                             Label("Partner Budgeting", systemImage: "person.2.fill")
                             Spacer()
                             if !PartnerService.isBackendReady {
-                                Text("Coming Soon")
+                                Text("Unavailable")
                                     .font(.caption.weight(.semibold))
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 2)
@@ -400,12 +400,9 @@ struct SettingsView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             }
-            .confirmationDialog(
-                "Delete your account? This permanently removes your sign-in, all of your bills, and every device's copy of your data. This cannot be undone.",
-                isPresented: $showDeleteAccountConfirm,
-                titleVisibility: .visible
-            ) {
-                Button("Delete Account", role: .destructive) {
+            .sheet(isPresented: $showDeleteAccountConfirm) {
+                DeleteAccountSheet {
+                    showDeleteAccountConfirm = false
                     Task {
                         isDeletingAccount = true
                         let ok = await auth.deleteAccount()
@@ -415,8 +412,11 @@ struct SettingsView: View {
                         }
                         isDeletingAccount = false
                     }
+                } onCancel: {
+                    showDeleteAccountConfirm = false
                 }
-                Button("Cancel", role: .cancel) {}
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
             .alert(
                 "Couldn't delete your account",

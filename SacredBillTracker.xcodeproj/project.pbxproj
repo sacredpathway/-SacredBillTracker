@@ -86,6 +86,8 @@
 		PRTN1005PRTN1005PRTN1005 /* PartnerBudgetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0005PRTN0005PRTN0005 /* PartnerBudgetingView.swift */; };
 		PRTN1006PRTN1006PRTN1006 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0006PRTN0006PRTN0006 /* AccountView.swift */; };
 		PRTN1007PRTN1007PRTN1007 /* DeleteAccountSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0007PRTN0007PRTN0007 /* DeleteAccountSheet.swift */; };
+		PRIV1001PRIV1001PRIV1001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */; };
+		PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */; };
 		QUOT1001QUOT1001QUOT1001 /* DailyQuotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */; };
 		QUTS1001QUTS1001QUTS1001 /* QuoteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */; };
 		RVWX1001RVWX1001RVWX1001 /* ReviewPromptService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */; };
@@ -207,6 +209,7 @@
 		PRTN0005PRTN0005PRTN0005 /* PartnerBudgetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerBudgetingView.swift; sourceTree = "<group>"; };
 		PRTN0006PRTN0006PRTN0006 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		PRTN0007PRTN0007PRTN0007 /* DeleteAccountSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountSheet.swift; sourceTree = "<group>"; };
+		PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuotes.swift; sourceTree = "<group>"; };
 		QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteService.swift; sourceTree = "<group>"; };
 		RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptService.swift; sourceTree = "<group>"; };
@@ -469,6 +472,7 @@
 			isa = PBXGroup;
 			children = (
 				FDA8F8EA2F98336600A87244 /* SacredBillTracker.entitlements */,
+				PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */,
 				PRTN2001PRTN2001PRTN2001 /* DesignSystem */,
 				228BBD9890300E43C1C536CD /* Extensions */,
 				6C935AC7806439A1E050A374 /* Models */,
@@ -670,6 +674,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CFE9D72014C7366EEAC212E6 /* Assets.xcassets in Resources */,
+				PRIV1001PRIV1001PRIV1001 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -677,6 +682,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -44,10 +44,8 @@ final class AuthService: NSObject, ObservableObject {
     /// returns it the *first* time the user signs in.
     @Published private(set) var displayName: String?
 
-    /// v1.0.9 — Email on the current Supabase session. Used by
-    /// `SubscriptionManager` to apply the owner allowlist (Sacred
-    /// Focus+ permanently unlocked for the project owner) without
-    /// charging through StoreKit.
+    /// Email on the current Supabase session. Used for account display and
+    /// DEBUG-only local QA helpers.
     @Published private(set) var currentUserEmail: String?
 
     /// Last auth error for UI to surface.

@@ -188,10 +188,10 @@ struct SacredBillTrackerApp: App {
                     Task { await handleUserChange(newUserID) }
                 }
                 .onChange(of: auth.currentUserEmail) { _, _ in
-                    // v1.0.9 — Re-check the owner allowlist when the
-                    // user's email becomes known. Do not touch StoreKit
-                    // here; products/receipts are loaded only from
-                    // paywall/subscription surfaces.
+                    // Re-check DEBUG-only local QA helpers when the user's
+                    // email becomes known. Do not touch StoreKit here;
+                    // products/receipts load only from paywall/subscription
+                    // surfaces.
                     subscriptions.recheckOwnerOverride()
                 }
         }

@@ -363,9 +363,9 @@ struct FinancialOverviewSection: View {
         .accessibilityHint("Open \(title.lowercased()) bill details")
     }
 
-    /// Tappable totals tile used by the compact grid. Wraps a
-    /// NavigationLink so the parent NavigationStack pushes the
-    /// drill-in destination.
+    /// Tappable income counter that visually matches the classic bill
+    /// counters above it: colored icon + label, bold amount, and a
+    /// quiet explanatory subtitle with no separate tinted card treatment.
     private func tile<Destination: View>(
         title: String,
         amount: Decimal,
@@ -377,38 +377,53 @@ struct FinancialOverviewSection: View {
         NavigationLink {
             destination
         } label: {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(spacing: 7) {
                     Image(systemName: icon)
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(tint)
                     Text(title)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(tint)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .minimumScaleFactor(0.74)
                 }
+                .foregroundStyle(tint)
+
                 Text(currency.string(from: amount as NSDecimalNumber) ?? "$0")
-                    .font(.system(.title2, design: .rounded).weight(.bold).monospacedDigit())
-                    .foregroundStyle(.primary)
+                    .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
+                    .foregroundStyle(Color(.label))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.68)
+
+                Text(incomeCounterSubtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color(.systemBackground))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(Color(.separator).opacity(0.22), lineWidth: 1)
-            )
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .frame(maxWidth: fullWidth ? .infinity : nil)
         .accessibilityHint("Open \(title.lowercased()) details")
+    }
+
+    private var incomeCounterSubtitle: String {
+        switch incomePeriod {
+        case .thisMonth:
+            return "Total income this month"
+        case .lastMonth:
+            return "Total income last month"
+        case .last30Days:
+            return "Total income last 30 days"
+        case .thisWeek:
+            return "Total income this week"
+        case .thisYear:
+            return "Total income this year"
+        case .allTime:
+            return "Total income all time"
+        }
     }
 
     private func statTile(label: String, value: String, tint: Color) -> some View {

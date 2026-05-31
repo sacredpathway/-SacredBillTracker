@@ -45,15 +45,16 @@ final class SubscriptionManager: ObservableObject {
 
     /// v1.0.9 — Sacred Focus+ add-on entitlement. Tracked independently
     /// of the Pro tier: Pro users still need to subscribe to Focus+ for
-    /// this to be true. The owner allowlist below also flips this on
-    /// for the project owner's signed-in account.
+    /// this to be true.
     @Published private(set) var hasFocusPlus: Bool = false
 
-    /// Owner allowlist — emails that always have Sacred Focus+ unlocked
-    /// regardless of StoreKit entitlements. Lowercased compare.
+    #if DEBUG
+    /// Debug-only owner allowlist for local QA. Release builds must unlock
+    /// Sacred Focus+ only through StoreKit entitlements.
     private static let focusPlusOwnerEmails: Set<String> = [
         "demarquishinton@gmail.com"
     ]
+    #endif
 
     // MARK: - Convenience
 
@@ -204,12 +205,13 @@ final class SubscriptionManager: ObservableObject {
             }
         }
 
-        // Owner allowlist override — Sacred Focus+ permanently unlocked
-        // for the project owner regardless of StoreKit state.
+        #if DEBUG
+        // Debug-only local QA override. Release builds do not bypass StoreKit.
         if let email = AuthService.shared.currentUserEmail,
            Self.focusPlusOwnerEmails.contains(email.lowercased()) {
             focusPlus = true
         }
+        #endif
 
         self.purchasedProductIDs = activeIDs
         self.currentTier = tier
@@ -221,10 +223,12 @@ final class SubscriptionManager: ObservableObject {
     /// refresh. Sign-in updates `currentUserEmail` after the initial
     /// entitlement pass, so we call this on user change.
     func recheckOwnerOverride() {
+        #if DEBUG
         guard let email = AuthService.shared.currentUserEmail else { return }
         if Self.focusPlusOwnerEmails.contains(email.lowercased()) {
             self.hasFocusPlus = true
         }
+        #endif
     }
 
     /// Clear local entitlement presentation state on sign-out without
