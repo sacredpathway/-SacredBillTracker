@@ -4,21 +4,29 @@
 //
 //  v1.0.9 — Combined hero card. Replaces the separate `DailyQuoteBanner`
 //  + `BrandHeaderView` stack at the top of the Dashboard with one
-//  premium, compact card titled "Sacred Daily Focus".
+//  premium productivity hub titled "Sacred Focus".
 //
 //  Contains:
 //    • Sacred Bill Tracker logo (Tree of Life)
 //    • App name
-//    • Today's quote (single-line preview, expands on tap)
+//    • Today's quote
 //    • Author
 //    • Share button
+//    • Notes / Schedule / To-Do previews
 //
-//  The whole card is a principal button — tapping anywhere (except the
-//  share glyph) opens `DailyFocusDetailView` as a sheet with the full
-//  quote, attribution, and today's money-focus prompt.
+//  The header opens the Focus+ center/paywall. Each productivity
+//  preview opens its own full screen.
 //
 
 import SwiftUI
+
+private enum SacredFocusDestination: String, Identifiable {
+    case notes
+    case schedule
+    case todo
+
+    var id: String { rawValue }
+}
 
 struct SacredDailyFocusCard: View {
 
@@ -26,6 +34,7 @@ struct SacredDailyFocusCard: View {
 
     @EnvironmentObject private var subs: SubscriptionManager
     @EnvironmentObject private var store: BillStore
+    @EnvironmentObject private var noteStore: NoteStore
     @EnvironmentObject private var scheduleStore: ScheduleStore
     @EnvironmentObject private var todoStore: TodoStore
 
@@ -35,103 +44,62 @@ struct SacredDailyFocusCard: View {
     /// point and there is no second dashboard card.
     @State private var showFocusCenter = false
     @State private var showPaywall = false
+    @State private var destination: SacredFocusDestination?
 
     private static let appStoreURL: String =
         "https://apps.apple.com/us/app/sacred-bill-tracker/id6762890363"
 
     var body: some View {
-        Button {
-            if subs.hasFocusPlus {
-                showFocusCenter = true
-            } else {
-                showPaywall = true
-            }
-        } label: {
-            HStack(alignment: .center, spacing: 14) {
+        VStack(alignment: .leading, spacing: 14) {
+            focusHeader
 
-                // Logo — same Tree of Life used everywhere else, with
-                // the lime ring + gold shadow signature.
-                logo
-                    .frame(width: 50, height: 50)
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle().stroke(Color.appLime.opacity(0.85), lineWidth: 1.25)
-                    )
-                    .shadow(color: Color.appLime.opacity(0.25), radius: 6, y: 0)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text("Sacred Focus")
-                            .font(.subheadline.weight(.bold))
-                            .foregroundStyle(Color.appAccent)
-                            .lineLimit(1)
-                        focusPlusBadge
-                    }
-
-                    Text(quote.text)
-                        .font(.footnote.weight(.medium))
-                        .foregroundStyle(.white)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    if !quote.author.trimmingCharacters(in: .whitespaces).isEmpty {
-                        Text("— \(quote.author)")
-                            .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.75))
-                            .lineLimit(1)
-                    }
-                }
-
-                Spacer(minLength: 6)
-
-                // Share — its own tappable target so the surrounding
-                // card button doesn't swallow the tap. Wrapped in a
-                // ZStack so SwiftUI doesn't treat it as part of the
-                // outer Button's hit area.
-                ShareLink(
-                    item: shareText,
-                    subject: Text("Quote from Sacred Bill Tracker")
-                ) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.appAccent)
-                        .frame(width: 36, height: 36)
-                        .background(
-                            Circle().fill(Color.appAccent.opacity(0.15))
-                        )
-                        .contentShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Share today's quote")
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(
-                LinearGradient(
-                    colors: [Color.appSacredBlack, Color.black],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+            VStack(spacing: 8) {
+                previewButton(
+                    destination: .notes,
+                    title: "Notes Preview",
+                    systemImage: "note.text",
+                    primary: notesPrimary,
+                    secondary: notesSecondary,
+                    detail: notesDetail
                 )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 18))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(Color.appAccent.opacity(0.30), lineWidth: 0.5)
-            )
-            .contentShape(RoundedRectangle(cornerRadius: 18))
+                previewButton(
+                    destination: .schedule,
+                    title: "Schedule Preview",
+                    systemImage: "calendar.badge.clock",
+                    primary: schedulePrimary,
+                    secondary: scheduleSecondary,
+                    detail: scheduleDetail
+                )
+                previewButton(
+                    destination: .todo,
+                    title: "To-Do Preview",
+                    systemImage: "checklist",
+                    primary: todoPrimary,
+                    secondary: todoSecondary,
+                    detail: todoDetail
+                )
+            }
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Sacred Focus. \(quote.text).")
-        .accessibilityHint(subs.hasFocusPlus
-            ? "Opens Sacred Focus Plus — daily planning, quotes, to-dos, and Schedule Buddy."
-            : "Opens the Sacred Focus Plus upgrade screen.")
-        // v1.0.9 — Subscribed: push Focus+ center as a sheet.
+        .padding(16)
+        .background(
+            LinearGradient(
+                colors: [Color.appSacredBlack, Color.black],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.appAccent.opacity(0.30), lineWidth: 0.5)
+        )
+        .accessibilityElement(children: .contain)
         .sheet(isPresented: $showFocusCenter) {
             NavigationStack {
                 DailyFocusCenterView()
                     .environmentObject(subs)
                     .environmentObject(store)
+                    .environmentObject(noteStore)
                     .environmentObject(scheduleStore)
                     .environmentObject(todoStore)
                     .toolbar {
@@ -141,11 +109,265 @@ struct SacredDailyFocusCard: View {
                     }
             }
         }
-        // v1.0.9 — Not subscribed: open Focus+ paywall.
         .sheet(isPresented: $showPaywall) {
             FocusPlusPaywallView()
                 .environmentObject(subs)
         }
+        .sheet(item: $destination) { destination in
+            NavigationStack {
+                switch destination {
+                case .notes:
+                    NotesListView()
+                        .environmentObject(noteStore)
+                case .schedule:
+                    ScheduleAllListView()
+                        .environmentObject(scheduleStore)
+                case .todo:
+                    TodoAllListView()
+                        .environmentObject(todoStore)
+                }
+            }
+        }
+    }
+
+    private var focusHeader: some View {
+        HStack(alignment: .center, spacing: 14) {
+            Button {
+                openFocus()
+            } label: {
+                HStack(alignment: .center, spacing: 14) {
+                    logo
+                        .frame(width: 50, height: 50)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle().stroke(Color.appLime.opacity(0.85), lineWidth: 1.25)
+                        )
+                        .shadow(color: Color.appLime.opacity(0.25), radius: 6, y: 0)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Text("Sacred Focus")
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(Color.appAccent)
+                                .lineLimit(1)
+                            focusPlusBadge
+                        }
+
+                        Text(quote.text)
+                            .font(.footnote.weight(.medium))
+                            .foregroundStyle(.white)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        if !quote.author.trimmingCharacters(in: .whitespaces).isEmpty {
+                            Text("— \(quote.author)")
+                                .font(.caption2)
+                                .foregroundStyle(.white.opacity(0.75))
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Sacred Focus. \(quote.text).")
+            .accessibilityHint(subs.hasFocusPlus
+                ? "Opens Sacred Focus Plus — daily planning, quotes, to-dos, and Schedule Buddy."
+                : "Opens the Sacred Focus Plus upgrade screen.")
+
+            Spacer(minLength: 6)
+
+            ShareLink(
+                item: shareText,
+                subject: Text("Quote from Sacred Bill Tracker")
+            ) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.appAccent)
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Circle().fill(Color.appAccent.opacity(0.15))
+                    )
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Share today's quote")
+        }
+    }
+
+    private func previewButton(
+        destination: SacredFocusDestination,
+        title: String,
+        systemImage: String,
+        primary: String,
+        secondary: String,
+        detail: String?
+    ) -> some View {
+        Button {
+            self.destination = destination
+        } label: {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: systemImage)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.appAccent)
+                    .frame(width: 26, height: 26)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color.appAccent.opacity(0.92))
+                        .lineLimit(1)
+
+                    Text(primary)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+
+                    Text(secondary)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.72))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+
+                    if let detail, !detail.isEmpty {
+                        Text(detail)
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.58))
+                            .lineLimit(2)
+                    }
+                }
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.appAccent.opacity(0.75))
+                    .padding(.top, 4)
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.white.opacity(0.055))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Color.appAccent.opacity(0.16), lineWidth: 0.5)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(title). \(primary). \(secondary)")
+    }
+
+    private func openFocus() {
+        if subs.hasFocusPlus {
+            showFocusCenter = true
+        } else {
+            showPaywall = true
+        }
+    }
+
+    private var notesPrimary: String {
+        guard let note = noteStore.mostRecent else { return "No notes yet" }
+        return note.title.nilIfBlank ?? "Untitled note"
+    }
+
+    private var notesSecondary: String {
+        guard let note = noteStore.mostRecent else { return "Tap to create your first note" }
+        return mediumDateFormatter.string(from: note.updatedAt)
+    }
+
+    private var notesDetail: String? {
+        noteStore.mostRecent?.body.nilIfBlank
+    }
+
+    private var schedulePrimary: String {
+        guard let next = nextSchedule else { return "No upcoming events" }
+        return next.item.title.nilIfBlank ?? "Untitled event"
+    }
+
+    private var scheduleSecondary: String {
+        guard let next = nextSchedule else { return "Tap to schedule one" }
+        return timeFormatter.string(from: next.date)
+    }
+
+    private var scheduleDetail: String? {
+        guard let next = nextSchedule else { return nil }
+        return mediumDateFormatter.string(from: next.date)
+    }
+
+    private var todoPrimary: String {
+        let count = openTodos.count
+        return count == 0 ? "No tasks yet" : "\(count) open task\(count == 1 ? "" : "s")"
+    }
+
+    private var todoSecondary: String {
+        guard let next = nextTodo else { return "Tap to add one" }
+        return next.title.nilIfBlank ?? "Untitled task"
+    }
+
+    private var todoDetail: String? {
+        guard let next = nextTodo else { return nil }
+        return "Due \(mediumDateFormatter.string(from: next.dueDate))"
+    }
+
+    private var openTodos: [FocusTodo] {
+        todoStore.items
+            .filter { !$0.isComplete }
+            .sorted { $0.dueDate < $1.dueDate }
+    }
+
+    private var nextTodo: FocusTodo? {
+        openTodos.first
+    }
+
+    private var nextSchedule: (item: ScheduleItem, date: Date)? {
+        let calendar = Calendar.current
+        let now = Date()
+        let today = calendar.startOfDay(for: now)
+        var matches: [(ScheduleItem, Date)] = []
+
+        for offset in 0..<366 {
+            guard let day = calendar.date(byAdding: .day, value: offset, to: today) else { continue }
+            for item in scheduleStore.items(on: day, calendar: calendar) where !item.isComplete {
+                let start = occurrenceStart(for: item, on: day, calendar: calendar)
+                if start >= now {
+                    matches.append((item, start))
+                }
+            }
+            if !matches.isEmpty {
+                if let match = matches.min(by: { $0.1 < $1.1 }) {
+                    return (item: match.0, date: match.1)
+                }
+            }
+        }
+
+        return nil
+    }
+
+    private func occurrenceStart(for item: ScheduleItem, on day: Date, calendar: Calendar) -> Date {
+        let time = calendar.dateComponents([.hour, .minute, .second], from: item.startTime)
+        return calendar.date(
+            bySettingHour: time.hour ?? 0,
+            minute: time.minute ?? 0,
+            second: time.second ?? 0,
+            of: day
+        ) ?? item.startTime
+    }
+
+    private var mediumDateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("MMM d")
+        return formatter
+    }
+
+    private var timeFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter
     }
 
     // MARK: - Focus+ badge
@@ -218,6 +440,13 @@ struct SacredDailyFocusCard: View {
             parts.append(Self.appStoreURL)
         }
         return parts.joined(separator: "\n")
+    }
+}
+
+private extension String {
+    var nilIfBlank: String? {
+        let value = trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
     }
 }
 
