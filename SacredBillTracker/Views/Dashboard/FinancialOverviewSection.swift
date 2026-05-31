@@ -380,15 +380,10 @@ struct FinancialOverviewSection: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
                     Image(systemName: icon)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 28, height: 28)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .fill(tint)
-                        )
-                    Text(title)
                         .font(.caption.weight(.bold))
+                        .foregroundStyle(tint)
+                    Text(title)
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(tint)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
@@ -404,13 +399,12 @@ struct FinancialOverviewSection: View {
             .padding(.vertical, 16)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(tint.opacity(0.10))
+                    .fill(Color(.systemBackground))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(tint.opacity(0.20), lineWidth: 1)
+                    .strokeBorder(Color(.separator).opacity(0.22), lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 3)
         }
         .buttonStyle(.plain)
         .frame(maxWidth: fullWidth ? .infinity : nil)
