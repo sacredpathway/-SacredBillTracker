@@ -85,7 +85,7 @@ struct BillHealthScoreCard: View {
         .padding(18)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Theme.Color.card)
+                .fill(Color(.systemBackground))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)

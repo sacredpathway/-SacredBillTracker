@@ -28,6 +28,10 @@ struct FinancialOverviewSection: View {
     /// Passed in so this section stays a pure display component.
     @Binding var combineIncome: Bool
 
+    /// Dashboard scope selected by the All / Personal / Business control.
+    /// `.household` maps to Personal in the existing bill data model.
+    let scope: BillTypeFilter
+
     /// Dashboard-wide income filter (week / 30d / month / year / all).
     /// Used for income totals + insight.
     let incomePeriod: IncomeDashboardPeriod
@@ -85,37 +89,27 @@ struct FinancialOverviewSection: View {
 
     private var compactGrid: some View {
         VStack(spacing: 10) {
-            HStack(spacing: 10) {
-                // Bills — Personal / Business
-                tile(
-                    title: "Personal Bills",
-                    amount: store.totalThisMonth(for: .household),
-                    tint: .appHouseholdText,
-                    icon: "house.fill",
-                    destination: BillsByTypeListView(type: .household)
-                        .environmentObject(store)
-                )
-                tile(
-                    title: "Business Bills",
-                    amount: store.totalThisMonth(for: .business),
-                    tint: .appBusinessText,
-                    icon: "briefcase.fill",
-                    destination: BillsByTypeListView(type: .business)
-                        .environmentObject(store)
-                )
-            }
+            switch scope {
+            case .all:
+                HStack(spacing: 10) {
+                    tile(
+                        title: "Personal Bills",
+                        amount: store.totalThisMonth(for: .household),
+                        tint: .appHouseholdText,
+                        icon: "house.fill",
+                        destination: BillsByTypeListView(type: .household)
+                            .environmentObject(store)
+                    )
+                    tile(
+                        title: "Business Bills",
+                        amount: store.totalThisMonth(for: .business),
+                        tint: .appBusinessText,
+                        icon: "briefcase.fill",
+                        destination: BillsByTypeListView(type: .business)
+                            .environmentObject(store)
+                    )
+                }
 
-            if combineIncome {
-                tile(
-                    title: "Combined Income",
-                    amount: combinedIncomeTotal,
-                    tint: Color.appAccentText,
-                    icon: "dollarsign.circle.fill",
-                    destination: IncomeListView()
-                        .environmentObject(incomeStore),
-                    fullWidth: true
-                )
-            } else {
                 HStack(spacing: 10) {
                     tile(
                         title: "Personal Income",
@@ -134,6 +128,46 @@ struct FinancialOverviewSection: View {
                             .environmentObject(incomeStore)
                     )
                 }
+
+            case .household:
+                tile(
+                    title: "Personal Bills",
+                    amount: store.totalThisMonth(for: .household),
+                    tint: .appHouseholdText,
+                    icon: "house.fill",
+                    destination: BillsByTypeListView(type: .household)
+                        .environmentObject(store),
+                    fullWidth: true
+                )
+                tile(
+                    title: "Personal Income",
+                    amount: incomeTotal(for: .personal),
+                    tint: .appHouseholdText,
+                    icon: IncomeType.personal.systemImage,
+                    destination: IncomeListView(typeFilter: .personal)
+                        .environmentObject(incomeStore),
+                    fullWidth: true
+                )
+
+            case .business:
+                tile(
+                    title: "Business Bills",
+                    amount: store.totalThisMonth(for: .business),
+                    tint: .appBusinessText,
+                    icon: "briefcase.fill",
+                    destination: BillsByTypeListView(type: .business)
+                        .environmentObject(store),
+                    fullWidth: true
+                )
+                tile(
+                    title: "Business Income",
+                    amount: incomeTotal(for: .business),
+                    tint: .appBusinessText,
+                    icon: IncomeType.business.systemImage,
+                    destination: IncomeListView(typeFilter: .business)
+                        .environmentObject(incomeStore),
+                    fullWidth: true
+                )
             }
         }
     }
@@ -194,7 +228,7 @@ struct FinancialOverviewSection: View {
         // ── Income breakdown ───────────────────────────────────
         subsectionHeader("Income — \(incomePeriod.title)")
 
-        if combineIncome {
+        if scope == .all && combineIncome {
             HStack {
                 Text("Combined Income")
                     .font(.caption.weight(.semibold))
@@ -203,7 +237,7 @@ struct FinancialOverviewSection: View {
                 Text(currency.string(from: combinedIncomeTotal as NSDecimalNumber) ?? "$0")
                     .font(.subheadline.weight(.bold).monospacedDigit())
             }
-        } else {
+        } else if scope == .all {
             let bizP = percentage(of: incomeTotal(for: .business),
                                   in: combinedIncomeTotal) ?? 0
             let perP = combinedIncomeTotal > 0 ? 100 - bizP : 0
@@ -233,6 +267,15 @@ struct FinancialOverviewSection: View {
                 Text(currency.string(from: combinedIncomeTotal as NSDecimalNumber) ?? "$0")
                     .font(.subheadline.weight(.bold).monospacedDigit())
             }
+        } else {
+            HStack {
+                Text(scopeIncomeLabel)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(scopeTint)
+                Spacer()
+                Text(currency.string(from: scopedIncomeTotal as NSDecimalNumber) ?? "$0")
+                    .font(.subheadline.weight(.bold).monospacedDigit())
+            }
         }
 
         // Insight line.
@@ -254,16 +297,18 @@ struct FinancialOverviewSection: View {
                 .padding(.top, 4)
         }
 
-        Divider().padding(.vertical, 4)
+        if scope == .all {
+            Divider().padding(.vertical, 4)
 
-        // ── Combine Income toggle (now lives inside details) ───
-        Toggle(isOn: $combineIncome) {
-            Label("Combine Income", systemImage: combineIncome
-                  ? "rectangle.stack.fill"
-                  : "rectangle.split.2x1")
-                .font(.subheadline.weight(.semibold))
+            // ── Combine Income toggle (now lives inside details) ───
+            Toggle(isOn: $combineIncome) {
+                Label("Combine Income", systemImage: combineIncome
+                      ? "rectangle.stack.fill"
+                      : "rectangle.split.2x1")
+                    .font(.subheadline.weight(.semibold))
+            }
+            .tint(Color.appAccent)
         }
-        .tint(Color.appAccent)
     }
 
     // MARK: - Tile builders
@@ -362,7 +407,9 @@ struct FinancialOverviewSection: View {
     }
 
     private var billsThisMonth: [Bill] {
-        store.bills.filter { $0.isDueThisMonth }
+        store.bills.filter { bill in
+            bill.isDueThisMonth && scope.matches(bill.type)
+        }
     }
     private var billsThisMonthCount: Int { billsThisMonth.count }
     private var paidThisMonth: Decimal {
@@ -387,8 +434,12 @@ struct FinancialOverviewSection: View {
     }
 
     private var insightLine: String? {
-        let total = combinedIncomeTotal
+        let total = scopedIncomeTotal
         guard total > 0 else { return nil }
+        if scope != .all {
+            let amount = currency.string(from: total as NSDecimalNumber) ?? "$0"
+            return "\(scopeIncomeLabel) this period is \(amount)."
+        }
         if combineIncome {
             let amount = currency.string(from: total as NSDecimalNumber) ?? "$0"
             return "Your combined income this period is \(amount)."
@@ -401,11 +452,45 @@ struct FinancialOverviewSection: View {
             return "Personal income generated \(perP)% of your earnings this period."
         }
     }
+
+    private var scopedIncomeTotal: Decimal {
+        switch scope {
+        case .all:
+            return combinedIncomeTotal
+        case .household:
+            return incomeTotal(for: .personal)
+        case .business:
+            return incomeTotal(for: .business)
+        }
+    }
+
+    private var scopeIncomeLabel: String {
+        switch scope {
+        case .all:
+            return "Combined Income"
+        case .household:
+            return "Personal Income"
+        case .business:
+            return "Business Income"
+        }
+    }
+
+    private var scopeTint: Color {
+        switch scope {
+        case .all:
+            return Color.appAccentText
+        case .household:
+            return Color.appHouseholdText
+        case .business:
+            return Color.appBusinessText
+        }
+    }
 }
 
 #Preview {
     FinancialOverviewSection(
         combineIncome: .constant(false),
+        scope: .all,
         incomePeriod: .last30Days,
         weekStartDay: .monday
     )

@@ -105,10 +105,8 @@ struct DashboardView: View {
                         .padding(.top, 40)
                         .padding(.horizontal)
                     } else {
-                        if !combinedTotals {
-                            FilterPicker(selection: $store.filter)
-                                .padding(.horizontal)
-                        }
+                        FilterPicker(selection: $store.filter)
+                            .padding(.horizontal)
 
                         // v1.0.11 — Customizable widgets. Rendered in the
                         // user's saved order. Press-and-hold any widget (or
@@ -687,13 +685,10 @@ struct DashboardView: View {
     // MARK: - Snapshot
 
     private var snapshotGrid: some View {
-        // Combined Totals → ignore the BillTypeFilter, sum across both
-        // Personal + Business. Otherwise fall back to the existing
-        // type-filtered values from BillStore.
-        let dueToday    = combinedTotals ? store.allDueToday    : store.dueToday
-        let dueThisWeek = combinedTotals ? store.allDueThisWeek : store.dueThisWeek
-        let overdue     = combinedTotals ? store.allOverdue     : store.overdue
-        let upcoming    = combinedTotals ? store.allUpcoming    : store.upcoming
+        let dueToday    = store.dueToday
+        let dueThisWeek = store.dueThisWeek
+        let overdue     = store.overdue
+        let upcoming    = store.upcoming
 
         let columns = [GridItem(.flexible()), GridItem(.flexible())]
         return LazyVGrid(columns: columns, spacing: 12) {
@@ -860,7 +855,7 @@ struct DashboardView: View {
 
     @ViewBuilder
     private var overdueSection: some View {
-        let source = combinedTotals ? store.allOverdue : store.overdue
+        let source = store.overdue
         if !source.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 sectionHeader("Past due", tint: .red)
@@ -889,7 +884,7 @@ struct DashboardView: View {
 
     @ViewBuilder
     private var upcomingSection: some View {
-        let pool = combinedTotals ? store.allUpcoming : store.upcoming
+        let pool = store.upcoming
         let list = Array(pool.prefix(8))
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader("Due next")
@@ -958,14 +953,15 @@ struct DashboardView: View {
         case .incomeOverview:
             FinancialOverviewSection(
                 combineIncome: $combineIncome,
+                scope: store.filter,
                 incomePeriod: IncomeDashboardPeriod.from(rawValue: incomeDashboardPeriodRaw),
                 weekStartDay: WeekStartDay.from(rawValue: weekStartDayRaw)
             )
         case .healthScore:
             BillHealthScoreCard(
-                score: BillHealthScore.compute(from: store.bills),
+                score: BillHealthScore.compute(from: store.filteredBills),
                 onTap: {
-                    let s = BillHealthScore.compute(from: store.bills)
+                    let s = BillHealthScore.compute(from: store.filteredBills)
                     if s.overdueCount > 0       { healthInitialFilter = .overdue }
                     else if s.dueTodayCount > 0 { healthInitialFilter = .dueToday }
                     else if s.dueSoonCount > 0  { healthInitialFilter = .dueThisWeek }
