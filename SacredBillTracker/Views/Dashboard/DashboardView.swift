@@ -975,6 +975,9 @@ struct DashboardView: View {
         case .cashFlow:
             CashFlowCard(flow: store.cashFlow())
                 .padding(.horizontal)
+        case .payoffSummary:
+            PayoffSummaryCard(summary: store.payoffSummary(for: store.filter))
+                .padding(.horizontal)
         case .priority:
             PrioritySection(
                 bills: store.priorityBills(limit: 3),
@@ -1027,6 +1030,7 @@ enum DashboardWidget: String, CaseIterable, Identifiable, Codable {
     case quickStats
     case riskAlerts
     case cashFlow
+    case payoffSummary
     case priority
     case overdue
     case upcoming
@@ -1041,6 +1045,7 @@ enum DashboardWidget: String, CaseIterable, Identifiable, Codable {
         case .quickStats:     return "Quick Stats"
         case .riskAlerts:     return "Risk Alerts"
         case .cashFlow:       return "Cash Flow"
+        case .payoffSummary:  return "Payoff Progress"
         case .priority:       return "Priority Bills"
         case .overdue:        return "Past Due"
         case .upcoming:       return "Due Next"
@@ -1055,11 +1060,89 @@ enum DashboardWidget: String, CaseIterable, Identifiable, Codable {
         case .quickStats:     return "square.grid.2x2.fill"
         case .riskAlerts:     return "exclamationmark.triangle.fill"
         case .cashFlow:       return "arrow.left.arrow.right.circle.fill"
+        case .payoffSummary:  return "chart.line.downtrend.xyaxis.circle.fill"
         case .priority:       return "flag.fill"
         case .overdue:        return "clock.badge.exclamationmark.fill"
         case .upcoming:       return "tray.full.fill"
         case .snapshot:       return "chart.pie.fill"
         }
+    }
+}
+
+private struct PayoffSummaryCard: View {
+    let summary: BillStore.PayoffSummary
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                Image(systemName: "chart.line.downtrend.xyaxis.circle.fill")
+                    .foregroundStyle(Theme.Color.accentGreen)
+                Text("Payoff Progress")
+                    .font(.system(.title3, design: .rounded).weight(.bold))
+                Spacer()
+                if summary.trackedCount > 0 {
+                    Text("\(summary.trackedCount)")
+                        .font(.caption.bold().monospacedDigit())
+                        .foregroundStyle(Theme.Color.accentGreen)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Theme.Color.accentGreen.opacity(0.14),
+                                    in: Capsule())
+                }
+            }
+
+            if summary.trackedCount == 0 {
+                Text("No payoff balances tracked yet.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else {
+                ProgressView(value: summary.progress)
+                    .tint(Theme.Color.accentGreen)
+
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Remaining Payoff")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(PaydownPlanService.currency(summary.remainingBalance))
+                            .font(.title3.bold().monospacedDigit())
+                    }
+                    Spacer()
+                    Text("\(Int((summary.progress * 100).rounded()))% paid")
+                        .font(.subheadline.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(Theme.Color.accentGreen)
+                }
+
+                Divider()
+
+                LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
+                    metric("Tracked Balances", summary.originalBalance)
+                    metric("Paid Down", summary.paidDown)
+                    metric("Monthly Payoff", summary.monthlyPaymentAmount)
+                    metric("Remaining", summary.remainingBalance)
+                }
+            }
+        }
+        .padding(18)
+        .background(Color.appCard, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func metric(_ title: String, _ amount: Decimal) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(PaydownPlanService.currency(amount))
+                .font(.subheadline.weight(.semibold).monospacedDigit())
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

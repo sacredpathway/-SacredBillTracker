@@ -73,6 +73,14 @@ private struct BillRow: Codable {
     // migration decode cleanly (and rows from the new build encode null
     // when the user didn't set one).
     let payment_url: String?
+    let payoff_tracking_enabled: Bool?
+    let payoff_original_balance: Double?
+    let payoff_remaining_balance: Double?
+    let payoff_payment_amount: Double?
+    let payoff_interest_rate: Double?
+    let payoff_goal_date: Date?
+    let payoff_category: String?
+    let payoff_history: [PayoffPaymentRecord]?
 
     init(bill: Bill, userID: UUID) {
         self.id            = bill.id
@@ -92,6 +100,14 @@ private struct BillRow: Codable {
         self.deleted_at    = bill.deletedAt
         self.is_shared     = bill.isShared
         self.payment_url   = bill.paymentURL
+        self.payoff_tracking_enabled = bill.isPayoffTrackingEnabled
+        self.payoff_original_balance = bill.payoffOriginalBalance.map { ($0 as NSDecimalNumber).doubleValue }
+        self.payoff_remaining_balance = bill.payoffRemainingBalance.map { ($0 as NSDecimalNumber).doubleValue }
+        self.payoff_payment_amount = bill.payoffPaymentAmount.map { ($0 as NSDecimalNumber).doubleValue }
+        self.payoff_interest_rate = bill.payoffInterestRate.map { ($0 as NSDecimalNumber).doubleValue }
+        self.payoff_goal_date = bill.payoffGoalDate
+        self.payoff_category = bill.payoffCategory?.rawValue
+        self.payoff_history = bill.payoffHistory
     }
 
     func toBill() -> Bill? {
@@ -118,7 +134,15 @@ private struct BillRow: Codable {
             isShared: is_shared ?? false,
             deletedAt: deleted_at,
             ownerUserID: user_id,
-            paymentURL: payment_url?.nilIfEmpty
+            paymentURL: payment_url?.nilIfEmpty,
+            isPayoffTrackingEnabled: payoff_tracking_enabled ?? false,
+            payoffOriginalBalance: payoff_original_balance.map { Decimal($0) },
+            payoffRemainingBalance: payoff_remaining_balance.map { Decimal($0) },
+            payoffPaymentAmount: payoff_payment_amount.map { Decimal($0) },
+            payoffInterestRate: payoff_interest_rate.map { Decimal($0) },
+            payoffGoalDate: payoff_goal_date,
+            payoffCategory: payoff_category.flatMap { PayoffCategory(rawValue: $0) },
+            payoffHistory: payoff_history ?? []
         )
     }
 }

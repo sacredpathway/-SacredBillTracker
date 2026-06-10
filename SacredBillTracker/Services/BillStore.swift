@@ -181,6 +181,7 @@ final class BillStore: ObservableObject {
         var new = bill
         new.createdAt = Date()
         new.updatedAt = Date()
+        settlePayoffIfPaid(&new)
         bills.append(new)
         persist()
         if !new.isPaid {
@@ -200,6 +201,7 @@ final class BillStore: ObservableObject {
         guard let idx = bills.firstIndex(where: { $0.id == bill.id }) else { return }
         var updated = bill
         updated.updatedAt = Date()
+        settlePayoffIfPaid(&updated)
         bills[idx] = updated
         persist()
         notifications.cancelReminder(for: updated.id)
@@ -246,6 +248,7 @@ final class BillStore: ObservableObject {
         var revived = bill
         revived.deletedAt = nil
         revived.updatedAt = Date()
+        settlePayoffIfPaid(&revived)
         if !bills.contains(where: { $0.id == bill.id }) {
             bills.append(revived)
         }
@@ -296,6 +299,12 @@ final class BillStore: ObservableObject {
         BillWidgetBridge.update(from: snapshot)
     }
 
+    private func settlePayoffIfPaid(_ bill: inout Bill) {
+        guard bill.isPaid else { return }
+        let kind: PayoffPaymentKind = bill.isAutoPaid ? .autoPay : .manual
+        bill.applyPayoffPaymentIfNeeded(kind: kind)
+    }
+
     func delete(at offsets: IndexSet, from list: [Bill]) {
         let ids = offsets.map { list[$0].id }
         for id in ids {
@@ -309,6 +318,7 @@ final class BillStore: ObservableObject {
         var updated = bill
         updated.status = .paid
         updated.lastPaidDate = Date()
+        updated.applyPayoffPaymentIfNeeded(kind: updated.isAutoPaid ? .autoPay : .manual)
         update(updated)
 
         // Marking a bill paid is a clean positive moment — bill done,
@@ -331,7 +341,15 @@ final class BillStore: ObservableObject {
                 autoPay: updated.autoPay,
                 notes: updated.notes,
                 status: .unpaid,
-                lastPaidDate: updated.lastPaidDate
+                lastPaidDate: updated.lastPaidDate,
+                isPayoffTrackingEnabled: updated.isPayoffTrackingEnabled,
+                payoffOriginalBalance: updated.payoffOriginalBalance,
+                payoffRemainingBalance: updated.payoffRemainingBalance,
+                payoffPaymentAmount: updated.payoffPaymentAmount,
+                payoffInterestRate: updated.payoffInterestRate,
+                payoffGoalDate: updated.payoffGoalDate,
+                payoffCategory: updated.payoffCategory,
+                payoffHistory: updated.payoffHistory
             )
             add(next)
         }
@@ -339,6 +357,7 @@ final class BillStore: ObservableObject {
 
     func markUnpaid(_ bill: Bill) {
         var updated = bill
+        updated.reversePayoffPaymentForCurrentCycle()
         updated.status = .unpaid
         // Auto-pay covers the current cycle, so it must be off for the bill
         // to become semantically unpaid.
@@ -441,6 +460,70 @@ final class BillStore: ObservableObject {
         bills
             .filter { $0.isOverdue }
             .reduce(Decimal(0)) { $0 + $1.amount }
+    }
+
+    struct PayoffSummary: Hashable {
+        let trackedCount: Int
+        let originalBalance: Decimal
+        let paidDown: Decimal
+        let remainingBalance: Decimal
+        let monthlyPaymentAmount: Decimal
+
+        var progress: Double {
+            let original = (originalBalance as NSDecimalNumber).doubleValue
+            guard original > 0 else { return 0 }
+            let paid = (paidDown as NSDecimalNumber).doubleValue
+            return min(max(paid / original, 0), 1)
+        }
+    }
+
+    func payoffSummary(for scope: BillTypeFilter? = nil) -> PayoffSummary {
+        let activeScope = scope ?? filter
+        let tracked = latestPayoffSnapshots(
+            in: bills.filter { bill in
+                bill.isPayoffTrackingEnabled && activeScope.matches(bill.type)
+            }
+        )
+
+        let original = tracked.reduce(Decimal(0)) { $0 + $1.payoffOriginalBalanceValue }
+        let remaining = tracked.reduce(Decimal(0)) { $0 + $1.payoffRemainingBalanceValue }
+        let paidDown = tracked.reduce(Decimal(0)) { $0 + $1.payoffPaidDown }
+        let monthly = tracked.reduce(Decimal(0)) { $0 + $1.payoffEffectivePaymentAmount }
+
+        return PayoffSummary(
+            trackedCount: tracked.count,
+            originalBalance: original,
+            paidDown: paidDown,
+            remainingBalance: remaining,
+            monthlyPaymentAmount: monthly
+        )
+    }
+
+    private func latestPayoffSnapshots(in bills: [Bill]) -> [Bill] {
+        var byIdentity: [String: Bill] = [:]
+
+        for bill in bills {
+            let key = payoffIdentityKey(for: bill)
+            if let existing = byIdentity[key] {
+                if bill.dueDate > existing.dueDate
+                    || (bill.dueDate == existing.dueDate && bill.updatedAt > existing.updatedAt) {
+                    byIdentity[key] = bill
+                }
+            } else {
+                byIdentity[key] = bill
+            }
+        }
+
+        return Array(byIdentity.values)
+    }
+
+    private func payoffIdentityKey(for bill: Bill) -> String {
+        let normalizedName = bill.name
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        let original = NSDecimalNumber(decimal: bill.payoffOriginalBalanceValue).stringValue
+        let category = bill.payoffCategory?.rawValue ?? "uncategorized"
+        return "\(normalizedName)|\(bill.type.rawValue)|\(category)|\(original)"
     }
 
     func bills(on day: Date) -> [Bill] {
@@ -567,7 +650,15 @@ final class BillStore: ObservableObject {
             autoPay: bill.autoPay,
             notes: bill.notes,
             status: .unpaid,
-            lastPaidDate: bill.lastPaidDate
+            lastPaidDate: bill.lastPaidDate,
+            isPayoffTrackingEnabled: bill.isPayoffTrackingEnabled,
+            payoffOriginalBalance: bill.payoffOriginalBalance,
+            payoffRemainingBalance: bill.payoffRemainingBalance,
+            payoffPaymentAmount: bill.payoffPaymentAmount,
+            payoffInterestRate: bill.payoffInterestRate,
+            payoffGoalDate: bill.payoffGoalDate,
+            payoffCategory: bill.payoffCategory,
+            payoffHistory: bill.payoffHistory
         )
         add(copy)
         return copy

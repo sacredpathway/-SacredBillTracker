@@ -31,6 +31,9 @@ struct BillDetailView: View {
                 header(for: b)
                 amountCard(for: b)
                 detailsCard(for: b)
+                if b.isPayoffTrackingEnabled {
+                    payoffTrackingCard(for: b)
+                }
                 if b.isUsing153Plan {
                     paydownPlanCard(for: b)
                 }
@@ -190,6 +193,126 @@ struct BillDetailView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
             }
+        }
+    }
+
+    // MARK: - Payoff Tracking card
+
+    private func payoffTrackingCard(for b: Bill) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                Image(systemName: b.payoffCategory?.systemImage ?? "chart.line.downtrend.xyaxis")
+                    .foregroundStyle(Theme.Color.accentGreen)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Payoff Tracking")
+                        .font(.headline)
+                    if let category = b.payoffCategory {
+                        Text(category.title)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                Text("\(Int((b.payoffProgress * 100).rounded()))%")
+                    .font(.headline.monospacedDigit())
+                    .foregroundStyle(Theme.Color.accentGreen)
+            }
+
+            ProgressView(value: b.payoffProgress)
+                .tint(Theme.Color.accentGreen)
+
+            payoffMetricRow("Original Balance",
+                            value: PaydownPlanService.currency(b.payoffOriginalBalanceValue),
+                            icon: "banknote")
+            Divider()
+            payoffMetricRow("Remaining Balance",
+                            value: PaydownPlanService.currency(b.payoffRemainingBalanceValue),
+                            icon: "minus.circle.fill")
+            Divider()
+            payoffMetricRow("Amount Paid So Far",
+                            value: PaydownPlanService.currency(b.payoffPaidDown),
+                            icon: "checkmark.seal.fill")
+            Divider()
+            payoffMetricRow("Payment Amount",
+                            value: PaydownPlanService.currency(b.payoffEffectivePaymentAmount),
+                            icon: "arrow.down.circle.fill")
+
+            if let rate = b.payoffInterestRate {
+                Divider()
+                payoffMetricRow("Interest Rate",
+                                value: "\(NSDecimalNumber(decimal: rate).stringValue)%",
+                                icon: "percent")
+            }
+
+            if let goal = b.payoffGoalDate {
+                Divider()
+                payoffMetricRow("Goal Date",
+                                value: goal.mediumFormatted,
+                                icon: "calendar.badge.clock")
+            }
+
+            Text(payoffEstimateText(for: b))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.top, 2)
+
+            let recentHistory = Array(b.payoffHistory.sorted { $0.date > $1.date }.prefix(3))
+            if !recentHistory.isEmpty {
+                Divider()
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Payment History")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    ForEach(recentHistory) { record in
+                        payoffHistoryRow(record)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color.appCard, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func payoffMetricRow(_ title: String, value: String, icon: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .foregroundStyle(.secondary)
+                .frame(width: 22)
+            Text(title)
+            Spacer()
+            Text(value)
+                .font(.subheadline.monospacedDigit())
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func payoffEstimateText(for b: Bill) -> String {
+        if b.payoffRemainingBalanceValue <= 0 {
+            return "Paid off at the current tracked balance."
+        }
+        guard let count = b.estimatedPayoffPaymentCount else {
+            return "Progress updates when this bill is marked paid."
+        }
+        return "About \(count) payments left at the current payment amount."
+    }
+
+    private func payoffHistoryRow(_ record: PayoffPaymentRecord) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: record.kind == .reversal ? "arrow.uturn.backward.circle" : "checkmark.circle.fill")
+                .foregroundStyle(record.kind == .reversal ? Theme.Color.accentGold : Theme.Color.accentGreen)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(record.kind.title)
+                    .font(.subheadline.weight(.semibold))
+                Text(record.date.mediumFormatted)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text(PaydownPlanService.currency(record.amount))
+                .font(.subheadline.monospacedDigit())
+                .foregroundStyle(.secondary)
         }
     }
 

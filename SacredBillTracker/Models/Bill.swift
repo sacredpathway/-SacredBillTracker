@@ -7,6 +7,78 @@
 
 import Foundation
 
+enum PayoffCategory: String, Codable, CaseIterable, Identifiable, Hashable {
+    case mortgage
+    case autoLoan = "auto_loan"
+    case creditCard = "credit_card"
+    case personalLoan = "personal_loan"
+    case studentLoan = "student_loan"
+    case other
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .mortgage:     return "Mortgage"
+        case .autoLoan:     return "Auto Loan"
+        case .creditCard:   return "Credit Card"
+        case .personalLoan: return "Personal Loan"
+        case .studentLoan:  return "Student Loan"
+        case .other:        return "Other"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .mortgage:     return "house.fill"
+        case .autoLoan:     return "car.fill"
+        case .creditCard:   return "creditcard.fill"
+        case .personalLoan: return "doc.text.fill"
+        case .studentLoan:  return "graduationcap.fill"
+        case .other:        return "tag.fill"
+        }
+    }
+}
+
+enum PayoffPaymentKind: String, Codable, Hashable {
+    case manual
+    case autoPay = "auto_pay"
+    case reversal
+
+    var title: String {
+        switch self {
+        case .manual:   return "Manual payment"
+        case .autoPay:  return "Auto-Pay"
+        case .reversal: return "Reversal"
+        }
+    }
+}
+
+struct PayoffPaymentRecord: Identifiable, Codable, Hashable {
+    var id: UUID
+    var date: Date
+    var cycleDueDate: Date
+    var amount: Decimal
+    var remainingBalanceAfter: Decimal
+    var kind: PayoffPaymentKind
+
+    init(
+        id: UUID = UUID(),
+        date: Date = Date(),
+        cycleDueDate: Date,
+        amount: Decimal,
+        remainingBalanceAfter: Decimal,
+        kind: PayoffPaymentKind
+    ) {
+        self.id = id
+        self.date = date
+        self.cycleDueDate = cycleDueDate
+        self.amount = amount
+        self.remainingBalanceAfter = remainingBalanceAfter
+        self.kind = kind
+    }
+}
+
 struct Bill: Identifiable, Codable, Hashable {
 
     // MARK: - Stored
@@ -81,6 +153,21 @@ struct Bill: Identifiable, Codable, Hashable {
     // decode cleanly (see custom decoder below).
     var paymentURL: String?
 
+    // MARK: - Payoff Tracking
+    //
+    // Optional balance tracking for the user's own large recurring bills
+    // (mortgage, auto loan, credit card, personal/student loans, etc.).
+    // This is separate from Partner/Sacred Duo logic: deductions simply
+    // lower the user's remaining balance when a paid cycle is recorded.
+    var isPayoffTrackingEnabled: Bool
+    var payoffOriginalBalance: Decimal?
+    var payoffRemainingBalance: Decimal?
+    var payoffPaymentAmount: Decimal?
+    var payoffInterestRate: Decimal?
+    var payoffGoalDate: Date?
+    var payoffCategory: PayoffCategory?
+    var payoffHistory: [PayoffPaymentRecord]
+
     // MARK: - Init
 
     init(
@@ -105,7 +192,15 @@ struct Bill: Identifiable, Codable, Hashable {
         secondPaydownDate: Date? = nil,
         firstPaydownAmount: Decimal? = nil,
         secondPaydownAmount: Decimal? = nil,
-        paymentURL: String? = nil
+        paymentURL: String? = nil,
+        isPayoffTrackingEnabled: Bool = false,
+        payoffOriginalBalance: Decimal? = nil,
+        payoffRemainingBalance: Decimal? = nil,
+        payoffPaymentAmount: Decimal? = nil,
+        payoffInterestRate: Decimal? = nil,
+        payoffGoalDate: Date? = nil,
+        payoffCategory: PayoffCategory? = nil,
+        payoffHistory: [PayoffPaymentRecord] = []
     ) {
         self.id = id
         self.name = name
@@ -129,6 +224,14 @@ struct Bill: Identifiable, Codable, Hashable {
         self.firstPaydownAmount = firstPaydownAmount
         self.secondPaydownAmount = secondPaydownAmount
         self.paymentURL = paymentURL
+        self.isPayoffTrackingEnabled = isPayoffTrackingEnabled
+        self.payoffOriginalBalance = payoffOriginalBalance
+        self.payoffRemainingBalance = payoffRemainingBalance
+        self.payoffPaymentAmount = payoffPaymentAmount
+        self.payoffInterestRate = payoffInterestRate
+        self.payoffGoalDate = payoffGoalDate
+        self.payoffCategory = payoffCategory
+        self.payoffHistory = payoffHistory
     }
 
     // MARK: - Codable
@@ -147,6 +250,11 @@ struct Bill: Identifiable, Codable, Hashable {
         case firstPaydownAmount, secondPaydownAmount
         // v1.5 — Payment Link
         case paymentURL
+        // Payoff Tracking
+        case isPayoffTrackingEnabled, payoffOriginalBalance
+        case payoffRemainingBalance, payoffPaymentAmount
+        case payoffInterestRate, payoffGoalDate, payoffCategory
+        case payoffHistory
     }
 
     init(from decoder: Decoder) throws {
@@ -177,6 +285,15 @@ struct Bill: Identifiable, Codable, Hashable {
         // without the column still parse cleanly (paymentURL stays nil).
         let rawPaymentURL = try c.decodeIfPresent(String.self, forKey: .paymentURL)
         self.paymentURL = rawPaymentURL?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+        // Payoff Tracking — default to off/nil/empty for older JSON.
+        self.isPayoffTrackingEnabled = try c.decodeIfPresent(Bool.self, forKey: .isPayoffTrackingEnabled) ?? false
+        self.payoffOriginalBalance   = try c.decodeIfPresent(Decimal.self, forKey: .payoffOriginalBalance)
+        self.payoffRemainingBalance  = try c.decodeIfPresent(Decimal.self, forKey: .payoffRemainingBalance)
+        self.payoffPaymentAmount     = try c.decodeIfPresent(Decimal.self, forKey: .payoffPaymentAmount)
+        self.payoffInterestRate      = try c.decodeIfPresent(Decimal.self, forKey: .payoffInterestRate)
+        self.payoffGoalDate          = try c.decodeIfPresent(Date.self, forKey: .payoffGoalDate)
+        self.payoffCategory          = try c.decodeIfPresent(PayoffCategory.self, forKey: .payoffCategory)
+        self.payoffHistory           = try c.decodeIfPresent([PayoffPaymentRecord].self, forKey: .payoffHistory) ?? []
     }
 
     // MARK: - Derived
@@ -235,6 +352,114 @@ struct Bill: Identifiable, Codable, Hashable {
         fmt.numberStyle = .currency
         fmt.locale = .current
         return fmt.string(from: amount as NSDecimalNumber) ?? "$\(amount)"
+    }
+
+    var payoffOriginalBalanceValue: Decimal {
+        payoffOriginalBalance ?? payoffRemainingBalance ?? Decimal(0)
+    }
+
+    var payoffRemainingBalanceValue: Decimal {
+        payoffRemainingBalance ?? payoffOriginalBalanceValue
+    }
+
+    var payoffEffectivePaymentAmount: Decimal {
+        let payment = payoffPaymentAmount ?? amount
+        return payment > 0 ? payment : amount
+    }
+
+    var payoffPaidDown: Decimal {
+        let paid = payoffOriginalBalanceValue - payoffRemainingBalanceValue
+        return paid > 0 ? paid : Decimal(0)
+    }
+
+    var payoffProgress: Double {
+        let original = (payoffOriginalBalanceValue as NSDecimalNumber).doubleValue
+        guard original > 0 else { return 0 }
+        let paid = (payoffPaidDown as NSDecimalNumber).doubleValue
+        return min(max(paid / original, 0), 1)
+    }
+
+    var estimatedPayoffPaymentCount: Int? {
+        let remaining = (payoffRemainingBalanceValue as NSDecimalNumber).doubleValue
+        let payment = (payoffEffectivePaymentAmount as NSDecimalNumber).doubleValue
+        guard remaining > 0, payment > 0 else { return nil }
+        return Int(ceil(remaining / payment))
+    }
+
+    func payoffNetAmount(for cycleDueDate: Date? = nil, calendar: Calendar = .current) -> Decimal {
+        let target = calendar.startOfDay(for: cycleDueDate ?? dueDate)
+        return payoffHistory.reduce(Decimal(0)) { total, record in
+            guard calendar.isDate(record.cycleDueDate, inSameDayAs: target) else { return total }
+            switch record.kind {
+            case .manual, .autoPay:
+                return total + record.amount
+            case .reversal:
+                return total - record.amount
+            }
+        }
+    }
+
+    func hasPayoffPaymentApplied(for cycleDueDate: Date? = nil, calendar: Calendar = .current) -> Bool {
+        payoffNetAmount(for: cycleDueDate, calendar: calendar) > 0
+    }
+
+    @discardableResult
+    mutating func applyPayoffPaymentIfNeeded(
+        kind: PayoffPaymentKind,
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> Bool {
+        guard isPayoffTrackingEnabled else { return false }
+
+        let startingRemaining = payoffRemainingBalance ?? payoffOriginalBalance
+        guard let currentRemaining = startingRemaining, currentRemaining > 0 else { return false }
+        guard payoffEffectivePaymentAmount > 0 else { return false }
+        guard !hasPayoffPaymentApplied(for: dueDate, calendar: calendar) else { return false }
+
+        let deduction = min(payoffEffectivePaymentAmount, currentRemaining)
+        let nextRemaining = max(Decimal(0), currentRemaining - deduction)
+        payoffRemainingBalance = nextRemaining
+        payoffHistory.append(
+            PayoffPaymentRecord(
+                date: now,
+                cycleDueDate: calendar.startOfDay(for: dueDate),
+                amount: deduction,
+                remainingBalanceAfter: nextRemaining,
+                kind: kind
+            )
+        )
+        return true
+    }
+
+    @discardableResult
+    mutating func reversePayoffPaymentForCurrentCycle(
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> Bool {
+        guard isPayoffTrackingEnabled else { return false }
+        let appliedAmount = payoffNetAmount(for: dueDate, calendar: calendar)
+        guard appliedAmount > 0 else { return false }
+
+        let currentRemaining = payoffRemainingBalance ?? Decimal(0)
+        let uncappedRemaining = currentRemaining + appliedAmount
+        let restoredRemaining: Decimal
+        if let original = payoffOriginalBalance, original > 0 {
+            restoredRemaining = min(original, uncappedRemaining)
+        } else {
+            restoredRemaining = uncappedRemaining
+        }
+
+        payoffRemainingBalance = restoredRemaining
+        payoffHistory.append(
+            PayoffPaymentRecord(
+                date: now,
+                cycleDueDate: calendar.startOfDay(for: dueDate),
+                amount: appliedAmount,
+                remainingBalanceAfter: restoredRemaining,
+                kind: .reversal
+            )
+        )
+        return true
     }
 
     var isRecurring: Bool { recurrence.isRecurring }

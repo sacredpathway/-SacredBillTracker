@@ -51,7 +51,13 @@ enum SampleData {
                 type: .household,
                 autoPay: false,
                 notes: "",
-                status: .unpaid
+                status: .unpaid,
+                isPayoffTrackingEnabled: true,
+                payoffOriginalBalance: 28500.00,
+                payoffRemainingBalance: 22000.00,
+                payoffPaymentAmount: 548.50,
+                payoffInterestRate: 6.49,
+                payoffCategory: .autoLoan
             ),
 
             // 3. Car Insurance — paid recently (within last 7 days for the

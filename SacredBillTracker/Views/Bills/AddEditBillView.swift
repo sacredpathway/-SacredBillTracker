@@ -42,6 +42,17 @@ struct AddEditBillView: View {
     @State private var paymentURLString: String = ""
     @State private var showInvalidURLAlert = false
 
+    // Payoff Tracking — optional balance tracking for the user's own
+    // mortgage, auto loan, credit card, or other large recurring bill.
+    @State private var isPayoffTrackingEnabled: Bool = false
+    @State private var payoffOriginalBalanceString: String = ""
+    @State private var payoffRemainingBalanceString: String = ""
+    @State private var payoffPaymentAmountString: String = ""
+    @State private var payoffInterestRateString: String = ""
+    @State private var payoffGoalDate: Date = Date()
+    @State private var hasPayoffGoalDate: Bool = false
+    @State private var payoffCategory: PayoffCategory = .other
+
     @State private var showDeleteConfirm = false
     @State private var showPaywall = false
 
@@ -122,6 +133,8 @@ struct AddEditBillView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+
+                payoffTrackingSection
 
                 // 15/3 Paydown Plan — available on every bill regardless
                 // of category (v1.4.1). The eligibility gate that
@@ -297,6 +310,75 @@ struct AddEditBillView: View {
         }
     }
 
+    // MARK: - Payoff Tracking section
+
+    @ViewBuilder
+    private var payoffTrackingSection: some View {
+        Section {
+            Toggle(isOn: $isPayoffTrackingEnabled) {
+                HStack(spacing: 12) {
+                    Image(systemName: "chart.line.downtrend.xyaxis")
+                        .foregroundStyle(Theme.Color.accentGreen)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Track Payoff Balance")
+                        Text("Reduce a remaining balance when this bill is paid")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            if isPayoffTrackingEnabled {
+                Picker("Payoff Category", selection: $payoffCategory) {
+                    ForEach(PayoffCategory.allCases) { category in
+                        Label(category.title, systemImage: category.systemImage)
+                            .tag(category)
+                    }
+                }
+
+                payoffMoneyField("Original Balance", text: $payoffOriginalBalanceString)
+                payoffMoneyField("Remaining Balance", text: $payoffRemainingBalanceString)
+                payoffMoneyField("Payment Amount", text: $payoffPaymentAmountString)
+
+                HStack {
+                    Text("Interest Rate")
+                    Spacer()
+                    TextField("Optional", text: $payoffInterestRateString)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                    Text("%")
+                        .foregroundStyle(.secondary)
+                }
+
+                Toggle("Payoff Goal Date", isOn: $hasPayoffGoalDate)
+
+                if hasPayoffGoalDate {
+                    DatePicker("Goal Date", selection: $payoffGoalDate, displayedComponents: .date)
+                }
+            }
+        } header: {
+            Text("Payoff Tracking")
+        } footer: {
+            Text("Optional. For your own bills and loans only; paid cycles lower the remaining balance automatically.")
+                .font(.footnote)
+        }
+    }
+
+    private func payoffMoneyField(_ title: String, text: Binding<String>) -> some View {
+        HStack {
+            Text(title)
+            Spacer()
+            HStack(spacing: 4) {
+                Text("$")
+                    .foregroundStyle(.secondary)
+                TextField("0.00", text: text)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(maxWidth: 130)
+            }
+        }
+    }
+
     // MARK: - Helpers
 
     private var isEditing: Bool {
@@ -314,8 +396,50 @@ struct AddEditBillView: View {
 
     private var canSave: Bool {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
-        let amt = Decimal(string: amountString.replacingOccurrences(of: ",", with: "."))
-        return !trimmed.isEmpty && amt != nil && (amt ?? 0) > 0
+        let amt = decimalValue(from: amountString)
+        return !trimmed.isEmpty
+            && amt != nil
+            && (amt ?? 0) > 0
+            && payoffInputsAreValid
+    }
+
+    private var payoffInputsAreValid: Bool {
+        guard isPayoffTrackingEnabled else { return true }
+        guard let original = decimalValue(from: payoffOriginalBalanceString),
+              original > 0,
+              let remaining = decimalValue(from: payoffRemainingBalanceString),
+              remaining >= 0
+        else { return false }
+
+        if let payment = optionalDecimalValue(from: payoffPaymentAmountString), payment <= 0 {
+            return false
+        }
+
+        if let rate = optionalDecimalValue(from: payoffInterestRateString), rate < 0 {
+            return false
+        }
+
+        return true
+    }
+
+    private func decimalValue(from text: String) -> Decimal? {
+        let cleaned = text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "$", with: "")
+            .replacingOccurrences(of: ",", with: "")
+        guard !cleaned.isEmpty else { return nil }
+        return Decimal(string: cleaned)
+    }
+
+    private func optionalDecimalValue(from text: String) -> Decimal? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        return decimalValue(from: trimmed)
+    }
+
+    private func decimalString(_ value: Decimal?) -> String {
+        guard let value else { return "" }
+        return NSDecimalNumber(decimal: value).stringValue
     }
 
     private func loadMode() {
@@ -332,6 +456,14 @@ struct AddEditBillView: View {
             isShared = b.isShared
             isUsing153Plan = b.isUsing153Plan
             paymentURLString = b.paymentURL ?? ""
+            isPayoffTrackingEnabled = b.isPayoffTrackingEnabled
+            payoffOriginalBalanceString = decimalString(b.payoffOriginalBalance)
+            payoffRemainingBalanceString = decimalString(b.payoffRemainingBalance)
+            payoffPaymentAmountString = decimalString(b.payoffPaymentAmount)
+            payoffInterestRateString = decimalString(b.payoffInterestRate)
+            payoffGoalDate = b.payoffGoalDate ?? Date()
+            hasPayoffGoalDate = b.payoffGoalDate != nil
+            payoffCategory = b.payoffCategory ?? .other
         } else {
             // Add mode defaults
             category = BillCategory.categories(for: type).first ?? .rent
@@ -361,7 +493,7 @@ struct AddEditBillView: View {
     /// Writes the bill. Called from `save()` once the Payment Link has
     /// been validated/normalized (or proven empty).
     private func persist(normalizedPaymentURL: String?) {
-        guard let amt = Decimal(string: amountString.replacingOccurrences(of: ",", with: ".")) else { return }
+        guard let amt = decimalValue(from: amountString) else { return }
         // v1.4.1 — eligibility gate removed; plan is available on every bill.
         let planOn = isUsing153Plan
 
@@ -382,6 +514,7 @@ struct AddEditBillView: View {
                 isShared: isShared,
                 paymentURL: finalPaymentURL
             )
+            applyPayoffDraft(to: &newBill)
             PaydownPlanService.apply(isOn: planOn, to: &newBill)
             store.add(newBill)
         case .edit(var existing):
@@ -396,12 +529,30 @@ struct AddEditBillView: View {
             existing.status = status
             existing.isShared = isShared
             existing.paymentURL = finalPaymentURL
+            applyPayoffDraft(to: &existing)
             // Apply (or clear) the plan AFTER amount/dueDate are
             // updated so the recompute uses the latest values.
             PaydownPlanService.apply(isOn: planOn, to: &existing)
             store.update(existing)
         }
         dismiss()
+    }
+
+    private func applyPayoffDraft(to bill: inout Bill) {
+        bill.isPayoffTrackingEnabled = isPayoffTrackingEnabled
+        guard isPayoffTrackingEnabled else { return }
+
+        let original = decimalValue(from: payoffOriginalBalanceString)
+        let rawRemaining = decimalValue(from: payoffRemainingBalanceString)
+        let maxBalance = original ?? rawRemaining ?? Decimal(0)
+        let remaining = min(max(rawRemaining ?? maxBalance, Decimal(0)), maxBalance)
+
+        bill.payoffOriginalBalance = original
+        bill.payoffRemainingBalance = remaining
+        bill.payoffPaymentAmount = optionalDecimalValue(from: payoffPaymentAmountString)
+        bill.payoffInterestRate = optionalDecimalValue(from: payoffInterestRateString)
+        bill.payoffGoalDate = hasPayoffGoalDate ? payoffGoalDate : nil
+        bill.payoffCategory = payoffCategory
     }
 }
 
