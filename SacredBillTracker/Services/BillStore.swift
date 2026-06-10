@@ -183,7 +183,9 @@ final class BillStore: ObservableObject {
         new.updatedAt = Date()
         bills.append(new)
         persist()
-        Task { await notifications.scheduleReminder(for: new) }
+        if !new.isPaid {
+            Task { await notifications.scheduleReminder(for: new) }
+        }
 
         // Positive moment for the App Store review prompt — once the
         // user reaches 3+ bills they've clearly engaged with the app.
@@ -201,7 +203,7 @@ final class BillStore: ObservableObject {
         bills[idx] = updated
         persist()
         notifications.cancelReminder(for: updated.id)
-        if updated.status != .paid {
+        if !updated.isPaid {
             Task { await notifications.scheduleReminder(for: updated) }
         }
     }
@@ -247,7 +249,7 @@ final class BillStore: ObservableObject {
         if !bills.contains(where: { $0.id == bill.id }) {
             bills.append(revived)
         }
-        if revived.status != .paid {
+        if !revived.isPaid {
             Task { await notifications.scheduleReminder(for: revived) }
         }
 
@@ -338,6 +340,9 @@ final class BillStore: ObservableObject {
     func markUnpaid(_ bill: Bill) {
         var updated = bill
         updated.status = .unpaid
+        // Auto-pay covers the current cycle, so it must be off for the bill
+        // to become semantically unpaid.
+        updated.autoPay = false
         update(updated)
     }
 

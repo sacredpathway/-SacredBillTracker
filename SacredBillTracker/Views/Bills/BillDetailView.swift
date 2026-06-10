@@ -171,7 +171,7 @@ struct BillDetailView: View {
 
     private func actionButtons(for b: Bill) -> some View {
         HStack(spacing: 12) {
-            if b.status == .paid {
+            if b.isPaid {
                 Button {
                     store.markUnpaid(b)
                 } label: {

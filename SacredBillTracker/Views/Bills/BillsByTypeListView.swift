@@ -46,7 +46,7 @@ struct BillsByTypeListView: View {
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
-                            if bill.status != .paid {
+                            if !bill.isPaid {
                                 Button {
                                     store.markPaid(bill)
                                 } label: {

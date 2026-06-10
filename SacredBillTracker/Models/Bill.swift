@@ -21,8 +21,9 @@ struct Bill: Identifiable, Codable, Hashable {
     var autoPay: Bool
     var notes: String
 
-    /// User-set status. Computed `effectiveStatus` promotes `unpaid` to `overdue`
-    /// when the due date has passed.
+    /// User-set status. Computed `effectiveStatus` treats auto-pay bills as
+    /// paid and promotes uncovered unpaid bills to `overdue` once the due
+    /// date has passed.
     var status: PaymentStatus
 
     /// When this bill (or its previous occurrence) was last paid. Drives
@@ -180,15 +181,17 @@ struct Bill: Identifiable, Codable, Hashable {
 
     // MARK: - Derived
 
-    /// Treat an unpaid bill whose due date has passed as overdue.
+    /// Treat auto-pay as covered for the current due cycle, otherwise promote
+    /// an unpaid bill whose due date has passed to overdue.
     var effectiveStatus: PaymentStatus {
-        if status == .paid { return .paid }
+        if isPaid { return .paid }
         let cal = Calendar.current
         return cal.startOfDay(for: dueDate) < cal.startOfDay(for: Date())
             ? .overdue : .unpaid
     }
 
-    var isPaid: Bool     { status == .paid }
+    var isAutoPaid: Bool { autoPay }
+    var isPaid: Bool     { status == .paid || isAutoPaid }
     var isOverdue: Bool  { effectiveStatus == .overdue }
     var isDueToday: Bool { Calendar.current.isDateInToday(dueDate) }
 
@@ -224,7 +227,7 @@ struct Bill: Identifiable, Codable, Hashable {
         guard let last = lastPaidDate else { return false }
         let cal = Calendar.current
         let days = cal.dateComponents([.day], from: cal.startOfDay(for: last), to: cal.startOfDay(for: Date())).day ?? 0
-        return status == .paid && days >= 0 && days <= 7
+        return isPaid && days >= 0 && days <= 7
     }
 
     var formattedAmount: String {

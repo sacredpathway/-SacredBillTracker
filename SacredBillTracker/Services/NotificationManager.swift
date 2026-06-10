@@ -50,12 +50,14 @@ final class NotificationManager: ObservableObject {
         guard settings.authorizationStatus == .authorized
                 || settings.authorizationStatus == .provisional else { return }
 
-        for bill in bills where bill.status != .paid {
+        for bill in bills where !bill.isPaid {
             await scheduleReminder(for: bill)
         }
     }
 
     func scheduleReminder(for bill: Bill) async {
+        guard !bill.isPaid else { return }
+
         let center = UNUserNotificationCenter.current()
 
         // Build trigger date: X days before due, at 9:00 AM local.
