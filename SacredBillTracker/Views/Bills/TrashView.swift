@@ -17,48 +17,53 @@ struct TrashView: View {
     @EnvironmentObject private var store: BillStore
 
     var body: some View {
-        Group {
-            if store.deletedBills.isEmpty && !store.isLoadingTrash {
-                ScrollView {
+        VStack(spacing: 0) {
+            ProfileSwitcherBar()
+                .padding(.horizontal)
+                .padding(.top, 8)
+            Group {
+                if store.profileDeletedBills.isEmpty && !store.isLoadingTrash {
+                    ScrollView {
                     EmptyStateView(
                         systemImage: "trash",
                         title: "Trash is empty",
                         message: "Deleted bills appear here. Restore them anytime within 30 days."
                     )
                     .padding(.top, 60)
-                }
-                .refreshable { await store.reloadTrash() }
-            } else {
-                List {
-                    ForEach(store.deletedBills) { bill in
-                        TrashRow(bill: bill)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button {
-                                    store.restore(bill)
-                                } label: {
-                                    Label("Restore", systemImage: "arrow.uturn.backward")
-                                }
-                                .tint(.appAccent)
-
-                                #if DEBUG
-                                Button(role: .destructive) {
-                                    store.permanentlyDelete(bill)
-                                } label: {
-                                    Label("Delete Forever", systemImage: "trash.slash")
-                                }
-                                #endif
-                            }
                     }
+                    .refreshable { await store.reloadTrash() }
+                } else {
+                    List {
+                        ForEach(store.profileDeletedBills) { bill in
+                            TrashRow(bill: bill)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button {
+                                        store.restore(bill)
+                                    } label: {
+                                        Label("Restore", systemImage: "arrow.uturn.backward")
+                                    }
+                                    .tint(.appAccent)
+
+                                    #if DEBUG
+                                    Button(role: .destructive) {
+                                        store.permanentlyDelete(bill)
+                                    } label: {
+                                        Label("Delete Forever", systemImage: "trash.slash")
+                                    }
+                                    #endif
+                                }
+                        }
+                    }
+                    .listStyle(.insetGrouped)
+                    .refreshable { await store.reloadTrash() }
                 }
-                .listStyle(.insetGrouped)
-                .refreshable { await store.reloadTrash() }
             }
         }
         .navigationTitle("Trash")
         .navigationBarTitleDisplayMode(.inline)
         .task { await store.reloadTrash() }
         .overlay {
-            if store.isLoadingTrash && store.deletedBills.isEmpty {
+            if store.isLoadingTrash && store.profileDeletedBills.isEmpty {
                 ProgressView().controlSize(.large)
             }
         }
@@ -122,5 +127,6 @@ private struct TrashRow: View {
         TrashView()
     }
     .environmentObject(BillStore())
+    .environmentObject(ManagedProfileStore.shared)
 }
 #endif

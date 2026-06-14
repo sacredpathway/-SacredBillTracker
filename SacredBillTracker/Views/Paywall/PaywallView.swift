@@ -19,7 +19,7 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     /// The product the user currently has selected in the toggle.
-    @State private var selectedPlan: Plan = .yearly
+    @State private var selectedPlan: Plan = .monthly
 
     /// True while `purchase()` is in flight so the CTA spins.
     @State private var purchaseInFlight = false
@@ -158,8 +158,8 @@ struct PaywallView: View {
 
     private var planPicker: some View {
         VStack(spacing: 12) {
-            planRow(.yearly, product: subs.yearlyProduct, badge: "SAVE 33%")
             planRow(.monthly, product: subs.monthlyProduct, badge: nil)
+            planRow(.yearly, product: subs.yearlyProduct, badge: "SAVE 33%")
         }
     }
 
@@ -207,7 +207,7 @@ struct PaywallView: View {
                         ProgressView()
                             .controlSize(.mini)
                     } else {
-                        Text(plan == .yearly ? "$39.99 / year" : "$4.99 / month")
+                        Text(plan == .yearly ? "$39.99 / year" : "$19.99 / month")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }

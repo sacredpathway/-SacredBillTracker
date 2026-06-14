@@ -84,6 +84,9 @@ struct DashboardView: View {
                     // (subscribed) or FocusPlusPaywallView (not). The
                     // standalone Focus+ card has been removed so the
                     // dashboard top stays minimal.
+                    ProfileSwitcherBar()
+                        .padding(.horizontal)
+
                     SacredDailyFocusCard(quote: quotes.quote)
                         .padding(.horizontal)
 
@@ -1227,6 +1230,7 @@ struct DashboardCustomizeSheet: View {
     DashboardView()
         .environmentObject(BillStore())
         .environmentObject(IncomeStore())
+        .environmentObject(ManagedProfileStore.shared)
         .environmentObject(NotificationManager.shared)
         .environmentObject(SubscriptionManager())
         .environmentObject(NoteStore())

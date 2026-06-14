@@ -29,6 +29,9 @@ struct CalendarView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
+                ProfileSwitcherBar()
+                    .padding(.horizontal)
+
                 FilterPicker(selection: $store.filter)
                     .padding(.horizontal)
 
@@ -204,5 +207,6 @@ struct CalendarView: View {
 #Preview {
     CalendarView()
         .environmentObject(BillStore())
+        .environmentObject(ManagedProfileStore.shared)
         .environmentObject(NotificationManager.shared)
 }

@@ -14,14 +14,61 @@ final class BillStore: ObservableObject {
 
     // MARK: - Published state
 
-    @Published private(set) var bills: [Bill] = []
+    @Published private var storedBills: [Bill] = []
     @Published var filter: BillTypeFilter = .all
     @Published var isLoading: Bool = false
+    @Published private var profileContext: ManagedProfileContext = ManagedProfileStore.shared.context
 
     /// Soft-deleted bills (Trash). Populated by `reloadTrash()`; the
     /// Trash screen is the only consumer.
     @Published private(set) var deletedBills: [Bill] = []
     @Published var isLoadingTrash: Bool = false
+
+    /// Profile-scoped active bills. Existing views use this property,
+    /// which keeps bills from different managed profiles separated unless
+    /// the user explicitly selects All Profiles.
+    var bills: [Bill] { profileBills }
+
+    /// All loaded active bills across every managed profile. Use for
+    /// account-wide sync, billing limits, and destructive account actions.
+    var allStoredBills: [Bill] { storedBills }
+
+    var profileBills: [Bill] {
+        storedBills.filter {
+            isOwnedByCurrentAccount($0)
+            && profileContext.includes(profileID: $0.profileID)
+        }
+    }
+
+    var profileDeletedBills: [Bill] {
+        deletedBills.filter {
+            isOwnedByCurrentAccount($0)
+            && profileContext.includes(profileID: $0.profileID)
+        }
+    }
+
+    func applyProfileContext(_ context: ManagedProfileContext) {
+        guard profileContext != context else { return }
+        profileContext = context
+        BillWidgetBridge.update(from: profileBills)
+    }
+
+    private var activeStoredBills: [Bill] {
+        storedBills.filter { $0.deletedAt == nil }
+    }
+
+    private func stampProfileIfNeeded(_ bill: inout Bill) {
+        if bill.profileID == nil {
+            bill.profileID = profileContext.writeProfileID
+        }
+    }
+
+    private func isOwnedByCurrentAccount(_ bill: Bill) -> Bool {
+        guard let owner = bill.ownerUserID,
+              let currentUserID = AuthService.shared.currentUserID
+        else { return true }
+        return owner == currentUserID
+    }
 
     // MARK: - Dependencies
 
@@ -55,9 +102,16 @@ final class BillStore: ObservableObject {
     /// CachingBillRepository). Does NOT persist — the caller is
     /// expected to have already written to the repository.
     func replace(bills newBills: [Bill]) {
-        self.bills = newBills
-        Task { await notifications.rescheduleAll(for: newBills) }
-        BillWidgetBridge.update(from: newBills)
+        self.storedBills = newBills
+        Task { await notifications.rescheduleAll(for: activeStoredBills) }
+        BillWidgetBridge.update(from: profileBills)
+    }
+
+    func resetForSignedOutUser() {
+        storedBills = []
+        deletedBills = []
+        BillWidgetBridge.clearSnapshotAndReloadTimelines()
+        Task { await notifications.rescheduleAll(for: []) }
     }
 
     private func bootstrap() async {
@@ -75,10 +129,12 @@ final class BillStore: ObservableObject {
             // DEBUG ONLY: auto-seed sample bills so the simulator/dev runs
             // are never empty. Excluded from Release builds — production
             // signed-out users still see an empty Bills tab.
-            self.bills = SampleData.bills()
-            await notifications.rescheduleAll(for: bills)
+            var sample = SampleData.bills()
+            for idx in sample.indices { stampProfileIfNeeded(&sample[idx]) }
+            self.storedBills = sample
+            await notifications.rescheduleAll(for: activeStoredBills)
             #else
-            self.bills = []
+            self.storedBills = []
             await notifications.rescheduleAll(for: [])
             BillWidgetBridge.clearSnapshotAndReloadTimelines()
             #endif
@@ -95,24 +151,25 @@ final class BillStore: ObservableObject {
             // signed-in account has zero bills, auto-seed SampleData so
             // every dev launch shows a populated UI.
             if loaded.isEmpty {
-                let seed = SampleData.bills()
-                self.bills = seed
+                var seed = SampleData.bills()
+                for idx in seed.indices { stampProfileIfNeeded(&seed[idx]) }
+                self.storedBills = seed
                 try? await repository.saveBills(seed)
             } else {
-                self.bills = loaded
+                self.storedBills = loaded
             }
             #else
             // Release: run the one-time legacy demo purge (v2 — actually
             // deletes from Supabase via repository.delete(id:), unlike
             // the v1 attempt that only upserted survivors).
-            self.bills = await purgeLegacyDemoBillsIfNeeded(in: loaded)
+            self.storedBills = await purgeLegacyDemoBillsIfNeeded(in: loaded)
             #endif
         } catch {
-            self.bills = []
+            self.storedBills = []
         }
 
-        await notifications.rescheduleAll(for: bills)
-        BillWidgetBridge.update(from: bills)
+        await notifications.rescheduleAll(for: activeStoredBills)
+        BillWidgetBridge.update(from: profileBills)
     }
 
     /// UserDefaults flag — set ONLY after the legacy demo cleanup has
@@ -179,10 +236,11 @@ final class BillStore: ObservableObject {
 
     func add(_ bill: Bill) {
         var new = bill
+        stampProfileIfNeeded(&new)
         new.createdAt = Date()
         new.updatedAt = Date()
         settlePayoffIfPaid(&new)
-        bills.append(new)
+        storedBills.append(new)
         persist()
         if !new.isPaid {
             Task { await notifications.scheduleReminder(for: new) }
@@ -192,17 +250,18 @@ final class BillStore: ObservableObject {
         // user reaches 3+ bills they've clearly engaged with the app.
         // ReviewPromptService applies its own per-version + first-launch
         // throttle, so calling here is safe even on every add.
-        if bills.count >= 3 {
+        if storedBills.count >= 3 {
             ReviewPromptService.shared.recordPositiveMoment()
         }
     }
 
     func update(_ bill: Bill) {
-        guard let idx = bills.firstIndex(where: { $0.id == bill.id }) else { return }
+        guard let idx = storedBills.firstIndex(where: { $0.id == bill.id }) else { return }
         var updated = bill
+        stampProfileIfNeeded(&updated)
         updated.updatedAt = Date()
         settlePayoffIfPaid(&updated)
-        bills[idx] = updated
+        storedBills[idx] = updated
         persist()
         notifications.cancelReminder(for: updated.id)
         if !updated.isPaid {
@@ -221,7 +280,7 @@ final class BillStore: ObservableObject {
     /// lives in `permanentlyDelete(_:)` below.
     func delete(_ bill: Bill) {
         // Remove from in-memory active state first for instant UI feedback.
-        bills.removeAll { $0.id == bill.id }
+        storedBills.removeAll { $0.id == bill.id }
         notifications.cancelReminder(for: bill.id)
 
         // Mirror in cached deletedBills so a Trash screen that's already
@@ -238,7 +297,7 @@ final class BillStore: ObservableObject {
 
         let deletedID = bill.id
         Task { try? await repository.softDelete(id: deletedID) }
-        BillWidgetBridge.update(from: bills)
+        BillWidgetBridge.update(from: profileBills)
     }
 
     /// Restore a soft-deleted bill back to the active list.
@@ -249,8 +308,9 @@ final class BillStore: ObservableObject {
         revived.deletedAt = nil
         revived.updatedAt = Date()
         settlePayoffIfPaid(&revived)
-        if !bills.contains(where: { $0.id == bill.id }) {
-            bills.append(revived)
+        stampProfileIfNeeded(&revived)
+        if !storedBills.contains(where: { $0.id == bill.id }) {
+            storedBills.append(revived)
         }
         if !revived.isPaid {
             Task { await notifications.scheduleReminder(for: revived) }
@@ -258,7 +318,7 @@ final class BillStore: ObservableObject {
 
         let restoreID = bill.id
         Task { try? await repository.restore(id: restoreID) }
-        BillWidgetBridge.update(from: bills)
+        BillWidgetBridge.update(from: profileBills)
     }
 
     /// Refresh the Trash list from the repository. Call from TrashView
@@ -281,7 +341,7 @@ final class BillStore: ObservableObject {
     /// button is gated behind the same `#if DEBUG`.
     func permanentlyDelete(_ bill: Bill) {
         deletedBills.removeAll { $0.id == bill.id }
-        bills.removeAll { $0.id == bill.id }
+        storedBills.removeAll { $0.id == bill.id }
         notifications.cancelReminder(for: bill.id)
         let id = bill.id
         Task { try? await repository.delete(id: id) }
@@ -291,12 +351,12 @@ final class BillStore: ObservableObject {
     /// Writes the full in-memory snapshot via UPSERT. Used by `add` and
     /// `update` only — never for delete. See `delete(_:)` for why.
     private func persist() {
-        let snapshot = bills
+        let snapshot = storedBills
         Task { try? await repository.saveBills(snapshot) }
         // v1.6 — keep the Home Screen widget snapshot in sync after every
         // local mutation. Safe no-op if the App Group entitlement isn't
         // provisioned (e.g. older signed builds).
-        BillWidgetBridge.update(from: snapshot)
+        BillWidgetBridge.update(from: profileBills)
     }
 
     private func settlePayoffIfPaid(_ bill: inout Bill) {
@@ -308,7 +368,7 @@ final class BillStore: ObservableObject {
     func delete(at offsets: IndexSet, from list: [Bill]) {
         let ids = offsets.map { list[$0].id }
         for id in ids {
-            if let bill = bills.first(where: { $0.id == id }) {
+            if let bill = storedBills.first(where: { $0.id == id }) {
                 delete(bill)
             }
         }
@@ -342,6 +402,7 @@ final class BillStore: ObservableObject {
                 notes: updated.notes,
                 status: .unpaid,
                 lastPaidDate: updated.lastPaidDate,
+                profileID: updated.profileID,
                 isPayoffTrackingEnabled: updated.isPayoffTrackingEnabled,
                 payoffOriginalBalance: updated.payoffOriginalBalance,
                 payoffRemainingBalance: updated.payoffRemainingBalance,
@@ -651,6 +712,7 @@ final class BillStore: ObservableObject {
             notes: bill.notes,
             status: .unpaid,
             lastPaidDate: bill.lastPaidDate,
+            profileID: bill.profileID,
             isPayoffTrackingEnabled: bill.isPayoffTrackingEnabled,
             payoffOriginalBalance: bill.payoffOriginalBalance,
             payoffRemainingBalance: bill.payoffRemainingBalance,
@@ -676,8 +738,9 @@ final class BillStore: ObservableObject {
     /// new fixture set replaces — not merges with — whatever was there.
     /// `saveBills` is an UPSERT; without the wipe, old bills survive.
     func resetWithSampleData() {
-        let fresh = SampleData.bills()
-        bills = fresh
+        var fresh = SampleData.bills()
+        for idx in fresh.indices { stampProfileIfNeeded(&fresh[idx]) }
+        storedBills = fresh
         Task {
             try? await repository.deleteAll()
             try? await repository.saveBills(fresh)
@@ -714,16 +777,18 @@ final class BillStore: ObservableObject {
                  category: .software,      recurrence: .monthly,
                  type: .business,  autoPay: true,  notes: "", status: .unpaid),
         ]
-        bills = seed
+        var profiledSeed = seed
+        for idx in profiledSeed.indices { stampProfileIfNeeded(&profiledSeed[idx]) }
+        storedBills = profiledSeed
         Task {
-            try? await repository.saveBills(bills)
-            await notifications.rescheduleAll(for: bills)
+            try? await repository.saveBills(profiledSeed)
+            await notifications.rescheduleAll(for: profiledSeed)
         }
     }
     #endif
 
     func wipeAll() {
-        bills = []
+        storedBills = []
         BillWidgetBridge.clearSnapshotAndReloadTimelines()
         Task {
             // CRITICAL: `saveBills([])` was a no-op on Supabase (its

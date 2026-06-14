@@ -17,6 +17,7 @@ struct AddEditBillView: View {
     @EnvironmentObject private var store: BillStore
     @EnvironmentObject private var subs: SubscriptionManager
     @EnvironmentObject private var auth: AuthService
+    @EnvironmentObject private var profiles: ManagedProfileStore
     @Environment(\.dismiss) private var dismiss
 
     let mode: Mode
@@ -32,6 +33,7 @@ struct AddEditBillView: View {
     @State private var notes: String = ""
     @State private var status: PaymentStatus = .unpaid
     @State private var isShared: Bool = false
+    @State private var profileID: UUID?
 
     // 15/3 Paydown Plan (v1.4) — opt-in for revolving-credit bills.
     @State private var isUsing153Plan: Bool = false
@@ -63,6 +65,24 @@ struct AddEditBillView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if profiles.canUseManagedProfiles && profiles.profiles.count > 1 {
+                    Section(
+                        header: Text("Profile"),
+                        footer: Text("This bill stays inside the selected profile unless you switch to All Profiles.")
+                            .font(.footnote)
+                    ) {
+                        Picker("Managed Account", selection: Binding(
+                            get: { profileID ?? profiles.context.writeProfileID ?? profiles.profiles.first?.id },
+                            set: { profileID = $0 }
+                        )) {
+                            ForEach(profiles.profiles) { profile in
+                                Label(profile.name, systemImage: profile.iconSystemName)
+                                    .tag(Optional(profile.id))
+                            }
+                        }
+                    }
+                }
+
                 Section("Bill") {
                     TextField("Name", text: $name)
                     HStack {
@@ -464,9 +484,11 @@ struct AddEditBillView: View {
             payoffGoalDate = b.payoffGoalDate ?? Date()
             hasPayoffGoalDate = b.payoffGoalDate != nil
             payoffCategory = b.payoffCategory ?? .other
+            profileID = b.profileID ?? profiles.context.writeProfileID
         } else {
             // Add mode defaults
             category = BillCategory.categories(for: type).first ?? .rent
+            profileID = profiles.context.writeProfileID
         }
     }
 
@@ -512,6 +534,7 @@ struct AddEditBillView: View {
                 notes: notes,
                 status: status,
                 isShared: isShared,
+                profileID: profileID ?? profiles.context.writeProfileID,
                 paymentURL: finalPaymentURL
             )
             applyPayoffDraft(to: &newBill)
@@ -528,6 +551,7 @@ struct AddEditBillView: View {
             existing.notes = notes
             existing.status = status
             existing.isShared = isShared
+            existing.profileID = profileID ?? existing.profileID ?? profiles.context.writeProfileID
             existing.paymentURL = finalPaymentURL
             applyPayoffDraft(to: &existing)
             // Apply (or clear) the plan AFTER amount/dueDate are
@@ -561,11 +585,15 @@ struct AddEditBillView: View {
     AddEditBillView(mode: .add)
         .environmentObject(BillStore())
         .environmentObject(SubscriptionManager())
+        .environmentObject(AuthService.shared)
+        .environmentObject(ManagedProfileStore.shared)
 }
 
 #Preview("Edit") {
     AddEditBillView(mode: .edit(SampleData.bills()[0]))
         .environmentObject(BillStore())
         .environmentObject(SubscriptionManager())
+        .environmentObject(AuthService.shared)
+        .environmentObject(ManagedProfileStore.shared)
 }
 #endif

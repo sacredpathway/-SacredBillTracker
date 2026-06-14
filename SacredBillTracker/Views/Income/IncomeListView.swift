@@ -39,6 +39,8 @@ struct IncomeListView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                ProfileSwitcherBar()
+                    .padding(.horizontal)
 
                 totalsGrid
                     .padding(.horizontal)
@@ -177,8 +179,8 @@ struct IncomeListView: View {
     /// Entries scoped to the optional `typeFilter`. Used by the
     /// empty-state branch + the rendered list so they stay in sync.
     private var filteredEntries: [WeeklyIncome] {
-        guard let typeFilter else { return store.entries }
-        return store.entries.filter { $0.type == typeFilter }
+        guard let typeFilter else { return store.profileEntries }
+        return store.profileEntries.filter { $0.type == typeFilter }
     }
 
     /// Navigation title that reflects the active filter.
@@ -238,5 +240,6 @@ struct IncomeListView: View {
     NavigationStack {
         IncomeListView()
             .environmentObject(IncomeStore())
+            .environmentObject(ManagedProfileStore.shared)
     }
 }

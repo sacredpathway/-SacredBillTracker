@@ -55,6 +55,8 @@ import Supabase
 private struct BillRow: Codable {
     let id: UUID
     let user_id: UUID
+    let owner_id: UUID?
+    let profile_id: UUID?
     let name: String
     let amount: Double
     let due_date: Date
@@ -85,6 +87,8 @@ private struct BillRow: Codable {
     init(bill: Bill, userID: UUID) {
         self.id            = bill.id
         self.user_id       = userID
+        self.owner_id      = userID
+        self.profile_id    = bill.profileID
         self.name          = bill.name
         self.amount        = (bill.amount as NSDecimalNumber).doubleValue
         self.due_date      = bill.dueDate
@@ -133,7 +137,8 @@ private struct BillRow: Codable {
             updatedAt: updated_at,
             isShared: is_shared ?? false,
             deletedAt: deleted_at,
-            ownerUserID: user_id,
+            ownerUserID: owner_id ?? user_id,
+            profileID: profile_id,
             paymentURL: payment_url?.nilIfEmpty,
             isPayoffTrackingEnabled: payoff_tracking_enabled ?? false,
             payoffOriginalBalance: payoff_original_balance.map { Decimal($0) },

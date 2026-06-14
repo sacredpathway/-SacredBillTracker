@@ -20,6 +20,7 @@ import SwiftUI
 struct AddEditIncomeView: View {
 
     @EnvironmentObject private var store: IncomeStore
+    @EnvironmentObject private var profiles: ManagedProfileStore
     @Environment(\.dismiss) private var dismiss
 
     // MARK: - Editing state
@@ -32,6 +33,7 @@ struct AddEditIncomeView: View {
     @State private var sourceName: String
     @State private var type: IncomeType
     @State private var note: String
+    @State private var profileID: UUID?
 
     @State private var showDeleteConfirm: Bool = false
 
@@ -45,12 +47,14 @@ struct AddEditIncomeView: View {
             _sourceName   = State(initialValue: e.sourceName)
             _type         = State(initialValue: e.type)
             _note         = State(initialValue: e.note)
+            _profileID    = State(initialValue: e.profileID)
         } else {
             _amountString = State(initialValue: "")
             _date         = State(initialValue: Date())
             _sourceName   = State(initialValue: "")
             _type         = State(initialValue: .business)
             _note         = State(initialValue: "")
+            _profileID    = State(initialValue: nil)
         }
     }
 
@@ -59,6 +63,20 @@ struct AddEditIncomeView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if profiles.canUseManagedProfiles && profiles.profiles.count > 1 {
+                    Section(header: Text("Profile")) {
+                        Picker("Managed Account", selection: Binding(
+                            get: { profileID ?? profiles.context.writeProfileID ?? profiles.profiles.first?.id },
+                            set: { profileID = $0 }
+                        )) {
+                            ForEach(profiles.profiles) { profile in
+                                Label(profile.name, systemImage: profile.iconSystemName)
+                                    .tag(Optional(profile.id))
+                            }
+                        }
+                    }
+                }
+
                 Section("Amount earned") {
                     HStack {
                         Text(currencySymbol)
@@ -128,6 +146,11 @@ struct AddEditIncomeView: View {
                 Button("Delete", role: .destructive) { deleteAndDismiss() }
                 Button("Cancel", role: .cancel) {}
             }
+            .onAppear {
+                if profileID == nil {
+                    profileID = existing?.profileID ?? profiles.context.writeProfileID
+                }
+            }
         }
     }
 
@@ -169,6 +192,8 @@ struct AddEditIncomeView: View {
             updated.type = type
             updated.sourceName = trimmedSource
             updated.note = trimmedNote
+            updated.profileID = profileID ?? profiles.context.writeProfileID
+            updated.ownerUserID = profiles.context.ownerID
             store.update(updated)
         } else {
             let new = WeeklyIncome(
@@ -177,7 +202,9 @@ struct AddEditIncomeView: View {
                 weekEnd: dayEnd,
                 type: type,
                 sourceName: trimmedSource,
-                note: trimmedNote
+                note: trimmedNote,
+                profileID: profileID ?? profiles.context.writeProfileID,
+                ownerUserID: profiles.context.ownerID
             )
             store.add(new)
         }
@@ -215,4 +242,5 @@ struct AddEditIncomeView: View {
 #Preview {
     AddEditIncomeView()
         .environmentObject(IncomeStore())
+        .environmentObject(ManagedProfileStore.shared)
 }

@@ -29,6 +29,8 @@ struct ReportsView: View {
             ScrollView {
                 if subs.isPro || FreeTierLimits.allowReports {
                     VStack(alignment: .leading, spacing: 20) {
+                        ProfileSwitcherBar()
+                            .padding(.horizontal)
                         monthPicker
                         totalsRow
                         typeSelector
@@ -252,6 +254,7 @@ struct ReportsView: View {
 #Preview {
     ReportsView()
         .environmentObject(BillStore())
+        .environmentObject(ManagedProfileStore.shared)
         .environmentObject(NotificationManager.shared)
         .environmentObject(SubscriptionManager())
 }

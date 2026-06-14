@@ -15,6 +15,7 @@ struct CPAReadyExportView: View {
 
     @EnvironmentObject private var billStore: BillStore
     @EnvironmentObject private var incomeStore: IncomeStore
+    @EnvironmentObject private var profileStore: ManagedProfileStore
 
     // MARK: - Range
 
@@ -41,6 +42,11 @@ struct CPAReadyExportView: View {
         Form {
             heroSection
 
+            Section(header: Text("Managed Profile")) {
+                ProfileSwitcherBar()
+                    .environmentObject(profileStore)
+            }
+
             Section("Export Range") {
                 Picker("Range", selection: $rangeOption) {
                     ForEach(CPADateRangeOption.allCases) { opt in
@@ -64,7 +70,7 @@ struct CPAReadyExportView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Section("Profile") {
+            Section(header: Text("Tax Profile")) {
                 Toggle("Business mode", isOn: $businessMode)
                 if businessMode {
                     TextField("Business name", text: $businessName)
@@ -188,7 +194,7 @@ struct CPAReadyExportView: View {
 
     private var filteredIncome: [WeeklyIncome] {
         let range = resolvedRange.closedRange
-        return incomeStore.entries.filter { range.contains($0.weekStart) }
+        return incomeStore.profileEntries.filter { range.contains($0.weekStart) }
     }
 
     private var estimatedNet: Decimal {
@@ -280,5 +286,6 @@ struct ShareSheet: UIViewControllerRepresentable {
         CPAReadyExportView()
             .environmentObject(BillStore())
             .environmentObject(IncomeStore())
+            .environmentObject(ManagedProfileStore.shared)
     }
 }

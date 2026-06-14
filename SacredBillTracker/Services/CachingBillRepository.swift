@@ -192,7 +192,7 @@ final class CachingBillRepository: BillRepository {
     /// user's bills out of UserDefaults before the remote refresh
     /// completes.
     func clearLocalCache() async {
-        try? await local.saveBills([])
+        try? await local.deleteAll()
     }
 
     // MARK: - Merge policy

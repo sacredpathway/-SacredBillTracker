@@ -21,6 +21,7 @@ final class IncomeStore: ObservableObject {
     // MARK: - Published state
 
     @Published private(set) var entries: [WeeklyIncome] = []
+    @Published private var profileContext: ManagedProfileContext = ManagedProfileStore.shared.context
 
     // MARK: - Storage
 
@@ -55,12 +56,53 @@ final class IncomeStore: ObservableObject {
         }
     }
 
+    var profileEntries: [WeeklyIncome] {
+        guard profileContext.ownerID != nil else { return [] }
+        return entries.filter {
+            profileContext.owns(ownerID: $0.ownerUserID)
+            && profileContext.includes(profileID: $0.profileID)
+        }
+    }
+
+    func applyProfileContext(_ context: ManagedProfileContext) {
+        guard profileContext != context else { return }
+        profileContext = context
+        if adoptLegacyEntriesIfNeeded() {
+            persist()
+            return
+        }
+        IncomeWidgetBridge.update(from: profileEntries)
+    }
+
+    private func stampProfileIfNeeded(_ entry: inout WeeklyIncome) {
+        if entry.ownerUserID == nil {
+            entry.ownerUserID = profileContext.ownerID
+        }
+        if entry.profileID == nil {
+            entry.profileID = profileContext.writeProfileID
+        }
+    }
+
+    private func adoptLegacyEntriesIfNeeded() -> Bool {
+        guard let ownerID = profileContext.ownerID else { return false }
+        var changed = false
+        for idx in entries.indices where entries[idx].ownerUserID == nil {
+            entries[idx].ownerUserID = ownerID
+            if entries[idx].profileID == nil {
+                entries[idx].profileID = profileContext.defaultProfileID
+            }
+            entries[idx].updatedAt = Date()
+            changed = true
+        }
+        return changed
+    }
+
     // MARK: - I/O
 
     private func load() {
         guard let data = storage.data(forKey: defaultsKey) else {
             entries = []
-            IncomeWidgetBridge.update(from: entries)
+            IncomeWidgetBridge.update(from: profileEntries)
             return
         }
         let decoder = JSONDecoder()
@@ -69,10 +111,14 @@ final class IncomeStore: ObservableObject {
             let decoded = try decoder.decode([WeeklyIncome].self, from: data)
             // Newest weeks first.
             entries = decoded.sorted { $0.weekStart > $1.weekStart }
-            IncomeWidgetBridge.update(from: entries)
+            if adoptLegacyEntriesIfNeeded() {
+                persist()
+            } else {
+                IncomeWidgetBridge.update(from: profileEntries)
+            }
         } catch {
             entries = []
-            IncomeWidgetBridge.update(from: entries)
+            IncomeWidgetBridge.update(from: profileEntries)
         }
     }
 
@@ -81,13 +127,14 @@ final class IncomeStore: ObservableObject {
         encoder.dateEncodingStrategy = .iso8601
         guard let data = try? encoder.encode(entries) else { return }
         storage.set(data, forKey: defaultsKey)
-        IncomeWidgetBridge.update(from: entries)
+        IncomeWidgetBridge.update(from: profileEntries)
     }
 
     // MARK: - CRUD
 
     func add(_ entry: WeeklyIncome) {
         var new = entry
+        stampProfileIfNeeded(&new)
         new.createdAt = Date()
         new.updatedAt = Date()
         entries.insert(new, at: 0)
@@ -98,6 +145,7 @@ final class IncomeStore: ObservableObject {
     func update(_ entry: WeeklyIncome) {
         guard let idx = entries.firstIndex(where: { $0.id == entry.id }) else { return }
         var updated = entry
+        stampProfileIfNeeded(&updated)
         updated.updatedAt = Date()
         entries[idx] = updated
         sort()
@@ -131,7 +179,7 @@ final class IncomeStore: ObservableObject {
     /// Mon→Sun week. (Matches `WeeklyIncome.currentWeekBounds`.)
     var thisWeekTotal: Decimal {
         let (start, end) = WeeklyIncome.currentWeekBounds()
-        return entries
+        return profileEntries
             .filter { $0.weekStart >= start && $0.weekStart <= end }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
@@ -142,7 +190,7 @@ final class IncomeStore: ObservableObject {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         guard let start = cal.date(byAdding: .day, value: -30, to: today) else { return 0 }
-        return entries
+        return profileEntries
             .filter { $0.weekStart >= start }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
@@ -153,7 +201,7 @@ final class IncomeStore: ObservableObject {
     var thisMonthTotal: Decimal {
         let cal = Calendar.current
         let now = Date()
-        return entries
+        return profileEntries
             .filter {
                 cal.component(.month, from: $0.weekStart) == cal.component(.month, from: now)
                 && cal.component(.year,  from: $0.weekStart) == cal.component(.year,  from: now)
@@ -162,12 +210,12 @@ final class IncomeStore: ObservableObject {
     }
 
     var allTimeTotal: Decimal {
-        entries.reduce(Decimal(0)) { $0 + $1.amount }
+        profileEntries.reduce(Decimal(0)) { $0 + $1.amount }
     }
 
     /// All entries that fall (by `weekStart`) inside the given closed range.
     func entries(in range: ClosedRange<Date>) -> [WeeklyIncome] {
-        entries.filter { range.contains($0.weekStart) }
+        profileEntries.filter { range.contains($0.weekStart) }
     }
 
     /// Sum entries whose `weekStart` is in `range`.
@@ -179,7 +227,7 @@ final class IncomeStore: ObservableObject {
     /// Returned newest-month first.
     func monthlyBreakdown() -> [(month: Date, total: Decimal)] {
         let cal = Calendar.current
-        let grouped = Dictionary(grouping: entries) { entry -> Date in
+        let grouped = Dictionary(grouping: profileEntries) { entry -> Date in
             let comps = cal.dateComponents([.year, .month], from: entry.weekStart)
             return cal.date(from: comps) ?? entry.weekStart
         }
@@ -191,7 +239,7 @@ final class IncomeStore: ObservableObject {
     /// Monthly breakdown restricted to a date range.
     func monthlyBreakdown(in range: ClosedRange<Date>) -> [(month: Date, total: Decimal)] {
         let cal = Calendar.current
-        let scoped = entries.filter { range.contains($0.weekStart) }
+        let scoped = profileEntries.filter { range.contains($0.weekStart) }
         let grouped = Dictionary(grouping: scoped) { entry -> Date in
             let comps = cal.dateComponents([.year, .month], from: entry.weekStart)
             return cal.date(from: comps) ?? entry.weekStart
@@ -205,7 +253,7 @@ final class IncomeStore: ObservableObject {
 
     /// Sum entries of a given type inside a closed range.
     func total(in range: ClosedRange<Date>, type: IncomeType) -> Decimal {
-        entries
+        profileEntries
             .filter { range.contains($0.weekStart) && $0.type == type }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
@@ -213,7 +261,7 @@ final class IncomeStore: ObservableObject {
     /// All-time total for a given type (used by IncomeListView totals
     /// and CPA summary).
     func allTimeTotal(type: IncomeType) -> Decimal {
-        entries
+        profileEntries
             .filter { $0.type == type }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }

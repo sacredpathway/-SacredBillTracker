@@ -123,6 +123,11 @@ struct Bill: Identifiable, Codable, Hashable {
     /// (Partner Budgeting, v1.0.5). Nil for purely-local bills.
     var ownerUserID: UUID?
 
+    /// Account-owned financial profile. Nil is treated as the owner's
+    /// default profile for backward compatibility with pre-profile rows.
+    /// This is not an auth identity and never maps to a separate login.
+    var profileID: UUID?
+
     // MARK: - 15/3 Paydown Plan (v1.4)
     //
     // Optional, opt-in payment-splitting strategy for revolving-credit
@@ -187,6 +192,7 @@ struct Bill: Identifiable, Codable, Hashable {
         isShared: Bool = false,
         deletedAt: Date? = nil,
         ownerUserID: UUID? = nil,
+        profileID: UUID? = nil,
         isUsing153Plan: Bool = false,
         firstPaydownDate: Date? = nil,
         secondPaydownDate: Date? = nil,
@@ -218,6 +224,7 @@ struct Bill: Identifiable, Codable, Hashable {
         self.isShared = isShared
         self.deletedAt = deletedAt
         self.ownerUserID = ownerUserID
+        self.profileID = profileID
         self.isUsing153Plan = isUsing153Plan
         self.firstPaydownDate = firstPaydownDate
         self.secondPaydownDate = secondPaydownDate
@@ -244,7 +251,7 @@ struct Bill: Identifiable, Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case id, name, amount, dueDate, category, recurrence, type
         case autoPay, notes, status, lastPaidDate, createdAt, updatedAt
-        case isShared, deletedAt, ownerUserID
+        case isShared, deletedAt, ownerUserID, profileID
         // v1.4 — 15/3 Paydown Plan
         case isUsing153Plan, firstPaydownDate, secondPaydownDate
         case firstPaydownAmount, secondPaydownAmount
@@ -275,6 +282,7 @@ struct Bill: Identifiable, Codable, Hashable {
         self.isShared     = try c.decodeIfPresent(Bool.self,  forKey: .isShared) ?? false
         self.deletedAt    = try c.decodeIfPresent(Date.self,  forKey: .deletedAt)
         self.ownerUserID  = try c.decodeIfPresent(UUID.self,  forKey: .ownerUserID)
+        self.profileID    = try c.decodeIfPresent(UUID.self,  forKey: .profileID)
         // 15/3 Paydown Plan — all five default to off/nil for older JSON.
         self.isUsing153Plan      = try c.decodeIfPresent(Bool.self,    forKey: .isUsing153Plan) ?? false
         self.firstPaydownDate    = try c.decodeIfPresent(Date.self,    forKey: .firstPaydownDate)

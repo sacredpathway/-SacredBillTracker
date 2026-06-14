@@ -35,6 +35,7 @@ struct ContentView: View {
     ContentView()
         .environmentObject(BillStore())
         .environmentObject(IncomeStore())
+        .environmentObject(ManagedProfileStore.shared)
         .environmentObject(NotificationManager.shared)
         .environmentObject(AuthService.shared)
         .environmentObject(SubscriptionManager())

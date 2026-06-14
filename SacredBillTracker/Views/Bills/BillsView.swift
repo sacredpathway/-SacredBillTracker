@@ -9,6 +9,7 @@ struct BillsView: View {
 
     @EnvironmentObject private var store: BillStore
     @EnvironmentObject private var incomeStore: IncomeStore
+    @EnvironmentObject private var profileStore: ManagedProfileStore
     @EnvironmentObject private var subs: SubscriptionManager
     @EnvironmentObject private var auth: AuthService
     @State private var showAdd = false
@@ -61,6 +62,10 @@ struct BillsView: View {
                     .background(Theme.Color.background.ignoresSafeArea())
 
             VStack(spacing: 0) {
+                ProfileSwitcherBar()
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+
                 // Partner Budgeting backend is live (v1.0.5). My / Shared
                 // scope picker so users can switch between their own
                 // bills and bills shared with their partner.
@@ -133,7 +138,7 @@ struct BillsView: View {
 
     /// True when the user can add another bill under their current tier.
     private var canAddBill: Bool {
-        subs.isPro || store.bills.count < FreeTierLimits.maxBills
+        subs.isPro || store.allStoredBills.count < FreeTierLimits.maxBills
     }
 
     /// Native iOS share button — pipes a plain-text summary of the
@@ -197,9 +202,9 @@ struct BillsView: View {
         case .mine:
             EmptyStateView(
                 systemImage: "tray",
-                title: searchText.isEmpty ? "No bills yet" : "No bills found",
+                title: searchText.isEmpty ? emptyMineTitle : "No bills found",
                 message: searchText.isEmpty
-                    ? "No bills yet — tap + to add your first one."
+                    ? emptyMineMessage
                     : "No bills match your search."
             )
         case .shared:
@@ -284,9 +289,17 @@ struct BillsView: View {
     }
 
     private var visibleBills: [Bill] {
-        let pool = store.filteredBills
-            .filtered(by: scope, currentUserID: auth.currentUserID)
-            .filter { bill in
+        let base: [Bill]
+        switch scope {
+        case .mine:
+            base = store.filteredBills
+        case .shared:
+            base = store.allStoredBills
+                .filter { store.filter.matches($0.type) }
+                .filtered(by: .shared, currentUserID: auth.currentUserID)
+        }
+
+        let pool = base.filter { bill in
             let matchesSearch = searchText.isEmpty
                 || bill.name.localizedCaseInsensitiveContains(searchText)
                 || bill.notes.localizedCaseInsensitiveContains(searchText)
@@ -303,11 +316,29 @@ struct BillsView: View {
         }
         return pool.sorted(by: sortOption)
     }
+
+    private var emptyMineTitle: String {
+        if store.allStoredBills.isEmpty { return "No bills yet" }
+        if profileStore.selection == .allProfiles { return "No bills yet" }
+        return "No bills in this profile"
+    }
+
+    private var emptyMineMessage: String {
+        if store.allStoredBills.isEmpty {
+            return "No bills yet — tap + to add your first one."
+        }
+        if profileStore.selection == .allProfiles {
+            return "No bills yet — tap + to add your first one."
+        }
+        return "Add a bill here or switch to All Profiles."
+    }
 }
 
 #Preview {
     BillsView()
         .environmentObject(BillStore())
+        .environmentObject(IncomeStore())
+        .environmentObject(ManagedProfileStore.shared)
         .environmentObject(NotificationManager.shared)
         .environmentObject(SubscriptionManager())
 }

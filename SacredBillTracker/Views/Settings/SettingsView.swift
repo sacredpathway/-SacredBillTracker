@@ -9,6 +9,7 @@ struct SettingsView: View {
 
     @EnvironmentObject private var store: BillStore
     @EnvironmentObject private var incomeStore: IncomeStore
+    @EnvironmentObject private var profileStore: ManagedProfileStore
     @EnvironmentObject private var notifications: NotificationManager
     @EnvironmentObject private var auth: AuthService
     @EnvironmentObject private var subs: SubscriptionManager
@@ -20,6 +21,7 @@ struct SettingsView: View {
     @State private var showDeleteAccountConfirm = false
     @State private var isDeletingAccount = false
     @State private var showPaywall = false
+    @State private var paywallReason: String?
 
     // Income-tracking preferences (v1.2.2). Persist via AppStorage so
     // every income-aware view (Dashboard, AddEditIncomeView,
@@ -52,7 +54,7 @@ struct SettingsView: View {
                     Stepper(value: Binding(
                         get: { notifications.leadTimeDays },
                         set: { notifications.leadTimeDays = $0
-                               Task { await notifications.rescheduleAll(for: store.bills) } }
+                               Task { await notifications.rescheduleAll(for: store.allStoredBills) } }
                     ), in: 0...14) {
                         HStack {
                             Text("Remind")
@@ -79,6 +81,7 @@ struct SettingsView: View {
                         }
                     } else {
                         Button {
+                            paywallReason = nil
                             showPaywall = true
                         } label: {
                             HStack {
@@ -122,6 +125,50 @@ struct SettingsView: View {
                     }
                 }
 
+                Section {
+                    ProfileSwitcherBar()
+
+                    if subs.isPro {
+                        NavigationLink {
+                            ManagedProfilesView()
+                                .environmentObject(profileStore)
+                                .environmentObject(subs)
+                        } label: {
+                            HStack {
+                                Label("Manage Profiles", systemImage: "person.crop.circle.badge.gearshape")
+                                Spacer()
+                                Text("\(profileStore.profiles.count)")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    } else {
+                        Button {
+                            paywallReason = PremiumMessaging.managedProfiles
+                            showPaywall = true
+                        } label: {
+                            HStack {
+                                Label("Manage Profiles", systemImage: "lock.fill")
+                                Spacer()
+                                ProBadge()
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote.bold())
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    HStack {
+                        Image(systemName: "person.3.sequence.fill")
+                            .foregroundStyle(Color.appAccent)
+                        Text("Profiles")
+                    }
+                } footer: {
+                    Text("Manage your own bills, family bills, business, and property profiles inside this one account and subscription.")
+                        .font(.footnote)
+                }
+
                 // Partner Budgeting — backend is live as of v1.0.5.
                 // Shipped to Release / TestFlight / App Store.
                 Section {
@@ -154,7 +201,7 @@ struct SettingsView: View {
                         Text("Partner")
                     }
                 } footer: {
-                    Text("Invite your partner to budget together. Each partner manages their own subscription separately.")
+                    Text("Invite your partner to budget together. Each partner uses their own account.")
                         .font(.footnote)
                 }
 
@@ -167,8 +214,8 @@ struct SettingsView: View {
                             Label("Income Overview",
                                   systemImage: "dollarsign.circle.fill")
                             Spacer()
-                            if !incomeStore.entries.isEmpty {
-                                Text("\(incomeStore.entries.count)")
+                            if !incomeStore.profileEntries.isEmpty {
+                                Text("\(incomeStore.profileEntries.count)")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.secondary)
                             }
@@ -255,8 +302,8 @@ struct SettingsView: View {
                         HStack {
                             Label("Trash", systemImage: "trash")
                             Spacer()
-                            if !store.deletedBills.isEmpty {
-                                Text("\(store.deletedBills.count)")
+                            if !store.profileDeletedBills.isEmpty {
+                                Text("\(store.profileDeletedBills.count)")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.secondary)
                             }
@@ -328,7 +375,7 @@ struct SettingsView: View {
                     HStack {
                         Label("Bills Stored", systemImage: "number")
                         Spacer()
-                        Text("\(store.bills.count)").foregroundStyle(.secondary)
+                        Text("\(store.allStoredBills.count)").foregroundStyle(.secondary)
                     }
                     Link(destination: URL(string: "https://www.sacredpathway.org/sacred-bill-tracker-privacy")!) {
                         HStack {
@@ -430,7 +477,7 @@ struct SettingsView: View {
             } message: { message in
                 Text(message)
             }
-            .paywallSheet(isPresented: $showPaywall)
+            .paywallSheet(isPresented: $showPaywall, reason: paywallReason)
         }
     }
 
@@ -490,6 +537,7 @@ struct SettingsView: View {
     SettingsView()
         .environmentObject(BillStore())
         .environmentObject(IncomeStore())
+        .environmentObject(ManagedProfileStore.shared)
         .environmentObject(NotificationManager.shared)
         .environmentObject(AuthService.shared)
         .environmentObject(SubscriptionManager())

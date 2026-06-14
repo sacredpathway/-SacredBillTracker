@@ -40,6 +40,15 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
     /// Optional, separate from `sourceName`.
     var note: String
 
+    /// Account-owned financial profile. Nil is treated as the owner's
+    /// default profile for backward compatibility with older income JSON.
+    var profileID: UUID?
+
+    /// Signed-in account that owns this income entry. Managed profiles
+    /// are not separate auth users, so every profile-scoped income row
+    /// still belongs to the main subscriber account.
+    var ownerUserID: UUID?
+
     var createdAt: Date
     var updatedAt: Date
 
@@ -53,6 +62,8 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
         type: IncomeType = .business,
         sourceName: String = "",
         note: String = "",
+        profileID: UUID? = nil,
+        ownerUserID: UUID? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -63,6 +74,8 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
         self.type = type
         self.sourceName = sourceName
         self.note = note
+        self.profileID = profileID
+        self.ownerUserID = ownerUserID
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -73,7 +86,8 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
     // `type` / `sourceName` / `note` still loads cleanly.
 
     private enum CodingKeys: String, CodingKey {
-        case id, amount, weekStart, weekEnd, type, sourceName, note, createdAt, updatedAt
+        case id, amount, weekStart, weekEnd, type, sourceName, note
+        case profileID, ownerUserID, createdAt, updatedAt
     }
 
     init(from decoder: Decoder) throws {
@@ -99,6 +113,8 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
         }
         self.sourceName = resolvedSource
         self.note = resolvedNote
+        self.profileID = try c.decodeIfPresent(UUID.self, forKey: .profileID)
+        self.ownerUserID = try c.decodeIfPresent(UUID.self, forKey: .ownerUserID)
 
         // Type: respect any explicitly-saved value; otherwise classify
         // by scanning the source/note for business indicators. Falls

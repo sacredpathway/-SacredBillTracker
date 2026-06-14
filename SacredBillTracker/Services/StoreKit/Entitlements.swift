@@ -42,6 +42,13 @@ enum FreeTierLimits {
 
     /// Free users don't get cloud sync (stays local-only).
     static let allowCloudSync = false
+
+    /// Managed Financial Profiles are Premium-only in v1.0.10.
+    static let allowManagedProfiles = false
+}
+
+enum PremiumMessaging {
+    static let managedProfiles = "Managed Financial Profiles is a Premium feature. Manage your personal, family, business, and rental property finances in one place."
 }
 
 /// A small, purely-advisory description of what's gated. Used by
@@ -61,6 +68,10 @@ struct ProFeature: Identifiable, Hashable {
               icon: "briefcase.fill",
               title: "Business tracking",
               subtitle: "Separate books for side-hustles, LLCs, and contractors."),
+        .init(id: "profiles",
+              icon: "person.3.sequence.fill",
+              title: "Managed Financial Profiles",
+              subtitle: "Manage personal, family, business, and rental property finances in one subscription."),
         .init(id: "reports",
               icon: "chart.pie.fill",
               title: "Reports & insights",

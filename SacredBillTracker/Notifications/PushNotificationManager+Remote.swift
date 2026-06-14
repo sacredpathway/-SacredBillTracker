@@ -58,15 +58,14 @@ extension PushNotificationManager {
         else { return .noData }
 
         // Always pull fresh data first — this is the whole point of a silent push.
-        var didFetch = false
+        // No remote refresh hooks are wired yet, so this handler currently
+        // surfaces the local notification and reports no fetched data.
         switch category {
         case .settlementCreated, .settlementSynced:
             // TODO: hook your data layer here, e.g. await BillStore.shared.refresh()
-            // didFetch = true
             break
         case .shareLinkExpired, .shareLinkExpiringSoon:
             // TODO: hook your share-link data layer here
-            // didFetch = true
             break
         default:
             break
@@ -88,7 +87,7 @@ extension PushNotificationManager {
             payload: deepLinkPayload
         )
 
-        return didFetch ? .newData : .noData
+        return .noData
     }
 
     private func defaultBody(for category: NotificationCategory, userInfo: [AnyHashable: Any]) -> String {

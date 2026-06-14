@@ -117,6 +117,7 @@ struct SacredBillTrackerApp: App {
 
     @StateObject private var store = BillStore(repository: repo)
     @StateObject private var incomeStore = IncomeStore()
+    @StateObject private var profileStore = ManagedProfileStore.shared
     @StateObject private var notifications = NotificationManager.shared
     @StateObject private var auth = AuthService.shared
     @StateObject private var subscriptions = SubscriptionManager()
@@ -148,6 +149,7 @@ struct SacredBillTrackerApp: App {
             RootScene()
                 .environmentObject(store)
                 .environmentObject(incomeStore)
+                .environmentObject(profileStore)
                 .environmentObject(notifications)
                 .environmentObject(auth)
                 .environmentObject(subscriptions)
@@ -165,6 +167,9 @@ struct SacredBillTrackerApp: App {
                     // Forced-update gate — fetch on cold launch BEFORE
                     // anything else. Safe-fallback on failure (allowed).
                     await versionGate.refresh()
+                    await subscriptions.refreshEntitlements()
+                    profileStore.applyPremiumAccess(subscriptions.isPro)
+                    applyProfileContext()
 
                     // Once-per-cold-launch counter for the in-app review gate.
                     reviewPrompt.recordAppLaunch()
@@ -186,6 +191,16 @@ struct SacredBillTrackerApp: App {
                 }
                 .onChange(of: auth.currentUserID) { _, newUserID in
                     Task { await handleUserChange(newUserID) }
+                }
+                .onChange(of: subscriptions.isPro) { _, isPro in
+                    profileStore.applyPremiumAccess(isPro)
+                    applyProfileContext()
+                }
+                .onReceive(profileStore.$selection) { _ in
+                    applyProfileContext()
+                }
+                .onReceive(profileStore.$profiles) { _ in
+                    applyProfileContext()
                 }
                 .onChange(of: auth.currentUserEmail) { _, _ in
                     // Re-check DEBUG-only local QA helpers when the user's
@@ -210,14 +225,18 @@ struct SacredBillTrackerApp: App {
             // user's bills out of UserDefaults before the remote refresh
             // completes. (Privacy + App Store Guideline 5.1.1.)
             await realtime.stop()
-            store.replace(bills: [])
-            BillWidgetBridge.clearSnapshotAndReloadTimelines()
+            profileStore.resetForSignedOutUser()
+            applyProfileContext()
+            store.resetForSignedOutUser()
             subscriptions.clearForSignedOutUser()
             if let caching = Self.repo as? CachingBillRepository {
                 await caching.clearLocalCache()
             }
             return
         }
+
+        await profileStore.loadForSignedInUser(userID: userID, displayName: auth.displayName)
+        applyProfileContext()
 
         if let caching = Self.repo as? CachingBillRepository {
             await caching.migrateLocalToRemoteIfNeeded(userID: userID)
@@ -266,5 +285,12 @@ struct SacredBillTrackerApp: App {
         } else {
             await store.reload()
         }
+    }
+
+    @MainActor
+    private func applyProfileContext() {
+        let context = profileStore.context
+        store.applyProfileContext(context)
+        incomeStore.applyProfileContext(context)
     }
 }

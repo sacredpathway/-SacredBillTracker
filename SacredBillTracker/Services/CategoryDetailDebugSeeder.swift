@@ -28,7 +28,7 @@ enum CategoryDetailDebugSeeder {
     /// no-op the moment all QA bills are gone.
     @MainActor
     static func seedIfNeeded(into store: BillStore) {
-        let leftovers = store.bills.filter { $0.name.hasPrefix(qaPrefix) }
+        let leftovers = store.allStoredBills.filter { $0.name.hasPrefix(qaPrefix) }
         guard !leftovers.isEmpty else { return }
         for bill in leftovers {
             store.delete(bill)

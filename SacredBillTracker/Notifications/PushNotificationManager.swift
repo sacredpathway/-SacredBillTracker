@@ -255,10 +255,11 @@ extension PushNotificationManager: UNUserNotificationCenterDelegate {
             guard let key = k as? String, key != "deepLink" else { continue }
             if let s = v as? String { payload[key] = s }
         }
+        let routedPayload = payload
 
         await MainActor.run {
             self.pendingDeepLink = link
-            self.pendingDeepLinkPayload = payload
+            self.pendingDeepLinkPayload = routedPayload
         }
     }
 }

@@ -11,6 +11,7 @@ import SwiftUI
 struct QuickAddView: View {
 
     @EnvironmentObject private var store: BillStore
+    @EnvironmentObject private var profiles: ManagedProfileStore
     @Environment(\.dismiss) private var dismiss
 
     /// When set, `AddEditBillView(mode: .edit(seed))` opens pre-filled.
@@ -57,7 +58,8 @@ struct QuickAddView: View {
                                     type: bill.type,
                                     autoPay: bill.autoPay,
                                     notes: bill.notes,
-                                    status: .unpaid
+                                    status: .unpaid,
+                                    profileID: bill.profileID
                                 )
                                 seededBill = copy
                                 _ = copy
@@ -110,6 +112,7 @@ struct QuickAddView: View {
                     store.add(finalized)
                     dismiss()
                 }
+                .environmentObject(profiles)
             }
         }
     }
@@ -154,6 +157,7 @@ private struct SeededAddView: View {
     var onSave: (Bill) -> Void
 
     @EnvironmentObject private var store: BillStore
+    @EnvironmentObject private var profiles: ManagedProfileStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var name: String
@@ -164,6 +168,7 @@ private struct SeededAddView: View {
     @State private var recurrence: RecurrenceType
     @State private var autoPay: Bool
     @State private var notes: String
+    @State private var profileID: UUID?
 
     init(seed: Bill, onSave: @escaping (Bill) -> Void) {
         self.seed = seed
@@ -177,11 +182,26 @@ private struct SeededAddView: View {
         _recurrence = State(initialValue: seed.recurrence)
         _autoPay = State(initialValue: seed.autoPay)
         _notes = State(initialValue: seed.notes)
+        _profileID = State(initialValue: seed.profileID)
     }
 
     var body: some View {
         NavigationStack {
             Form {
+                if profiles.canUseManagedProfiles && profiles.profiles.count > 1 {
+                    Section(header: Text("Profile")) {
+                        Picker("Managed Account", selection: Binding(
+                            get: { profileID ?? profiles.context.writeProfileID ?? profiles.profiles.first?.id },
+                            set: { profileID = $0 }
+                        )) {
+                            ForEach(profiles.profiles) { profile in
+                                Label(profile.name, systemImage: profile.iconSystemName)
+                                    .tag(Optional(profile.id))
+                            }
+                        }
+                    }
+                }
+
                 Section("Bill") {
                     TextField("Name", text: $name)
                     HStack {
@@ -232,12 +252,18 @@ private struct SeededAddView: View {
                             type: type,
                             autoPay: autoPay,
                             notes: notes,
-                            status: .unpaid
+                            status: .unpaid,
+                            profileID: profileID ?? profiles.context.writeProfileID
                         )
                         onSave(bill)
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty
                               || (Decimal(string: amountString.replacingOccurrences(of: ",", with: ".")) ?? 0) <= 0)
+                }
+            }
+            .onAppear {
+                if profileID == nil {
+                    profileID = profiles.context.writeProfileID
                 }
             }
         }

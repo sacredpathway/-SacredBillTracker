@@ -107,6 +107,9 @@
 		SHRE1001SHRE1001SHRE1001 /* BillShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHRE0001SHRE0001SHRE0001 /* BillShareService.swift */; };
 		PDWN1001PDWN1001PDWN1001 /* PaydownPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */; };
 		CPA1002CPA1002CPA1002 /* CPAReadyExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */; };
+		MPRO1001MPRO1001MPRO1001 /* ManagedProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0001MPRO0001MPRO0001 /* ManagedProfile.swift */; };
+		MPRO1002MPRO1002MPRO1002 /* ManagedProfileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0002MPRO0002MPRO0002 /* ManagedProfileStore.swift */; };
+		MPRO1003MPRO1003MPRO1003 /* ManagedProfilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0003MPRO0003MPRO0003 /* ManagedProfilesView.swift */; };
 		AUTH1001AUTH1001AUTH1001 /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0001AUTH0001AUTH0001 /* AuthGateView.swift */; };
 		AUTH1002AUTH1002AUTH1002 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0002AUTH0002AUTH0002 /* LoginView.swift */; };
 		AUTH1003AUTH1003AUTH1003 /* CreateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0003AUTH0003AUTH0003 /* CreateAccountView.swift */; };
@@ -228,6 +231,9 @@
 		SHRE0001SHRE0001SHRE0001 /* BillShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillShareService.swift; sourceTree = "<group>"; };
 		PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaydownPlanService.swift; sourceTree = "<group>"; };
 		CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPAReadyExportView.swift; sourceTree = "<group>"; };
+		MPRO0001MPRO0001MPRO0001 /* ManagedProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfile.swift; sourceTree = "<group>"; };
+		MPRO0002MPRO0002MPRO0002 /* ManagedProfileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfileStore.swift; sourceTree = "<group>"; };
+		MPRO0003MPRO0003MPRO0003 /* ManagedProfilesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfilesView.swift; sourceTree = "<group>"; };
 		AUTH0001AUTH0001AUTH0001 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGateView.swift; sourceTree = "<group>"; };
 		AUTH0002AUTH0002AUTH0002 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AUTH0003AUTH0003AUTH0003 /* CreateAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
@@ -351,6 +357,7 @@
 				QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */,
 				QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */,
 				VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */,
+				MPRO0002MPRO0002MPRO0002 /* ManagedProfileStore.swift */,
 				INC0002INC0002INC0002 /* IncomeStore.swift */,
 				FSTR0001FSTR0001FSTR0001 /* FocusStores.swift */,
 				PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */,
@@ -397,6 +404,7 @@
 				BCKT0001BCKT0001BCKT0001 /* BillBucket.swift */,
 				SORT0001SORT0001SORT0001 /* BillSortOption.swift */,
 				VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */,
+				MPRO0001MPRO0001MPRO0001 /* ManagedProfile.swift */,
 				INC0001INC0001INC0001 /* WeeklyIncome.swift */,
 				INCP0001INCP0001INCP0001 /* IncomePeriod.swift */,
 				INCT0001INCT0001INCT0001 /* IncomeType.swift */,
@@ -432,6 +440,7 @@
 				INC2001INC2001INC2001 /* Income */,
 				PRTN2002PRTN2002PRTN2002 /* Partner */,
 				DDDD2002DDDD2002DDDD2002 /* Paywall */,
+				MPRO2001MPRO2001MPRO2001 /* Profiles */,
 				70A820689434FB967A61CB28 /* Reports */,
 				0FA7DC90CB1E8D2C4F5CA47F /* Settings */,
 			);
@@ -568,6 +577,14 @@
 				PRTN0007PRTN0007PRTN0007 /* DeleteAccountSheet.swift */,
 			);
 			path = Account;
+			sourceTree = "<group>";
+		};
+		MPRO2001MPRO2001MPRO2001 /* Profiles */ = {
+			isa = PBXGroup;
+			children = (
+				MPRO0003MPRO0003MPRO0003 /* ManagedProfilesView.swift */,
+			);
+			path = Profiles;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -830,6 +847,9 @@
 				SHRE1001SHRE1001SHRE1001 /* BillShareService.swift in Sources */,
 				PDWN1001PDWN1001PDWN1001 /* PaydownPlanService.swift in Sources */,
 				CPA1002CPA1002CPA1002 /* CPAReadyExportView.swift in Sources */,
+				MPRO1001MPRO1001MPRO1001 /* ManagedProfile.swift in Sources */,
+				MPRO1002MPRO1002MPRO1002 /* ManagedProfileStore.swift in Sources */,
+				MPRO1003MPRO1003MPRO1003 /* ManagedProfilesView.swift in Sources */,
 				AUTH1001AUTH1001AUTH1001 /* AuthGateView.swift in Sources */,
 				AUTH1002AUTH1002AUTH1002 /* LoginView.swift in Sources */,
 				AUTH1003AUTH1003AUTH1003 /* CreateAccountView.swift in Sources */,
@@ -933,7 +953,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -953,7 +973,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.0.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -967,7 +987,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
@@ -979,7 +999,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.0.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -994,7 +1014,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
@@ -1006,7 +1026,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.0.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1023,7 +1043,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1043,7 +1063,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.0.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
