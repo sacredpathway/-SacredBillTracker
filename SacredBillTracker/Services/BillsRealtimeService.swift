@@ -27,6 +27,12 @@ final class BillsRealtimeService {
     private var channel: RealtimeChannelV2?
     private var changeTask: Task<Void, Never>?
 
+    // Debounce state for coalescing realtime bursts (see start()).
+    private var pendingRefresh: Task<Void, Never>?
+    private var lastRefresh = Date.distantPast
+    private let refreshQuietWindow: UInt64 = 1_000_000_000  // 1.0s after last event
+    private let refreshMaxStaleness: TimeInterval = 5.0     // force a refresh at least this often
+
     /// Start listening for INSERT / UPDATE / DELETE on `public.bills`
     /// for the given user. Safe to call repeatedly — disconnects any
     /// prior subscription first.
@@ -54,8 +60,42 @@ final class BillsRealtimeService {
 
         await channel.subscribe()
 
-        changeTask = Task { [onChange] in
+        // Coalesce bursts of change events into a single refresh.
+        //
+        // `BillStore.persist()` upserts the user's FULL bill snapshot on
+        // every edit, and Supabase Realtime emits ONE event per changed
+        // row — so a single "mark paid" could fire dozens of events, each
+        // previously triggering a full `refreshFromRemote()` + GET /bills
+        // (the observed flood). We debounce: restart a short timer on each
+        // event and only refresh once the burst goes quiet. A max-staleness
+        // guard still forces a refresh during sustained activity so sync
+        // correctness is preserved.
+        lastRefresh = .distantPast
+        changeTask = Task { [weak self, onChange] in
             for await _ in stream {
+                guard let self else { break }
+                self.scheduleCoalescedRefresh(onChange)
+            }
+        }
+    }
+
+    /// Trailing-edge debounce with a leading-edge fast path after a quiet
+    /// period. All state is MainActor-isolated, so there are no data races.
+    private func scheduleCoalescedRefresh(_ onChange: @MainActor @escaping () async -> Void) {
+        let now = Date()
+        if now.timeIntervalSince(lastRefresh) >= refreshMaxStaleness {
+            // Been quiet for a while — refresh immediately (leading edge).
+            pendingRefresh?.cancel()
+            pendingRefresh = nil
+            lastRefresh = now
+            Task { await onChange() }
+        } else {
+            // Inside an active burst — collapse to one trailing refresh.
+            pendingRefresh?.cancel()
+            pendingRefresh = Task { [weak self, onChange] in
+                try? await Task.sleep(nanoseconds: self?.refreshQuietWindow ?? 1_000_000_000)
+                if Task.isCancelled { return }
+                self?.lastRefresh = Date()
                 await onChange()
             }
         }
@@ -65,6 +105,8 @@ final class BillsRealtimeService {
     func stop() async {
         changeTask?.cancel()
         changeTask = nil
+        pendingRefresh?.cancel()
+        pendingRefresh = nil
 
         if let channel {
             await channel.unsubscribe()

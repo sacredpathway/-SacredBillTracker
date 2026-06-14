@@ -38,7 +38,7 @@ struct ProfileSwitcherBar: View {
                     Button {
                         showManageProfiles = true
                     } label: {
-                        Label("Manage Profiles", systemImage: "person.crop.circle.badge.gearshape")
+                        Label("Manage Profiles", systemImage: "person.2.badge.gearshape")
                     }
                 } label: {
                     switcherLabel(locked: false)

@@ -196,10 +196,15 @@ struct SacredBillTrackerApp: App {
                     profileStore.applyPremiumAccess(isPro)
                     applyProfileContext()
                 }
-                .onReceive(profileStore.$selection) { _ in
+                // Use onChange (fires AFTER the value updates) rather than
+                // onReceive($published) (fires in willSet, BEFORE the value
+                // updates). Reading profileStore.context inside onReceive saw
+                // the stale, pre-tap selection, so switching profiles lagged
+                // one tap behind. onChange reads the committed value.
+                .onChange(of: profileStore.selection) { _, _ in
                     applyProfileContext()
                 }
-                .onReceive(profileStore.$profiles) { _ in
+                .onChange(of: profileStore.profiles) { _, _ in
                     applyProfileContext()
                 }
                 .onChange(of: auth.currentUserEmail) { _, _ in

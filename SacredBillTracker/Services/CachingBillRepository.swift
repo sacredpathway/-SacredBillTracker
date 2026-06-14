@@ -77,8 +77,21 @@ final class CachingBillRepository: BillRepository {
         var localByID: [UUID: Bill] = [:]
         for bill in cached { localByID[bill.id] = bill }
 
-        let merged: [Bill] = remoteBills.map { remoteBill in
+        var remoteIDs = Set<UUID>()
+        var merged: [Bill] = remoteBills.map { remoteBill in
+            remoteIDs.insert(remoteBill.id)
             guard let localBill = localByID[remoteBill.id] else { return remoteBill }
+
+            // If the local copy is NEWER than remote, the user made an edit
+            // (e.g. marked a bill paid) that hasn't synced yet. Keep local so
+            // a background refresh can't silently revert unsynced changes —
+            // this was the cause of "marked paid but it comes back" on relaunch.
+            if localBill.updatedAt > remoteBill.updatedAt {
+                return localBill
+            }
+
+            // Otherwise take remote, but preserve the local-only 15/3 paydown
+            // fields the bills schema doesn't yet carry.
             var out = remoteBill
             out.isUsing153Plan      = localBill.isUsing153Plan
             out.firstPaydownDate    = localBill.firstPaydownDate
@@ -88,7 +101,26 @@ final class CachingBillRepository: BillRepository {
             return out
         }
 
+        // Keep local-only bills that haven't reached the server yet (pending
+        // creates / unsynced edits). `cached` holds only ACTIVE bills, so a
+        // bill the user deleted locally is already excluded and won't be
+        // resurrected here.
+        let localOnly = cached.filter { !remoteIDs.contains($0.id) }
+        merged.append(contentsOf: localOnly)
+
         try await local.saveBills(merged)
+
+        // Re-push anything whose local copy is newer than (or missing from)
+        // remote, so unsynced edits actually reach the server instead of
+        // silently sitting in the local cache.
+        let needsPush = merged.filter { bill in
+            guard let remoteMatch = remoteBills.first(where: { $0.id == bill.id }) else { return true }
+            return bill.updatedAt > remoteMatch.updatedAt
+        }
+        if !needsPush.isEmpty {
+            try? await remote.saveBills(needsPush)
+        }
+
         return merged
     }
 

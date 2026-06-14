@@ -135,7 +135,7 @@ struct SettingsView: View {
                                 .environmentObject(subs)
                         } label: {
                             HStack {
-                                Label("Manage Profiles", systemImage: "person.crop.circle.badge.gearshape")
+                                Label("Manage Profiles", systemImage: "person.2.badge.gearshape")
                                 Spacer()
                                 Text("\(profileStore.profiles.count)")
                                     .font(.caption.weight(.semibold))
