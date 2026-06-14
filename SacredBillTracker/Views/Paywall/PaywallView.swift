@@ -207,7 +207,7 @@ struct PaywallView: View {
                         ProgressView()
                             .controlSize(.mini)
                     } else {
-                        Text(plan == .yearly ? "$39.99 / year" : "$19.99 / month")
+                        Text(plan == .yearly ? "$39.99 / year" : "$9.99 / month")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
