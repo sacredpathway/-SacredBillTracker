@@ -21,6 +21,14 @@
 #
 set -eu
 
+# Force a byte-safe locale. `strings -a` on a Mach-O binary emits bytes
+# that are not valid UTF-8; under a UTF-8 locale BSD sed/grep abort with
+# "RE error: illegal byte sequence". The C locale treats input as raw
+# bytes so the scan never crashes. Our patterns are all ASCII, so
+# case-insensitive matching is unaffected.
+export LC_ALL=C
+export LANG=C
+
 # ----------------------------------------------------------------------
 # 1. Release-only. Skip entirely for Debug (and any other config).
 # ----------------------------------------------------------------------
