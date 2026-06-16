@@ -603,7 +603,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/scripts/verify_release_no_debug_strings.sh\"\n";
+			shellScript = "sh \"${SRCROOT}/scripts/verify_release_no_debug_strings.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
