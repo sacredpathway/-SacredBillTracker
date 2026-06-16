@@ -589,6 +589,24 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		DEBADEADBEEF000000000001 /* Verify No Debug Strings (Release) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Verify No Debug Strings (Release)";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/scripts/verify_release_no_debug_strings.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		730950AD798A77AD508AA9E2 /* SacredBillTracker */ = {
 			isa = PBXNativeTarget;
@@ -598,6 +616,7 @@
 				FCB13D7EDBAAE7DD085AD9D3 /* Frameworks */,
 				3E4149F4CEEB2B45A1E83FF2 /* Resources */,
 				WGTEMB01WGTEMB01WGTEMB01 /* Embed Foundation Extensions */,
+				DEBADEADBEEF000000000001 /* Verify No Debug Strings (Release) */,
 			);
 			buildRules = (
 			);
