@@ -15,21 +15,6 @@
 	</array>
 	<key>NSPrivacyCollectedDataTypes</key>
 	<array>
-		<!-- Added for AppsFlyer/TikTok install attribution. Device ID (IDFA/IDFV)
-		     collected and used for tracking + third-party advertising. -->
-		<dict>
-			<key>NSPrivacyCollectedDataType</key>
-			<string>NSPrivacyCollectedDataTypeDeviceID</string>
-			<key>NSPrivacyCollectedDataTypeLinked</key>
-			<false/>
-			<key>NSPrivacyCollectedDataTypeTracking</key>
-			<true/>
-			<key>NSPrivacyCollectedDataTypePurposes</key>
-			<array>
-				<string>NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising</string>
-				<string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
-			</array>
-		</dict>
 		<!-- Email Address — collected via account sign-in (Supabase). Linked to
 		     the user, NOT used for tracking. Purpose: app functionality. -->
 		<dict>
@@ -60,13 +45,8 @@
 		</dict>
 	</array>
 	<key>NSPrivacyTracking</key>
-	<true/>
+	<false/>
 	<key>NSPrivacyTrackingDomains</key>
-	<array>
-		<!-- Use the exact domains AppsFlyer lists for your account/region.
-		     These are the common AppsFlyer endpoints. -->
-		<string>appsflyersdk.com</string>
-		<string>appsflyer.com</string>
-	</array>
+	<array/>
 </dict>
 </plist>
