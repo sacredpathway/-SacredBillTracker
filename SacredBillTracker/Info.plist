@@ -30,6 +30,13 @@
 -->
 <plist version="1.0">
 <dict>
+	<!-- AppsFlyer Dev Key injected from Secrets.xcconfig (build setting APPSFLYER_DEV_KEY),
+	     substituted at build time and read at runtime via the bundle info dictionary.
+	     Stays a placeholder until the real key is set in the git-ignored Secrets.xcconfig;
+	     the app refuses to start AppsFlyer while it is a placeholder. -->
+	<key>AppsFlyerDevKey</key>
+	<string>$(APPSFLYER_DEV_KEY)</string>
+
 	<!-- ATT prompt copy. Required because the app now requests tracking. -->
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Sacred Bill Tracker uses this to measure ad performance so we can keep improving the app. Your information is never sold.</string>

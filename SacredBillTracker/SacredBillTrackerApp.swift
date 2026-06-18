@@ -338,23 +338,48 @@ final class AppsFlyerManager: NSObject {
 
     static let shared = AppsFlyerManager()
     private var didStart = false
+    /// True only when a real (non-placeholder) Dev Key was found and applied.
+    private var isConfigured = false
     private override init() { super.init() }
 
+    /// Placeholder/sentinel values that must NOT be treated as a real key.
+    private static let placeholderKeys: Set<String> = [
+        "", "paste_real_key_here", "APPSFLYER_DEV_KEY_HERE", "$(APPSFLYER_DEV_KEY)"
+    ]
+
+    /// Reads APPSFLYER_DEV_KEY (Info.plist key "AppsFlyerDevKey", injected from
+    /// Secrets.xcconfig). Returns nil if missing or still a placeholder.
+    private static func resolvedDevKey() -> String? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "AppsFlyerDevKey") as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return placeholderKeys.contains(raw) ? nil : raw
+    }
+
     /// Call once, early (App.init). Sets keys; sends nothing yet.
+    /// If the Dev Key is missing/placeholder, logs a safe warning and does NOT
+    /// configure or start AppsFlyer.
     func configure() {
+        guard let devKey = Self.resolvedDevKey() else {
+            print("[AppsFlyer] Dev Key not configured (placeholder). AppsFlyer will not start. " +
+                  "Set APPSFLYER_DEV_KEY in Secrets.xcconfig.")
+            isConfigured = false
+            return
+        }
         let af = AppsFlyerLib.shared()
-        af.appsFlyerDevKey = "APPSFLYER_DEV_KEY_HERE"   // placeholder — inject the real key at build time, never commit it
+        af.appsFlyerDevKey = devKey
         af.appleAppID      = "6762890363"               // Sacred Bill Tracker iOS App ID
         af.delegate        = self
         // Hold the install postback until ATT is answered (or 60s) so the
         // IDFA is included when the user grants tracking.
         af.waitForATTUserAuthorization(timeoutInterval: 60)
         // af.isDebug = true   // DEV ONLY — remove before release
+        isConfigured = true
     }
 
     /// Request ATT once, then start the SDK once. SKAdNetwork still works if
-    /// the user denies ATT.
+    /// the user denies ATT. No-op when the Dev Key is not configured.
     func requestATTThenStart() {
+        guard isConfigured else { return }
         if #available(iOS 14, *) {
             ATTrackingManager.requestTrackingAuthorization { [weak self] _ in
                 DispatchQueue.main.async { self?.start() }
@@ -365,7 +390,7 @@ final class AppsFlyerManager: NSObject {
     }
 
     private func start() {
-        guard !didStart else { return }
+        guard isConfigured, !didStart else { return }
         didStart = true
         AppsFlyerLib.shared().start()
     }

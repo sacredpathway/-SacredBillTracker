@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		12255B7B972DFD75ACEBE607 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD925339A11F367E5068FA6 /* ReportsView.swift */; };
-		CATD1001CATD1001CATD1001 /* CategoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CATD0001CATD0001CATD0001 /* CategoryDetailView.swift */; };
 		12BFC2EE15207399F023DDC2 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E998C8199BE79A32DCF860CC /* EmptyStateView.swift */; };
 		1DD5733FC7E240CF70D691A9 /* DeviceTokenSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C05C1D6B04AA364C1E06315 /* DeviceTokenSync.swift */; };
+		21AF42C395C13CCBEE2DCE47 /* AppsFlyerLib in Frameworks */ = {isa = PBXBuildFile; productRef = E3C14C9487C62B647B9B2B45 /* AppsFlyerLib */; };
 		26F52DF4C4D787C965850FC7 /* BillRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20B21B9DB0B8F06E01D593C5 /* BillRowView.swift */; };
 		276DB5CE7BEF2738FE20D43D /* Bill.swift in Sources */ = {isa = PBXBuildFile; fileRef = B252CE25C6BFAAA19783989B /* Bill.swift */; };
 		27F24FBE8E5DF38E7D842A23 /* QuickAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C7549FABB88EBA3BA59F888 /* QuickAddView.swift */; };
@@ -29,8 +29,8 @@
 		8A894E6CCC217A0E466E6E58 /* BillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C569E9E53EEFE34D34F7F7EB /* BillsView.swift */; };
 		8C39F5CD344F415BC9C3F384 /* BillRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD309CBCB575F112EC23B203 /* BillRepository.swift */; };
 		8EFE50C7A81D432D29372160 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE079A04FBE544C87B570E6F /* SettingsView.swift */; };
-		95219A33275E5DAC1C979124 /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5C1179848BC10A0F4DC45E /* PushNotificationManager.swift */; };
-		9EA5E3C1C60C46B0B53BCB17 /* PushNotificationManager+Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFEB813F963556ADC7B0B592 /* PushNotificationManager+Remote.swift */; };
+		95219A33275E5DAC1C979124 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5C1179848BC10A0F4DC45E /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift */; };
+		9EA5E3C1C60C46B0B53BCB17 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFEB813F963556ADC7B0B592 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift */; };
 		A9E0CBEE23CCAEE822163E82 /* BillDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1801AA917BD014DE39336181 /* BillDetailView.swift */; };
 		AAAA0001AAAA0001AAAA0001 /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0001BBBB0001BBBB0001 /* SupabaseConfig.swift */; };
 		AAAA0002AAAA0002AAAA0002 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0002BBBB0002BBBB0002 /* AuthService.swift */; };
@@ -38,31 +38,28 @@
 		AAAA0004AAAA0004AAAA0004 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0004BBBB0004BBBB0004 /* SignInView.swift */; };
 		AAAA0005AAAA0005AAAA0005 /* BillsRealtimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0005BBBB0005BBBB0005 /* BillsRealtimeService.swift */; };
 		AAAA0011AAAA0011AAAA0011 /* LegacyDemoBills.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA0010AAAA0010AAAA0010 /* LegacyDemoBills.swift */; };
+		'APRF1001APRF1001APRF1001' = {isa = PBXBuildFile; fileRef = APRF0001APRF0001APRF0001; };
+		'AUTH1001AUTH1001AUTH1001' = {isa = PBXBuildFile; fileRef = AUTH0001AUTH0001AUTH0001; };
+		'AUTH1002AUTH1002AUTH1002' = {isa = PBXBuildFile; fileRef = AUTH0002AUTH0002AUTH0002; };
+		'AUTH1003AUTH1003AUTH1003' = {isa = PBXBuildFile; fileRef = AUTH0003AUTH0003AUTH0003; };
+		'AUTH1004AUTH1004AUTH1004' = {isa = PBXBuildFile; fileRef = AUTH0004AUTH0004AUTH0004; };
+		'AUTH1005AUTH1005AUTH1005' = {isa = PBXBuildFile; fileRef = AUTH0005AUTH0005AUTH0005; };
 		B0C2A237B73D2B6C3BC63AD3 /* PaymentStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759F52BD0A33780C8163ADDB /* PaymentStatus.swift */; };
 		B3F21277BCC1004415D0506B /* SupabaseBillRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAC997A1DA889FDDBFE5ADD /* SupabaseBillRepository.swift */; };
 		B5A8198B1802A0584C988D2B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675CD137754118E4844947E4 /* ContentView.swift */; };
 		BB215241BAD98D92A8B51B57 /* NotificationCategories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418C8109C7CC5C32CCB90766 /* NotificationCategories.swift */; };
-		BCKT1001BCKT1001BCKT1001 /* BillBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCKT0001BCKT0001BCKT0001 /* BillBucket.swift */; };
-		BCKT1002BCKT1002BCKT1002 /* BucketBillsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCKT0002BCKT0002BCKT0002 /* BucketBillsListView.swift */; };
-		BBTL1001BBTL1001BBTL1001 /* BillsByTypeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBTL0001BBTL0001BBTL0001 /* BillsByTypeListView.swift */; };
-		FOVS1001FOVS1001FOVS1001 /* FinancialOverviewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FOVS0001FOVS0001FOVS0001 /* FinancialOverviewSection.swift */; };
-		SDFC1001SDFC1001SDFC1001 /* SacredDailyFocusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = SDFC0001SDFC0001SDFC0001 /* SacredDailyFocusCard.swift */; };
-		APRF1001APRF1001APRF1001 /* AppearancePreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = APRF0001APRF0001APRF0001 /* AppearancePreference.swift */; };
-		FPPW1001FPPW1001FPPW1001 /* FocusPlusPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FPPW0001FPPW0001FPPW0001 /* FocusPlusPaywallView.swift */; };
-		FPEC1001FPEC1001FPEC1001 /* FocusPlusEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FPEC0001FPEC0001FPEC0001 /* FocusPlusEntryCard.swift */; };
-		FRR01001FRR01001FRR01001 /* FocusRepeatRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRR00001FRR00001FRR00001 /* FocusRepeatRule.swift */; };
-		TPRI1001TPRI1001TPRI1001 /* TodoPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = TPRI0001TPRI0001TPRI0001 /* TodoPriority.swift */; };
-		SCHI1001SCHI1001SCHI1001 /* ScheduleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCHI0001SCHI0001SCHI0001 /* ScheduleItem.swift */; };
-		FTDO1001FTDO1001FTDO1001 /* FocusTodo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FTDO0001FTDO0001FTDO0001 /* FocusTodo.swift */; };
-		FSTR1001FSTR1001FSTR1001 /* FocusStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = FSTR0001FSTR0001FSTR0001 /* FocusStores.swift */; };
-		SIEV1001SIEV1001SIEV1001 /* ScheduleItemEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SIEV0001SIEV0001SIEV0001 /* ScheduleItemEditView.swift */; };
-		TIEV1001TIEV1001TIEV1001 /* TodoItemEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIEV0001TIEV0001TIEV0001 /* TodoItemEditView.swift */; };
-		PRCM1001PRCM1001PRCM1001 /* PremiumComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRCM0001PRCM0001PRCM0001 /* PremiumComponents.swift */; };
-		HATT1001HATT1001HATT1001 /* HealthAttentionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HATT0001HATT0001HATT0001 /* HealthAttentionListView.swift */; };
+		'BBTL1001BBTL1001BBTL1001' = {isa = PBXBuildFile; fileRef = BBTL0001BBTL0001BBTL0001; };
+		'BCKT1001BCKT1001BCKT1001' = {isa = PBXBuildFile; fileRef = BCKT0001BCKT0001BCKT0001; };
+		'BCKT1002BCKT1002BCKT1002' = {isa = PBXBuildFile; fileRef = BCKT0002BCKT0002BCKT0002; };
 		C75585103A20F74CD74D26B4 /* BillType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376520D3B996FD93D29274AF /* BillType.swift */; };
 		C79D9F60D27D3C87CD689471 /* BrandHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30F4E3119E425494C167EEA3 /* BrandHeaderView.swift */; };
+		'CATD1001CATD1001CATD1001' = {isa = PBXBuildFile; fileRef = CATD0001CATD0001CATD0001; };
 		CB3BBDDC5F62E22AAD2EE26A /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3770D11D6E4AC732A53C284A /* DeepLinkRouter.swift */; };
+		'CBKV1001CBKV1001CBKV1001' = {isa = PBXBuildFile; fileRef = CBKV0001CBKV0001CBKV0001; };
+		'CDDS1001CDDS1001CDDS1001' = {isa = PBXBuildFile; fileRef = CDDS0001CDDS0001CDDS0001; };
 		CFE9D72014C7366EEAC212E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9D049148AF854EB24C2B2E5 /* Assets.xcassets */; };
+		'CPA1001CPA1001CPA1001' = {isa = PBXBuildFile; fileRef = CPA0001CPA0001CPA0001; };
+		'CPA1002CPA1002CPA1002' = {isa = PBXBuildFile; fileRef = CPA0002CPA0002CPA0002; };
 		D933F686E796F409084E196B /* RecurrenceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE0EB48F476018D0BA8C1F0 /* RecurrenceType.swift */; };
 		DDDD1001DDDD1001DDDD1001 /* ProductIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */; };
 		DDDD1002DDDD1002DDDD1002 /* Entitlements.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */; };
@@ -74,60 +71,88 @@
 		E79E495EB32A3A4DEDA9E64C /* CashFlowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB54A10B9C7128808E6CD0B /* CashFlowCard.swift */; };
 		EB16D928D10DF9D4D57DDA3A /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C601944789BE0D7770B6162 /* NotificationManager.swift */; };
 		F359346B60A9B00987A17785 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34928484F15201D290FB9C1C /* SampleData.swift */; };
-		CDDS1001CDDS1001CDDS1001 /* CategoryDetailDebugSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDDS0001CDDS0001CDDS0001 /* CategoryDetailDebugSeeder.swift */; };
 		F4ED483D8CBDDD887D7A2072 /* RiskAlertCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F540ED935D7FED2E7AE5D9 /* RiskAlertCard.swift */; };
 		FE199C59C7F78EAC069184FA /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A350EB7AE0B70234B5BD784 /* NotificationPreferences.swift */; };
 		FEE5C6432C66F9E3A4EDCC76 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E9A96D326215ECD34DD55B /* NotificationSettingsView.swift */; };
 		FFC4C3B1CBF4FF8A63C5BD80 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A77C81C05D0A317538035A /* DashboardView.swift */; };
-		PRTN1001PRTN1001PRTN1001 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0001PRTN0001PRTN0001 /* Theme.swift */; };
-		PRTN1002PRTN1002PRTN1002 /* BillScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0002PRTN0002PRTN0002 /* BillScope.swift */; };
-		PRTN1003PRTN1003PRTN1003 /* PartnerInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0003PRTN0003PRTN0003 /* PartnerInvite.swift */; };
-		PRTN1004PRTN1004PRTN1004 /* PartnerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0004PRTN0004PRTN0004 /* PartnerService.swift */; };
-		PRTN1005PRTN1005PRTN1005 /* PartnerBudgetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0005PRTN0005PRTN0005 /* PartnerBudgetingView.swift */; };
-		PRTN1006PRTN1006PRTN1006 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0006PRTN0006PRTN0006 /* AccountView.swift */; };
-		PRTN1007PRTN1007PRTN1007 /* DeleteAccountSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0007PRTN0007PRTN0007 /* DeleteAccountSheet.swift */; };
-		PRIV1001PRIV1001PRIV1001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */; };
-		PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */; };
-		QUOT1001QUOT1001QUOT1001 /* DailyQuotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */; };
-		QUTS1001QUTS1001QUTS1001 /* QuoteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */; };
-		RVWX1001RVWX1001RVWX1001 /* ReviewPromptService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */; };
-		SORT1001SORT1001SORT1001 /* BillSortOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = SORT0001SORT0001SORT0001 /* BillSortOption.swift */; };
-		SUPA0003SUPA0003SUPA0003 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = SUPA0002SUPA0002SUPA0002 /* Supabase */; };
-		TRSH1001TRSH1001TRSH1001 /* TrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TRSH0001TRSH0001TRSH0001 /* TrashView.swift */; };
-		VGAT1001VGAT1001VGAT1001 /* AppVersionConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */; };
-		VGAT1002VGAT1002VGAT1002 /* VersionGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */; };
-		VGAT1003VGAT1003VGAT1003 /* ForceUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0003VGAT0003VGAT0003 /* ForceUpdateView.swift */; };
-		INC1001INC1001INC1001 /* WeeklyIncome.swift in Sources */ = {isa = PBXBuildFile; fileRef = INC0001INC0001INC0001 /* WeeklyIncome.swift */; };
-		INC1002INC1002INC1002 /* IncomeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = INC0002INC0002INC0002 /* IncomeStore.swift */; };
-		PURL1001PURL1001PURL1001 /* PaymentURLValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */; };
-		CBKV1001CBKV1001CBKV1001 /* CloudBackedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBKV0001CBKV0001CBKV0001 /* CloudBackedDefaults.swift */; };
-		INC1003INC1003INC1003 /* AddEditIncomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = INC0003INC0003INC0003 /* AddEditIncomeView.swift */; };
-		INC1004INC1004INC1004 /* IncomeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = INC0004INC0004INC0004 /* IncomeListView.swift */; };
-		CPA1001CPA1001CPA1001 /* CPAReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPA0001CPA0001CPA0001 /* CPAReportGenerator.swift */; };
-		SHRE1001SHRE1001SHRE1001 /* BillShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHRE0001SHRE0001SHRE0001 /* BillShareService.swift */; };
-		PDWN1001PDWN1001PDWN1001 /* PaydownPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */; };
-		CPA1002CPA1002CPA1002 /* CPAReadyExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */; };
-		MPRO1001MPRO1001MPRO1001 /* ManagedProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0001MPRO0001MPRO0001 /* ManagedProfile.swift */; };
-		MPRO1002MPRO1002MPRO1002 /* ManagedProfileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0002MPRO0002MPRO0002 /* ManagedProfileStore.swift */; };
-		MPRO1003MPRO1003MPRO1003 /* ManagedProfilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0003MPRO0003MPRO0003 /* ManagedProfilesView.swift */; };
-		AUTH1001AUTH1001AUTH1001 /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0001AUTH0001AUTH0001 /* AuthGateView.swift */; };
-		AUTH1002AUTH1002AUTH1002 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0002AUTH0002AUTH0002 /* LoginView.swift */; };
-		AUTH1003AUTH1003AUTH1003 /* CreateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0003AUTH0003AUTH0003 /* CreateAccountView.swift */; };
-		AUTH1004AUTH1004AUTH1004 /* SubscriptionGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0004AUTH0004AUTH0004 /* SubscriptionGateView.swift */; };
-		AUTH1005AUTH1005AUTH1005 /* ForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0005AUTH0005AUTH0005 /* ForgotPasswordView.swift */; };
-		INCP1001INCP1001INCP1001 /* IncomePeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = INCP0001INCP0001INCP0001 /* IncomePeriod.swift */; };
-		INCT1001INCT1001INCT1001 /* IncomeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = INCT0001INCT0001INCT0001 /* IncomeType.swift */; };
-		LEAFBG02LEAFBG02LEAFBG02 /* SacredLeafScrollBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = LEAFBG01LEAFBG01LEAFBG01 /* SacredLeafScrollBackground.swift */; };
-		HEALTH02HEALTH02HEALTH02 /* BillHealthScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = HEALTH01HEALTH01HEALTH01 /* BillHealthScore.swift */; };
-		HCARD002HCARD002HCARD002 /* BillHealthScoreCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HCARD001HCARD001HCARD001 /* BillHealthScoreCard.swift */; };
-		SNAP0002SNAP0002SNAP0002 /* FinancialSnapshotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SNAP0001SNAP0001SNAP0001 /* FinancialSnapshotView.swift */; };
-		WGTB0001WGTB0001WGTB0001 /* SacredBillTrackerWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = WGTF0001WGTF0001WGTF0001 /* SacredBillTrackerWidgetBundle.swift */; };
-		WGTB0002WGTB0002WGTB0002 /* SacredBillTrackerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WGTF0002WGTF0002WGTF0002 /* SacredBillTrackerWidget.swift */; };
-		WGTB0003WGTB0003WGTB0003 /* WidgetSharedBillSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = WGTF0003WGTF0003WGTF0003 /* WidgetSharedBillSnapshot.swift */; };
-		WGTB0103WGTB0103WGTB0103 /* WidgetSharedBillSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = WGTF0003WGTF0003WGTF0003 /* WidgetSharedBillSnapshot.swift */; };
-		WGTB0004WGTB0004WGTB0004 /* BillWidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = WGTF0004WGTF0004WGTF0004 /* BillWidgetBridge.swift */; };
-		WGTEMF01WGTEMF01WGTEMF01 /* SacredBillTrackerWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = WGTAPX01WGTAPX01WGTAPX01 /* SacredBillTrackerWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		'FOVS1001FOVS1001FOVS1001' = {isa = PBXBuildFile; fileRef = FOVS0001FOVS0001FOVS0001; };
+		'FPEC1001FPEC1001FPEC1001' = {isa = PBXBuildFile; fileRef = FPEC0001FPEC0001FPEC0001; };
+		'FPPW1001FPPW1001FPPW1001' = {isa = PBXBuildFile; fileRef = FPPW0001FPPW0001FPPW0001; };
+		'FRR01001FRR01001FRR01001' = {isa = PBXBuildFile; fileRef = FRR00001FRR00001FRR00001; };
+		'FSTR1001FSTR1001FSTR1001' = {isa = PBXBuildFile; fileRef = FSTR0001FSTR0001FSTR0001; };
+		'FTDO1001FTDO1001FTDO1001' = {isa = PBXBuildFile; fileRef = FTDO0001FTDO0001FTDO0001; };
+		'HATT1001HATT1001HATT1001' = {isa = PBXBuildFile; fileRef = HATT0001HATT0001HATT0001; };
+		'HCARD002HCARD002HCARD002' = {isa = PBXBuildFile; fileRef = HCARD001HCARD001HCARD001; };
+		'HEALTH02HEALTH02HEALTH02' = {isa = PBXBuildFile; fileRef = HEALTH01HEALTH01HEALTH01; };
+		'INC1001INC1001INC1001' = {isa = PBXBuildFile; fileRef = INC0001INC0001INC0001; };
+		'INC1002INC1002INC1002' = {isa = PBXBuildFile; fileRef = INC0002INC0002INC0002; };
+		'INC1003INC1003INC1003' = {isa = PBXBuildFile; fileRef = INC0003INC0003INC0003; };
+		'INC1004INC1004INC1004' = {isa = PBXBuildFile; fileRef = INC0004INC0004INC0004; };
+		'INCP1001INCP1001INCP1001' = {isa = PBXBuildFile; fileRef = INCP0001INCP0001INCP0001; };
+		'INCT1001INCT1001INCT1001' = {isa = PBXBuildFile; fileRef = INCT0001INCT0001INCT0001; };
+		'LEAFBG02LEAFBG02LEAFBG02' = {isa = PBXBuildFile; fileRef = LEAFBG01LEAFBG01LEAFBG01; };
+		'MPRO1001MPRO1001MPRO1001' = {isa = PBXBuildFile; fileRef = MPRO0001MPRO0001MPRO0001; };
+		'MPRO1002MPRO1002MPRO1002' = {isa = PBXBuildFile; fileRef = MPRO0002MPRO0002MPRO0002; };
+		'MPRO1003MPRO1003MPRO1003' = {isa = PBXBuildFile; fileRef = MPRO0003MPRO0003MPRO0003; };
+		'PDWN1001PDWN1001PDWN1001' = {isa = PBXBuildFile; fileRef = PDWN0001PDWN0001PDWN0001; };
+		'PRCM1001PRCM1001PRCM1001' = {isa = PBXBuildFile; fileRef = PRCM0001PRCM0001PRCM0001; };
+		'PRIV1001PRIV1001PRIV1001' = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001; };
+		'PRIV1002PRIV1002PRIV1002' = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001; };
+		'PRTN1001PRTN1001PRTN1001' = {isa = PBXBuildFile; fileRef = PRTN0001PRTN0001PRTN0001; };
+		'PRTN1002PRTN1002PRTN1002' = {isa = PBXBuildFile; fileRef = PRTN0002PRTN0002PRTN0002; };
+		'PRTN1003PRTN1003PRTN1003' = {isa = PBXBuildFile; fileRef = PRTN0003PRTN0003PRTN0003; };
+		'PRTN1004PRTN1004PRTN1004' = {isa = PBXBuildFile; fileRef = PRTN0004PRTN0004PRTN0004; };
+		'PRTN1005PRTN1005PRTN1005' = {isa = PBXBuildFile; fileRef = PRTN0005PRTN0005PRTN0005; };
+		'PRTN1006PRTN1006PRTN1006' = {isa = PBXBuildFile; fileRef = PRTN0006PRTN0006PRTN0006; };
+		'PRTN1007PRTN1007PRTN1007' = {isa = PBXBuildFile; fileRef = PRTN0007PRTN0007PRTN0007; };
+		'PURL1001PURL1001PURL1001' = {isa = PBXBuildFile; fileRef = PURL0001PURL0001PURL0001; };
+		'QUOT1001QUOT1001QUOT1001' = {isa = PBXBuildFile; fileRef = QUOT0001QUOT0001QUOT0001; };
+		'QUTS1001QUTS1001QUTS1001' = {isa = PBXBuildFile; fileRef = QUTS0001QUTS0001QUTS0001; };
+		'RVWX1001RVWX1001RVWX1001' = {isa = PBXBuildFile; fileRef = RVWX0001RVWX0001RVWX0001; };
+		'SCHI1001SCHI1001SCHI1001' = {isa = PBXBuildFile; fileRef = SCHI0001SCHI0001SCHI0001; };
+		'SDFC1001SDFC1001SDFC1001' = {isa = PBXBuildFile; fileRef = SDFC0001SDFC0001SDFC0001; };
+		'SHRE1001SHRE1001SHRE1001' = {isa = PBXBuildFile; fileRef = SHRE0001SHRE0001SHRE0001; };
+		'SIEV1001SIEV1001SIEV1001' = {isa = PBXBuildFile; fileRef = SIEV0001SIEV0001SIEV0001; };
+		'SNAP0002SNAP0002SNAP0002' = {isa = PBXBuildFile; fileRef = SNAP0001SNAP0001SNAP0001; };
+		'SORT1001SORT1001SORT1001' = {isa = PBXBuildFile; fileRef = SORT0001SORT0001SORT0001; };
+		'SUPA0003SUPA0003SUPA0003' = {isa = PBXBuildFile; productRef = SUPA0002SUPA0002SUPA0002; };
+		'TIEV1001TIEV1001TIEV1001' = {isa = PBXBuildFile; fileRef = TIEV0001TIEV0001TIEV0001; };
+		'TPRI1001TPRI1001TPRI1001' = {isa = PBXBuildFile; fileRef = TPRI0001TPRI0001TPRI0001; };
+		'TRSH1001TRSH1001TRSH1001' = {isa = PBXBuildFile; fileRef = TRSH0001TRSH0001TRSH0001; };
+		'VGAT1001VGAT1001VGAT1001' = {isa = PBXBuildFile; fileRef = VGAT0001VGAT0001VGAT0001; };
+		'VGAT1002VGAT1002VGAT1002' = {isa = PBXBuildFile; fileRef = VGAT0002VGAT0002VGAT0002; };
+		'VGAT1003VGAT1003VGAT1003' = {isa = PBXBuildFile; fileRef = VGAT0003VGAT0003VGAT0003; };
+		'WGTB0001WGTB0001WGTB0001' = {isa = PBXBuildFile; fileRef = WGTF0001WGTF0001WGTF0001; };
+		'WGTB0002WGTB0002WGTB0002' = {isa = PBXBuildFile; fileRef = WGTF0002WGTF0002WGTF0002; };
+		'WGTB0003WGTB0003WGTB0003' = {isa = PBXBuildFile; fileRef = WGTF0003WGTF0003WGTF0003; };
+		'WGTB0004WGTB0004WGTB0004' = {isa = PBXBuildFile; fileRef = WGTF0004WGTF0004WGTF0004; };
+		'WGTB0103WGTB0103WGTB0103' = {isa = PBXBuildFile; fileRef = WGTF0003WGTF0003WGTF0003; };
+		'WGTEMF01WGTEMF01WGTEMF01' = {isa = PBXBuildFile; fileRef = WGTAPX01WGTAPX01WGTAPX01; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		'WGTPRX01WGTPRX01WGTPRX01' = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1781F676DEDF5767F3243DB0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WGTTGT01WGTTGT01WGTTGT01;
+			remoteInfo = SacredBillTrackerWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		'WGTEMB01WGTEMB01WGTEMB01' = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				WGTEMF01WGTEMF01WGTEMF01,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		06A77C81C05D0A317538035A /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -139,10 +164,9 @@
 		1A350EB7AE0B70234B5BD784 /* NotificationPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
 		1C05C1D6B04AA364C1E06315 /* DeviceTokenSync.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceTokenSync.swift; sourceTree = "<group>"; };
 		20B21B9DB0B8F06E01D593C5 /* BillRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillRowView.swift; sourceTree = "<group>"; };
-		2F5C1179848BC10A0F4DC45E /* PushNotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift"; sourceTree = "<absolute>"; };
+		2F5C1179848BC10A0F4DC45E /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift"; sourceTree = "<absolute>"; };
 		30F4E3119E425494C167EEA3 /* BrandHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandHeaderView.swift; sourceTree = "<group>"; };
 		34928484F15201D290FB9C1C /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
-		CDDS0001CDDS0001CDDS0001 /* CategoryDetailDebugSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailDebugSeeder.swift; sourceTree = "<group>"; };
 		376520D3B996FD93D29274AF /* BillType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillType.swift; sourceTree = "<group>"; };
 		3770D11D6E4AC732A53C284A /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		40C750C0F2CC1690F3324DDF /* LocalBillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalBillRepository.swift; sourceTree = "<group>"; };
@@ -154,40 +178,36 @@
 		675CD137754118E4844947E4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6C7549FABB88EBA3BA59F888 /* QuickAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QuickAddView.swift; path = SacredBillTracker/Views/Bills/QuickAddView.swift; sourceTree = SOURCE_ROOT; };
 		6DD925339A11F367E5068FA6 /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
-		CATD0001CATD0001CATD0001 /* CategoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailView.swift; sourceTree = "<group>"; };
 		724E49A6BA33D00F3C5A00AE /* PrioritySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrioritySection.swift; path = SacredBillTracker/Views/Components/PrioritySection.swift; sourceTree = SOURCE_ROOT; };
 		759F52BD0A33780C8163ADDB /* PaymentStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStatus.swift; sourceTree = "<group>"; };
 		7C601944789BE0D7770B6162 /* NotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		8962CA11470A1C4878619F8F /* Color+Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
 		A035339CA64FB82C6F750F78 /* NotificationIntegrationHooks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationIntegrationHooks.swift; sourceTree = "<group>"; };
 		AAAA0010AAAA0010AAAA0010 /* LegacyDemoBills.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDemoBills.swift; sourceTree = "<group>"; };
+		'APRF0001APRF0001APRF0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearancePreference.swift; sourceTree = "<group>"; };
+		'AUTH0001AUTH0001AUTH0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGateView.swift; sourceTree = "<group>"; };
+		'AUTH0002AUTH0002AUTH0002' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		'AUTH0003AUTH0003AUTH0003' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
+		'AUTH0004AUTH0004AUTH0004' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionGateView.swift; sourceTree = "<group>"; };
+		'AUTH0005AUTH0005AUTH0005' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		B252CE25C6BFAAA19783989B /* Bill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bill.swift; sourceTree = "<group>"; };
 		BBBB0001BBBB0001BBBB0001 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
 		BBBB0002BBBB0002BBBB0002 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		BBBB0003BBBB0003BBBB0003 /* CachingBillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachingBillRepository.swift; sourceTree = "<group>"; };
 		BBBB0004BBBB0004BBBB0004 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		BBBB0005BBBB0005BBBB0005 /* BillsRealtimeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillsRealtimeService.swift; sourceTree = "<group>"; };
-		BCKT0001BCKT0001BCKT0001 /* BillBucket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillBucket.swift; sourceTree = "<group>"; };
-		BCKT0002BCKT0002BCKT0002 /* BucketBillsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketBillsListView.swift; sourceTree = "<group>"; };
-		BBTL0001BBTL0001BBTL0001 /* BillsByTypeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillsByTypeListView.swift; sourceTree = "<group>"; };
-		FOVS0001FOVS0001FOVS0001 /* FinancialOverviewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialOverviewSection.swift; sourceTree = "<group>"; };
-		SDFC0001SDFC0001SDFC0001 /* SacredDailyFocusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredDailyFocusCard.swift; sourceTree = "<group>"; };
-		APRF0001APRF0001APRF0001 /* AppearancePreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearancePreference.swift; sourceTree = "<group>"; };
-		FPPW0001FPPW0001FPPW0001 /* FocusPlusPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPlusPaywallView.swift; sourceTree = "<group>"; };
-		FPEC0001FPEC0001FPEC0001 /* FocusPlusEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPlusEntryCard.swift; sourceTree = "<group>"; };
-		FRR00001FRR00001FRR00001 /* FocusRepeatRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusRepeatRule.swift; sourceTree = "<group>"; };
-		TPRI0001TPRI0001TPRI0001 /* TodoPriority.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoPriority.swift; sourceTree = "<group>"; };
-		SCHI0001SCHI0001SCHI0001 /* ScheduleItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleItem.swift; sourceTree = "<group>"; };
-		FTDO0001FTDO0001FTDO0001 /* FocusTodo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusTodo.swift; sourceTree = "<group>"; };
-		FSTR0001FSTR0001FSTR0001 /* FocusStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStores.swift; sourceTree = "<group>"; };
-		SIEV0001SIEV0001SIEV0001 /* ScheduleItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleItemEditView.swift; sourceTree = "<group>"; };
-		TIEV0001TIEV0001TIEV0001 /* TodoItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemEditView.swift; sourceTree = "<group>"; };
-		PRCM0001PRCM0001PRCM0001 /* PremiumComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumComponents.swift; sourceTree = "<group>"; };
-		HATT0001HATT0001HATT0001 /* HealthAttentionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthAttentionListView.swift; sourceTree = "<group>"; };
+		'BBTL0001BBTL0001BBTL0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillsByTypeListView.swift; sourceTree = "<group>"; };
+		'BCKT0001BCKT0001BCKT0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillBucket.swift; sourceTree = "<group>"; };
+		'BCKT0002BCKT0002BCKT0002' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketBillsListView.swift; sourceTree = "<group>"; };
 		C569E9E53EEFE34D34F7F7EB /* BillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillsView.swift; sourceTree = "<group>"; };
 		C9D049148AF854EB24C2B2E5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		'CATD0001CATD0001CATD0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailView.swift; sourceTree = "<group>"; };
+		'CBKV0001CBKV0001CBKV0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudBackedDefaults.swift; sourceTree = "<group>"; };
 		CD309CBCB575F112EC23B203 /* BillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillRepository.swift; sourceTree = "<group>"; };
-		CFEB813F963556ADC7B0B592 /* PushNotificationManager+Remote.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift"; sourceTree = "<absolute>"; };
+		'CDDS0001CDDS0001CDDS0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailDebugSeeder.swift; sourceTree = "<group>"; };
+		CFEB813F963556ADC7B0B592 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift"; sourceTree = "<absolute>"; };
+		'CPA0001CPA0001CPA0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPAReportGenerator.swift; sourceTree = "<group>"; };
+		'CPA0002CPA0002CPA0002' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPAReadyExportView.swift; sourceTree = "<group>"; };
 		D43CCB5B4F5F9C24ED039DDF /* Date+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helpers.swift"; sourceTree = "<group>"; };
 		DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductIdentifiers.swift; sourceTree = "<group>"; };
 		DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlements.swift; sourceTree = "<group>"; };
@@ -205,53 +225,58 @@
 		FC5B4DDC439940F06B2F726E /* AppDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FDA8F8EA2F98336600A87244 /* SacredBillTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SacredBillTracker.entitlements; sourceTree = "<group>"; };
 		FDAC997A1DA889FDDBFE5ADD /* SupabaseBillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseBillRepository.swift; sourceTree = "<group>"; };
-		PRTN0001PRTN0001PRTN0001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		PRTN0002PRTN0002PRTN0002 /* BillScope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillScope.swift; sourceTree = "<group>"; };
-		PRTN0003PRTN0003PRTN0003 /* PartnerInvite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerInvite.swift; sourceTree = "<group>"; };
-		PRTN0004PRTN0004PRTN0004 /* PartnerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerService.swift; sourceTree = "<group>"; };
-		PRTN0005PRTN0005PRTN0005 /* PartnerBudgetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerBudgetingView.swift; sourceTree = "<group>"; };
-		PRTN0006PRTN0006PRTN0006 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
-		PRTN0007PRTN0007PRTN0007 /* DeleteAccountSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountSheet.swift; sourceTree = "<group>"; };
-		PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuotes.swift; sourceTree = "<group>"; };
-		QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteService.swift; sourceTree = "<group>"; };
-		RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptService.swift; sourceTree = "<group>"; };
-		SORT0001SORT0001SORT0001 /* BillSortOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillSortOption.swift; sourceTree = "<group>"; };
-		TRSH0001TRSH0001TRSH0001 /* TrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
-		VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionConfig.swift; sourceTree = "<group>"; };
-		VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionGateService.swift; sourceTree = "<group>"; };
-		VGAT0003VGAT0003VGAT0003 /* ForceUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForceUpdateView.swift; sourceTree = "<group>"; };
-		INC0001INC0001INC0001 /* WeeklyIncome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyIncome.swift; sourceTree = "<group>"; };
-		INC0002INC0002INC0002 /* IncomeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeStore.swift; sourceTree = "<group>"; };
-		PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentURLValidator.swift; sourceTree = "<group>"; };
-		CBKV0001CBKV0001CBKV0001 /* CloudBackedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudBackedDefaults.swift; sourceTree = "<group>"; };
-		INC0003INC0003INC0003 /* AddEditIncomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditIncomeView.swift; sourceTree = "<group>"; };
-		INC0004INC0004INC0004 /* IncomeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeListView.swift; sourceTree = "<group>"; };
-		CPA0001CPA0001CPA0001 /* CPAReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPAReportGenerator.swift; sourceTree = "<group>"; };
-		SHRE0001SHRE0001SHRE0001 /* BillShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillShareService.swift; sourceTree = "<group>"; };
-		PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaydownPlanService.swift; sourceTree = "<group>"; };
-		CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPAReadyExportView.swift; sourceTree = "<group>"; };
-		MPRO0001MPRO0001MPRO0001 /* ManagedProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfile.swift; sourceTree = "<group>"; };
-		MPRO0002MPRO0002MPRO0002 /* ManagedProfileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfileStore.swift; sourceTree = "<group>"; };
-		MPRO0003MPRO0003MPRO0003 /* ManagedProfilesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfilesView.swift; sourceTree = "<group>"; };
-		AUTH0001AUTH0001AUTH0001 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGateView.swift; sourceTree = "<group>"; };
-		AUTH0002AUTH0002AUTH0002 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		AUTH0003AUTH0003AUTH0003 /* CreateAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
-		AUTH0004AUTH0004AUTH0004 /* SubscriptionGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionGateView.swift; sourceTree = "<group>"; };
-		AUTH0005AUTH0005AUTH0005 /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
-		INCP0001INCP0001INCP0001 /* IncomePeriod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomePeriod.swift; sourceTree = "<group>"; };
-		INCT0001INCT0001INCT0001 /* IncomeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeType.swift; sourceTree = "<group>"; };
-		LEAFBG01LEAFBG01LEAFBG01 /* SacredLeafScrollBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredLeafScrollBackground.swift; sourceTree = "<group>"; };
-		HEALTH01HEALTH01HEALTH01 /* BillHealthScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillHealthScore.swift; sourceTree = "<group>"; };
-		HCARD001HCARD001HCARD001 /* BillHealthScoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillHealthScoreCard.swift; sourceTree = "<group>"; };
-		SNAP0001SNAP0001SNAP0001 /* FinancialSnapshotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialSnapshotView.swift; sourceTree = "<group>"; };
-		WGTF0001WGTF0001WGTF0001 /* SacredBillTrackerWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredBillTrackerWidgetBundle.swift; sourceTree = "<group>"; };
-		WGTF0002WGTF0002WGTF0002 /* SacredBillTrackerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredBillTrackerWidget.swift; sourceTree = "<group>"; };
-		WGTF0003WGTF0003WGTF0003 /* WidgetSharedBillSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSharedBillSnapshot.swift; sourceTree = "<group>"; };
-		WGTF0004WGTF0004WGTF0004 /* BillWidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillWidgetBridge.swift; sourceTree = "<group>"; };
-		WGTF0005WGTF0005WGTF0005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		WGTF0006WGTF0006WGTF0006 /* SacredBillTrackerWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SacredBillTrackerWidgets.entitlements; sourceTree = "<group>"; };
-		WGTAPX01WGTAPX01WGTAPX01 /* SacredBillTrackerWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SacredBillTrackerWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		'FOVS0001FOVS0001FOVS0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialOverviewSection.swift; sourceTree = "<group>"; };
+		'FPEC0001FPEC0001FPEC0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPlusEntryCard.swift; sourceTree = "<group>"; };
+		'FPPW0001FPPW0001FPPW0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPlusPaywallView.swift; sourceTree = "<group>"; };
+		'FRR00001FRR00001FRR00001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusRepeatRule.swift; sourceTree = "<group>"; };
+		'FSTR0001FSTR0001FSTR0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStores.swift; sourceTree = "<group>"; };
+		'FTDO0001FTDO0001FTDO0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusTodo.swift; sourceTree = "<group>"; };
+		'HATT0001HATT0001HATT0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthAttentionListView.swift; sourceTree = "<group>"; };
+		'HCARD001HCARD001HCARD001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillHealthScoreCard.swift; sourceTree = "<group>"; };
+		'HEALTH01HEALTH01HEALTH01' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillHealthScore.swift; sourceTree = "<group>"; };
+		'INC0001INC0001INC0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyIncome.swift; sourceTree = "<group>"; };
+		'INC0002INC0002INC0002' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeStore.swift; sourceTree = "<group>"; };
+		'INC0003INC0003INC0003' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditIncomeView.swift; sourceTree = "<group>"; };
+		'INC0004INC0004INC0004' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeListView.swift; sourceTree = "<group>"; };
+		'INCP0001INCP0001INCP0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomePeriod.swift; sourceTree = "<group>"; };
+		'INCT0001INCT0001INCT0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeType.swift; sourceTree = "<group>"; };
+		'LEAFBG01LEAFBG01LEAFBG01' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredLeafScrollBackground.swift; sourceTree = "<group>"; };
+		'MPRO0001MPRO0001MPRO0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfile.swift; sourceTree = "<group>"; };
+		'MPRO0002MPRO0002MPRO0002' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfileStore.swift; sourceTree = "<group>"; };
+		'MPRO0003MPRO0003MPRO0003' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfilesView.swift; sourceTree = "<group>"; };
+		'PDWN0001PDWN0001PDWN0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaydownPlanService.swift; sourceTree = "<group>"; };
+		'PRCM0001PRCM0001PRCM0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumComponents.swift; sourceTree = "<group>"; };
+		'PRIV0001PRIV0001PRIV0001' = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		'PRTN0001PRTN0001PRTN0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		'PRTN0002PRTN0002PRTN0002' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillScope.swift; sourceTree = "<group>"; };
+		'PRTN0003PRTN0003PRTN0003' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerInvite.swift; sourceTree = "<group>"; };
+		'PRTN0004PRTN0004PRTN0004' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerService.swift; sourceTree = "<group>"; };
+		'PRTN0005PRTN0005PRTN0005' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerBudgetingView.swift; sourceTree = "<group>"; };
+		'PRTN0006PRTN0006PRTN0006' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		'PRTN0007PRTN0007PRTN0007' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountSheet.swift; sourceTree = "<group>"; };
+		'PURL0001PURL0001PURL0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentURLValidator.swift; sourceTree = "<group>"; };
+		'QUOT0001QUOT0001QUOT0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuotes.swift; sourceTree = "<group>"; };
+		'QUTS0001QUTS0001QUTS0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteService.swift; sourceTree = "<group>"; };
+		'RVWX0001RVWX0001RVWX0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptService.swift; sourceTree = "<group>"; };
+		'SCHI0001SCHI0001SCHI0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleItem.swift; sourceTree = "<group>"; };
+		'SDFC0001SDFC0001SDFC0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredDailyFocusCard.swift; sourceTree = "<group>"; };
+		'SHRE0001SHRE0001SHRE0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillShareService.swift; sourceTree = "<group>"; };
+		'SIEV0001SIEV0001SIEV0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleItemEditView.swift; sourceTree = "<group>"; };
+		'SNAP0001SNAP0001SNAP0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialSnapshotView.swift; sourceTree = "<group>"; };
+		'SORT0001SORT0001SORT0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillSortOption.swift; sourceTree = "<group>"; };
+		'TIEV0001TIEV0001TIEV0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemEditView.swift; sourceTree = "<group>"; };
+		'TPRI0001TPRI0001TPRI0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoPriority.swift; sourceTree = "<group>"; };
+		'TRSH0001TRSH0001TRSH0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
+		'VGAT0001VGAT0001VGAT0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionConfig.swift; sourceTree = "<group>"; };
+		'VGAT0002VGAT0002VGAT0002' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionGateService.swift; sourceTree = "<group>"; };
+		'VGAT0003VGAT0003VGAT0003' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForceUpdateView.swift; sourceTree = "<group>"; };
+		'WGTAPX01WGTAPX01WGTAPX01' = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SacredBillTrackerWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		'WGTF0001WGTF0001WGTF0001' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredBillTrackerWidgetBundle.swift; sourceTree = "<group>"; };
+		'WGTF0002WGTF0002WGTF0002' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredBillTrackerWidget.swift; sourceTree = "<group>"; };
+		'WGTF0003WGTF0003WGTF0003' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSharedBillSnapshot.swift; sourceTree = "<group>"; };
+		'WGTF0004WGTF0004WGTF0004' = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillWidgetBridge.swift; sourceTree = "<group>"; };
+		'WGTF0005WGTF0005WGTF0005' = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		'WGTF0006WGTF0006WGTF0006' = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SacredBillTrackerWidgets.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -259,7 +284,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				SUPA0003SUPA0003SUPA0003 /* Supabase in Frameworks */,
+				SUPA0003SUPA0003SUPA0003,
+				21AF42C395C13CCBEE2DCE47 /* AppsFlyerLib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		'WGTFRM01WGTFRM01WGTFRM01' = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,18 +303,9 @@
 			isa = PBXGroup;
 			children = (
 				DE079A04FBE544C87B570E6F /* SettingsView.swift */,
-				CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */,
+				CPA0002CPA0002CPA0002,
 			);
 			path = Settings;
-			sourceTree = "<group>";
-		};
-		INC2001INC2001INC2001 /* Income */ = {
-			isa = PBXGroup;
-			children = (
-				INC0003INC0003INC0003 /* AddEditIncomeView.swift */,
-				INC0004INC0004INC0004 /* IncomeListView.swift */,
-			);
-			path = Income;
 			sourceTree = "<group>";
 		};
 		228BBD9890300E43C1C536CD /* Extensions */ = {
@@ -303,8 +327,8 @@
 				FAB54A10B9C7128808E6CD0B /* CashFlowCard.swift */,
 				724E49A6BA33D00F3C5A00AE /* PrioritySection.swift */,
 				E1F540ED935D7FED2E7AE5D9 /* RiskAlertCard.swift */,
-				HCARD001HCARD001HCARD001 /* BillHealthScoreCard.swift */,
-				HATT0001HATT0001HATT0001 /* HealthAttentionListView.swift */,
+				HCARD001HCARD001HCARD001,
+				HATT0001HATT0001HATT0001,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -317,9 +341,9 @@
 				20B21B9DB0B8F06E01D593C5 /* BillRowView.swift */,
 				C569E9E53EEFE34D34F7F7EB /* BillsView.swift */,
 				6C7549FABB88EBA3BA59F888 /* QuickAddView.swift */,
-				BCKT0002BCKT0002BCKT0002 /* BucketBillsListView.swift */,
-				BBTL0001BBTL0001BBTL0001 /* BillsByTypeListView.swift */,
-				TRSH0001TRSH0001TRSH0001 /* TrashView.swift */,
+				BCKT0002BCKT0002BCKT0002,
+				BBTL0001BBTL0001BBTL0001,
+				TRSH0001TRSH0001TRSH0001,
 			);
 			path = Bills;
 			sourceTree = "<group>";
@@ -328,12 +352,12 @@
 			isa = PBXGroup;
 			children = (
 				06A77C81C05D0A317538035A /* DashboardView.swift */,
-				FOVS0001FOVS0001FOVS0001 /* FinancialOverviewSection.swift */,
-				SDFC0001SDFC0001SDFC0001 /* SacredDailyFocusCard.swift */,
-				FPEC0001FPEC0001FPEC0001 /* FocusPlusEntryCard.swift */,
-				SIEV0001SIEV0001SIEV0001 /* ScheduleItemEditView.swift */,
-				TIEV0001TIEV0001TIEV0001 /* TodoItemEditView.swift */,
-				PRCM0001PRCM0001PRCM0001 /* PremiumComponents.swift */,
+				FOVS0001FOVS0001FOVS0001,
+				SDFC0001SDFC0001SDFC0001,
+				FPEC0001FPEC0001FPEC0001,
+				SIEV0001SIEV0001SIEV0001,
+				TIEV0001TIEV0001TIEV0001,
+				PRCM0001PRCM0001PRCM0001,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -345,30 +369,30 @@
 				4B24F474938F7B6A2CD501F2 /* BillStore.swift */,
 				40C750C0F2CC1690F3324DDF /* LocalBillRepository.swift */,
 				34928484F15201D290FB9C1C /* SampleData.swift */,
-				CDDS0001CDDS0001CDDS0001 /* CategoryDetailDebugSeeder.swift */,
+				CDDS0001CDDS0001CDDS0001,
 				AAAA0010AAAA0010AAAA0010 /* LegacyDemoBills.swift */,
 				FDAC997A1DA889FDDBFE5ADD /* SupabaseBillRepository.swift */,
 				BBBB0001BBBB0001BBBB0001 /* SupabaseConfig.swift */,
 				BBBB0002BBBB0002BBBB0002 /* AuthService.swift */,
 				BBBB0003BBBB0003BBBB0003 /* CachingBillRepository.swift */,
 				BBBB0005BBBB0005BBBB0005 /* BillsRealtimeService.swift */,
-				PRTN0004PRTN0004PRTN0004 /* PartnerService.swift */,
-				RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */,
-				QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */,
-				QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */,
-				VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */,
-				MPRO0002MPRO0002MPRO0002 /* ManagedProfileStore.swift */,
-				INC0002INC0002INC0002 /* IncomeStore.swift */,
-				FSTR0001FSTR0001FSTR0001 /* FocusStores.swift */,
-				PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */,
-				CBKV0001CBKV0001CBKV0001 /* CloudBackedDefaults.swift */,
-				CPA0001CPA0001CPA0001 /* CPAReportGenerator.swift */,
-				SHRE0001SHRE0001SHRE0001 /* BillShareService.swift */,
-				PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */,
+				PRTN0004PRTN0004PRTN0004,
+				RVWX0001RVWX0001RVWX0001,
+				QUOT0001QUOT0001QUOT0001,
+				QUTS0001QUTS0001QUTS0001,
+				VGAT0002VGAT0002VGAT0002,
+				MPRO0002MPRO0002MPRO0002,
+				INC0002INC0002INC0002,
+				FSTR0001FSTR0001FSTR0001,
+				PURL0001PURL0001PURL0001,
+				CBKV0001CBKV0001CBKV0001,
+				CPA0001CPA0001CPA0001,
+				SHRE0001SHRE0001SHRE0001,
+				PDWN0001PDWN0001PDWN0001,
 				DDDD2001DDDD2001DDDD2001 /* StoreKit */,
 				7C601944789BE0D7770B6162 /* NotificationManager.swift */,
-				HEALTH01HEALTH01HEALTH01 /* BillHealthScore.swift */,
-				WGTF0004WGTF0004WGTF0004 /* BillWidgetBridge.swift */,
+				HEALTH01HEALTH01HEALTH01,
+				WGTF0004WGTF0004WGTF0004,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -378,12 +402,12 @@
 			children = (
 				418C8109C7CC5C32CCB90766 /* NotificationCategories.swift */,
 				1A350EB7AE0B70234B5BD784 /* NotificationPreferences.swift */,
-				2F5C1179848BC10A0F4DC45E /* PushNotificationManager.swift */,
+				2F5C1179848BC10A0F4DC45E /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift */,
 				FC5B4DDC439940F06B2F726E /* AppDelegate.swift */,
 				F6E9A96D326215ECD34DD55B /* NotificationSettingsView.swift */,
 				3770D11D6E4AC732A53C284A /* DeepLinkRouter.swift */,
 				1C05C1D6B04AA364C1E06315 /* DeviceTokenSync.swift */,
-				CFEB813F963556ADC7B0B592 /* PushNotificationManager+Remote.swift */,
+				CFEB813F963556ADC7B0B592 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift */,
 				A035339CA64FB82C6F750F78 /* NotificationIntegrationHooks.swift */,
 			);
 			name = Notifications;
@@ -399,20 +423,20 @@
 				759F52BD0A33780C8163ADDB /* PaymentStatus.swift */,
 				0EE0EB48F476018D0BA8C1F0 /* RecurrenceType.swift */,
 				48054014A27861114F48CC36 /* BillTemplate.swift */,
-				PRTN0002PRTN0002PRTN0002 /* BillScope.swift */,
-				PRTN0003PRTN0003PRTN0003 /* PartnerInvite.swift */,
-				BCKT0001BCKT0001BCKT0001 /* BillBucket.swift */,
-				SORT0001SORT0001SORT0001 /* BillSortOption.swift */,
-				VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */,
-				MPRO0001MPRO0001MPRO0001 /* ManagedProfile.swift */,
-				INC0001INC0001INC0001 /* WeeklyIncome.swift */,
-				INCP0001INCP0001INCP0001 /* IncomePeriod.swift */,
-				INCT0001INCT0001INCT0001 /* IncomeType.swift */,
-				APRF0001APRF0001APRF0001 /* AppearancePreference.swift */,
-				FRR00001FRR00001FRR00001 /* FocusRepeatRule.swift */,
-				TPRI0001TPRI0001TPRI0001 /* TodoPriority.swift */,
-				SCHI0001SCHI0001SCHI0001 /* ScheduleItem.swift */,
-				FTDO0001FTDO0001FTDO0001 /* FocusTodo.swift */,
+				PRTN0002PRTN0002PRTN0002,
+				PRTN0003PRTN0003PRTN0003,
+				BCKT0001BCKT0001BCKT0001,
+				SORT0001SORT0001SORT0001,
+				VGAT0001VGAT0001VGAT0001,
+				MPRO0001MPRO0001MPRO0001,
+				INC0001INC0001INC0001,
+				INCP0001INCP0001INCP0001,
+				INCT0001INCT0001INCT0001,
+				APRF0001APRF0001APRF0001,
+				FRR00001FRR00001FRR00001,
+				TPRI0001TPRI0001TPRI0001,
+				SCHI0001SCHI0001SCHI0001,
+				FTDO0001FTDO0001FTDO0001,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -421,8 +445,8 @@
 			isa = PBXGroup;
 			children = (
 				6DD925339A11F367E5068FA6 /* ReportsView.swift */,
-				CATD0001CATD0001CATD0001 /* CategoryDetailView.swift */,
-				SNAP0001SNAP0001SNAP0001 /* FinancialSnapshotView.swift */,
+				CATD0001CATD0001CATD0001,
+				SNAP0001SNAP0001SNAP0001,
 			);
 			path = Reports;
 			sourceTree = "<group>";
@@ -430,59 +454,39 @@
 		71D1FE1946103072294F5F58 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				PRTN2003PRTN2003PRTN2003 /* Account */,
+				PRTN2003PRTN2003PRTN2003,
 				CCCC0001CCCC0001CCCC0001 /* Auth */,
 				48E6E710E46199A949C96CC5 /* Bills */,
 				E9BA4F553E026740D95DD517 /* Calendar */,
 				2F9CD82E01707373CEA781AE /* Components */,
 				5133E1C76643458A074FECE1 /* Dashboard */,
-				VGAT2001VGAT2001VGAT2001 /* ForceUpdate */,
-				INC2001INC2001INC2001 /* Income */,
-				PRTN2002PRTN2002PRTN2002 /* Partner */,
+				VGAT2001VGAT2001VGAT2001,
+				INC2001INC2001INC2001,
+				PRTN2002PRTN2002PRTN2002,
 				DDDD2002DDDD2002DDDD2002 /* Paywall */,
-				MPRO2001MPRO2001MPRO2001 /* Profiles */,
+				MPRO2001MPRO2001MPRO2001,
 				70A820689434FB967A61CB28 /* Reports */,
 				0FA7DC90CB1E8D2C4F5CA47F /* Settings */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		VGAT2001VGAT2001VGAT2001 /* ForceUpdate */ = {
-			isa = PBXGroup;
-			children = (
-				VGAT0003VGAT0003VGAT0003 /* ForceUpdateView.swift */,
-			);
-			path = ForceUpdate;
-			sourceTree = "<group>";
-		};
 		88932FD6DD0EDC80FBF1C921 = {
 			isa = PBXGroup;
 			children = (
 				B486A56F7720E0D638FD26E7 /* SacredBillTracker */,
-				WGTGRP01WGTGRP01WGTGRP01 /* SacredBillTrackerWidgets */,
+				WGTGRP01WGTGRP01WGTGRP01,
 				D71BD8A0B6A6AA54EDBA6454 /* Products */,
 				C8E3EF4DBE49E56AD7B55F20 /* Frameworks */,
 			);
-			sourceTree = "<group>";
-		};
-		WGTGRP01WGTGRP01WGTGRP01 /* SacredBillTrackerWidgets */ = {
-			isa = PBXGroup;
-			children = (
-				WGTF0001WGTF0001WGTF0001 /* SacredBillTrackerWidgetBundle.swift */,
-				WGTF0002WGTF0002WGTF0002 /* SacredBillTrackerWidget.swift */,
-				WGTF0003WGTF0003WGTF0003 /* WidgetSharedBillSnapshot.swift */,
-				WGTF0005WGTF0005WGTF0005 /* Info.plist */,
-				WGTF0006WGTF0006WGTF0006 /* SacredBillTrackerWidgets.entitlements */,
-			);
-			path = SacredBillTracker/SacredBillTrackerWidgets;
 			sourceTree = "<group>";
 		};
 		B486A56F7720E0D638FD26E7 /* SacredBillTracker */ = {
 			isa = PBXGroup;
 			children = (
 				FDA8F8EA2F98336600A87244 /* SacredBillTracker.entitlements */,
-				PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */,
-				PRTN2001PRTN2001PRTN2001 /* DesignSystem */,
+				PRIV0001PRIV0001PRIV0001,
+				PRTN2001PRTN2001PRTN2001,
 				228BBD9890300E43C1C536CD /* Extensions */,
 				6C935AC7806439A1E050A374 /* Models */,
 				5CEB2F74DF1111338C72A3D0 /* Services */,
@@ -507,10 +511,10 @@
 			isa = PBXGroup;
 			children = (
 				BBBB0004BBBB0004BBBB0004 /* SignInView.swift */,
-				AUTH0001AUTH0001AUTH0001 /* AuthGateView.swift */,
-				AUTH0002AUTH0002AUTH0002 /* LoginView.swift */,
-				AUTH0003AUTH0003AUTH0003 /* CreateAccountView.swift */,
-				AUTH0005AUTH0005AUTH0005 /* ForgotPasswordView.swift */,
+				AUTH0001AUTH0001AUTH0001,
+				AUTH0002AUTH0002AUTH0002,
+				AUTH0003AUTH0003AUTH0003,
+				AUTH0005AUTH0005AUTH0005,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -519,7 +523,7 @@
 			isa = PBXGroup;
 			children = (
 				5141EFFF35ACD6C51F274E4D /* SacredBillTracker.app */,
-				WGTAPX01WGTAPX01WGTAPX01 /* SacredBillTrackerWidgets.appex */,
+				WGTAPX01WGTAPX01WGTAPX01,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -538,9 +542,9 @@
 			isa = PBXGroup;
 			children = (
 				DDDD0004DDDD0004DDDD0004 /* PaywallView.swift */,
-				FPPW0001FPPW0001FPPW0001 /* FocusPlusPaywallView.swift */,
+				FPPW0001FPPW0001FPPW0001,
 				DDDD0005DDDD0005DDDD0005 /* ProLockCard.swift */,
-				AUTH0004AUTH0004AUTH0004 /* SubscriptionGateView.swift */,
+				AUTH0004AUTH0004AUTH0004,
 			);
 			path = Paywall;
 			sourceTree = "<group>";
@@ -553,59 +557,70 @@
 			path = Calendar;
 			sourceTree = "<group>";
 		};
-		PRTN2001PRTN2001PRTN2001 /* DesignSystem */ = {
+		'INC2001INC2001INC2001' = {
 			isa = PBXGroup;
 			children = (
-				PRTN0001PRTN0001PRTN0001 /* Theme.swift */,
-				LEAFBG01LEAFBG01LEAFBG01 /* SacredLeafScrollBackground.swift */,
+				INC0003INC0003INC0003,
+				INC0004INC0004INC0004,
 			);
-			path = DesignSystem;
+			path = Income;
 			sourceTree = "<group>";
 		};
-		PRTN2002PRTN2002PRTN2002 /* Partner */ = {
+		'MPRO2001MPRO2001MPRO2001' = {
 			isa = PBXGroup;
 			children = (
-				PRTN0005PRTN0005PRTN0005 /* PartnerBudgetingView.swift */,
-			);
-			path = Partner;
-			sourceTree = "<group>";
-		};
-		PRTN2003PRTN2003PRTN2003 /* Account */ = {
-			isa = PBXGroup;
-			children = (
-				PRTN0006PRTN0006PRTN0006 /* AccountView.swift */,
-				PRTN0007PRTN0007PRTN0007 /* DeleteAccountSheet.swift */,
-			);
-			path = Account;
-			sourceTree = "<group>";
-		};
-		MPRO2001MPRO2001MPRO2001 /* Profiles */ = {
-			isa = PBXGroup;
-			children = (
-				MPRO0003MPRO0003MPRO0003 /* ManagedProfilesView.swift */,
+				MPRO0003MPRO0003MPRO0003,
 			);
 			path = Profiles;
 			sourceTree = "<group>";
 		};
-/* End PBXGroup section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		DEBADEADBEEF000000000001 /* Verify No Debug Strings (Release) */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
+		'PRTN2001PRTN2001PRTN2001' = {
+			isa = PBXGroup;
+			children = (
+				PRTN0001PRTN0001PRTN0001,
+				LEAFBG01LEAFBG01LEAFBG01,
 			);
-			inputPaths = (
-			);
-			name = "Verify No Debug Strings (Release)";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "sh \"${SRCROOT}/scripts/verify_release_no_debug_strings.sh\"\n";
+			path = DesignSystem;
+			sourceTree = "<group>";
 		};
-/* End PBXShellScriptBuildPhase section */
+		'PRTN2002PRTN2002PRTN2002' = {
+			isa = PBXGroup;
+			children = (
+				PRTN0005PRTN0005PRTN0005,
+			);
+			path = Partner;
+			sourceTree = "<group>";
+		};
+		'PRTN2003PRTN2003PRTN2003' = {
+			isa = PBXGroup;
+			children = (
+				PRTN0006PRTN0006PRTN0006,
+				PRTN0007PRTN0007PRTN0007,
+			);
+			path = Account;
+			sourceTree = "<group>";
+		};
+		'VGAT2001VGAT2001VGAT2001' = {
+			isa = PBXGroup;
+			children = (
+				VGAT0003VGAT0003VGAT0003,
+			);
+			path = ForceUpdate;
+			sourceTree = "<group>";
+		};
+		'WGTGRP01WGTGRP01WGTGRP01' = {
+			isa = PBXGroup;
+			children = (
+				WGTF0001WGTF0001WGTF0001,
+				WGTF0002WGTF0002WGTF0002,
+				WGTF0003WGTF0003WGTF0003,
+				WGTF0005WGTF0005WGTF0005,
+				WGTF0006WGTF0006WGTF0006,
+			);
+			path = SacredBillTracker/SacredBillTrackerWidgets;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
 		730950AD798A77AD508AA9E2 /* SacredBillTracker */ = {
@@ -615,29 +630,30 @@
 				21EA22531D07CFB94E0E0E52 /* Sources */,
 				FCB13D7EDBAAE7DD085AD9D3 /* Frameworks */,
 				3E4149F4CEEB2B45A1E83FF2 /* Resources */,
-				WGTEMB01WGTEMB01WGTEMB01 /* Embed Foundation Extensions */,
+				WGTEMB01WGTEMB01WGTEMB01,
 				DEBADEADBEEF000000000001 /* Verify No Debug Strings (Release) */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				WGTDEP01WGTDEP01WGTDEP01 /* PBXTargetDependency */,
+				WGTDEP01WGTDEP01WGTDEP01,
 			);
 			name = SacredBillTracker;
 			packageProductDependencies = (
-				SUPA0002SUPA0002SUPA0002 /* Supabase */,
+				SUPA0002SUPA0002SUPA0002,
+				E3C14C9487C62B647B9B2B45 /* AppsFlyerLib */,
 			);
 			productName = SacredBillTracker;
 			productReference = 5141EFFF35ACD6C51F274E4D /* SacredBillTracker.app */;
 			productType = "com.apple.product-type.application";
 		};
-		WGTTGT01WGTTGT01WGTTGT01 /* SacredBillTrackerWidgets */ = {
+		'WGTTGT01WGTTGT01WGTTGT01' = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = WGTBCL01WGTBCL01WGTBCL01 /* Build configuration list for PBXNativeTarget "SacredBillTrackerWidgets" */;
+			buildConfigurationList = WGTBCL01WGTBCL01WGTBCL01;
 			buildPhases = (
-				WGTSRC01WGTSRC01WGTSRC01 /* Sources */,
-				WGTFRM01WGTFRM01WGTFRM01 /* Frameworks */,
-				WGTRES01WGTRES01WGTRES01 /* Resources */,
+				WGTSRC01WGTSRC01WGTSRC01,
+				WGTFRM01WGTFRM01WGTFRM01,
+				WGTRES01WGTRES01WGTRES01,
 			);
 			buildRules = (
 			);
@@ -645,7 +661,7 @@
 			);
 			name = SacredBillTrackerWidgets;
 			productName = SacredBillTrackerWidgets;
-			productReference = WGTAPX01WGTAPX01WGTAPX01 /* SacredBillTrackerWidgets.appex */;
+			productReference = WGTAPX01WGTAPX01WGTAPX01;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -661,13 +677,13 @@
 					730950AD798A77AD508AA9E2 = {
 						CreatedOnToolsVersion = 15.0;
 						SystemCapabilities = {
-							com.apple.iCloud = {
+							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
 							};
 							com.apple.SignInWithApple = {
 								enabled = 1;
 							};
-							com.apple.ApplicationGroups.iOS = {
+							com.apple.iCloud = {
 								enabled = 1;
 							};
 						};
@@ -692,14 +708,15 @@
 			);
 			mainGroup = 88932FD6DD0EDC80FBF1C921;
 			packageReferences = (
-				SUPA0001SUPA0001SUPA0001 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				SUPA0001SUPA0001SUPA0001,
+				DBDD4A7BB3EDAE01ABF70F4F /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */,
 			);
 			productRefGroup = D71BD8A0B6A6AA54EDBA6454 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				730950AD798A77AD508AA9E2 /* SacredBillTracker */,
-				WGTTGT01WGTTGT01WGTTGT01 /* SacredBillTrackerWidgets */,
+				WGTTGT01WGTTGT01WGTTGT01,
 			);
 		};
 /* End PBXProject section */
@@ -710,61 +727,37 @@
 			buildActionMask = 2147483647;
 			files = (
 				CFE9D72014C7366EEAC212E6 /* Assets.xcassets in Resources */,
-				PRIV1001PRIV1001PRIV1001 /* PrivacyInfo.xcprivacy in Resources */,
+				PRIV1001PRIV1001PRIV1001,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		WGTRES01WGTRES01WGTRES01 /* Resources */ = {
+		'WGTRES01WGTRES01WGTRES01' = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */,
+				PRIV1002PRIV1002PRIV1002,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXFrameworksBuildPhase section */
-		WGTFRM01WGTFRM01WGTFRM01 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
+/* Begin PBXShellScriptBuildPhase section */
+		DEBADEADBEEF000000000001 /* Verify No Debug Strings (Release) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		WGTEMB01WGTEMB01WGTEMB01 /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				WGTEMF01WGTEMF01WGTEMF01 /* SacredBillTrackerWidgets.appex in Embed Foundation Extensions */,
+			inputPaths = (
 			);
-			name = "Embed Foundation Extensions";
+			name = "Verify No Debug Strings (Release)";
+			outputPaths = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sh \"${SRCROOT}/scripts/verify_release_no_debug_strings.sh\"\n";
 		};
-/* End PBXCopyFilesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		WGTDEP01WGTDEP01WGTDEP01 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = WGTTGT01WGTTGT01WGTTGT01 /* SacredBillTrackerWidgets */;
-			targetProxy = WGTPRX01WGTPRX01WGTPRX01 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
-/* Begin PBXContainerItemProxy section */
-		WGTPRX01WGTPRX01WGTPRX01 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1781F676DEDF5767F3243DB0 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = WGTTGT01WGTTGT01WGTTGT01;
-			remoteInfo = SacredBillTrackerWidgets;
-		};
-/* End PBXContainerItemProxy section */
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		21EA22531D07CFB94E0E0E52 /* Sources */ = {
@@ -778,14 +771,14 @@
 				276DB5CE7BEF2738FE20D43D /* Bill.swift in Sources */,
 				4CA05CBEA9B3A389100EAD38 /* BillCategory.swift in Sources */,
 				C75585103A20F74CD74D26B4 /* BillType.swift in Sources */,
-				SORT1001SORT1001SORT1001 /* BillSortOption.swift in Sources */,
+				SORT1001SORT1001SORT1001,
 				B0C2A237B73D2B6C3BC63AD3 /* PaymentStatus.swift in Sources */,
 				D933F686E796F409084E196B /* RecurrenceType.swift in Sources */,
 				8C39F5CD344F415BC9C3F384 /* BillRepository.swift in Sources */,
 				7B715F972A92491E36D54C6C /* BillStore.swift in Sources */,
 				3349ED36D62272BBCF445AE8 /* LocalBillRepository.swift in Sources */,
 				F359346B60A9B00987A17785 /* SampleData.swift in Sources */,
-				CDDS1001CDDS1001CDDS1001 /* CategoryDetailDebugSeeder.swift in Sources */,
+				CDDS1001CDDS1001CDDS1001,
 				AAAA0011AAAA0011AAAA0011 /* LegacyDemoBills.swift in Sources */,
 				B3F21277BCC1004415D0506B /* SupabaseBillRepository.swift in Sources */,
 				AAAA0001AAAA0001AAAA0001 /* SupabaseConfig.swift in Sources */,
@@ -804,7 +797,7 @@
 				611D242B83102E9FA902B643 /* StatCard.swift in Sources */,
 				FFC4C3B1CBF4FF8A63C5BD80 /* DashboardView.swift in Sources */,
 				12255B7B972DFD75ACEBE607 /* ReportsView.swift in Sources */,
-				CATD1001CATD1001CATD1001 /* CategoryDetailView.swift in Sources */,
+				CATD1001CATD1001CATD1001,
 				8EFE50C7A81D432D29372160 /* SettingsView.swift in Sources */,
 				578746E5980F5F954D57B1F1 /* BillTemplate.swift in Sources */,
 				E79E495EB32A3A4DEDA9E64C /* CashFlowCard.swift in Sources */,
@@ -816,87 +809,95 @@
 				DDDD1003DDDD1003DDDD1003 /* SubscriptionManager.swift in Sources */,
 				DDDD1004DDDD1004DDDD1004 /* PaywallView.swift in Sources */,
 				DDDD1005DDDD1005DDDD1005 /* ProLockCard.swift in Sources */,
-				PRTN1001PRTN1001PRTN1001 /* Theme.swift in Sources */,
-				PRTN1002PRTN1002PRTN1002 /* BillScope.swift in Sources */,
-				PRTN1003PRTN1003PRTN1003 /* PartnerInvite.swift in Sources */,
-				PRTN1004PRTN1004PRTN1004 /* PartnerService.swift in Sources */,
-				PRTN1005PRTN1005PRTN1005 /* PartnerBudgetingView.swift in Sources */,
-				PRTN1006PRTN1006PRTN1006 /* AccountView.swift in Sources */,
-				PRTN1007PRTN1007PRTN1007 /* DeleteAccountSheet.swift in Sources */,
-				RVWX1001RVWX1001RVWX1001 /* ReviewPromptService.swift in Sources */,
-				QUOT1001QUOT1001QUOT1001 /* DailyQuotes.swift in Sources */,
-				BCKT1001BCKT1001BCKT1001 /* BillBucket.swift in Sources */,
-				BCKT1002BCKT1002BCKT1002 /* BucketBillsListView.swift in Sources */,
-				BBTL1001BBTL1001BBTL1001 /* BillsByTypeListView.swift in Sources */,
-				FOVS1001FOVS1001FOVS1001 /* FinancialOverviewSection.swift in Sources */,
-				SDFC1001SDFC1001SDFC1001 /* SacredDailyFocusCard.swift in Sources */,
-				APRF1001APRF1001APRF1001 /* AppearancePreference.swift in Sources */,
-				FPPW1001FPPW1001FPPW1001 /* FocusPlusPaywallView.swift in Sources */,
-				FPEC1001FPEC1001FPEC1001 /* FocusPlusEntryCard.swift in Sources */,
-				FRR01001FRR01001FRR01001 /* FocusRepeatRule.swift in Sources */,
-				TPRI1001TPRI1001TPRI1001 /* TodoPriority.swift in Sources */,
-				SCHI1001SCHI1001SCHI1001 /* ScheduleItem.swift in Sources */,
-				FTDO1001FTDO1001FTDO1001 /* FocusTodo.swift in Sources */,
-				FSTR1001FSTR1001FSTR1001 /* FocusStores.swift in Sources */,
-				SIEV1001SIEV1001SIEV1001 /* ScheduleItemEditView.swift in Sources */,
-				TIEV1001TIEV1001TIEV1001 /* TodoItemEditView.swift in Sources */,
-				PRCM1001PRCM1001PRCM1001 /* PremiumComponents.swift in Sources */,
-				QUTS1001QUTS1001QUTS1001 /* QuoteService.swift in Sources */,
-				TRSH1001TRSH1001TRSH1001 /* TrashView.swift in Sources */,
-				VGAT1001VGAT1001VGAT1001 /* AppVersionConfig.swift in Sources */,
-				VGAT1002VGAT1002VGAT1002 /* VersionGateService.swift in Sources */,
-				VGAT1003VGAT1003VGAT1003 /* ForceUpdateView.swift in Sources */,
+				PRTN1001PRTN1001PRTN1001,
+				PRTN1002PRTN1002PRTN1002,
+				PRTN1003PRTN1003PRTN1003,
+				PRTN1004PRTN1004PRTN1004,
+				PRTN1005PRTN1005PRTN1005,
+				PRTN1006PRTN1006PRTN1006,
+				PRTN1007PRTN1007PRTN1007,
+				RVWX1001RVWX1001RVWX1001,
+				QUOT1001QUOT1001QUOT1001,
+				BCKT1001BCKT1001BCKT1001,
+				BCKT1002BCKT1002BCKT1002,
+				BBTL1001BBTL1001BBTL1001,
+				FOVS1001FOVS1001FOVS1001,
+				SDFC1001SDFC1001SDFC1001,
+				APRF1001APRF1001APRF1001,
+				FPPW1001FPPW1001FPPW1001,
+				FPEC1001FPEC1001FPEC1001,
+				FRR01001FRR01001FRR01001,
+				TPRI1001TPRI1001TPRI1001,
+				SCHI1001SCHI1001SCHI1001,
+				FTDO1001FTDO1001FTDO1001,
+				FSTR1001FSTR1001FSTR1001,
+				SIEV1001SIEV1001SIEV1001,
+				TIEV1001TIEV1001TIEV1001,
+				PRCM1001PRCM1001PRCM1001,
+				QUTS1001QUTS1001QUTS1001,
+				TRSH1001TRSH1001TRSH1001,
+				VGAT1001VGAT1001VGAT1001,
+				VGAT1002VGAT1002VGAT1002,
+				VGAT1003VGAT1003VGAT1003,
 				BB215241BAD98D92A8B51B57 /* NotificationCategories.swift in Sources */,
 				FE199C59C7F78EAC069184FA /* NotificationPreferences.swift in Sources */,
-				95219A33275E5DAC1C979124 /* PushNotificationManager.swift in Sources */,
+				95219A33275E5DAC1C979124 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift in Sources */,
 				357D1BE8EA2B41116A5D2B80 /* AppDelegate.swift in Sources */,
 				FEE5C6432C66F9E3A4EDCC76 /* NotificationSettingsView.swift in Sources */,
 				CB3BBDDC5F62E22AAD2EE26A /* DeepLinkRouter.swift in Sources */,
 				1DD5733FC7E240CF70D691A9 /* DeviceTokenSync.swift in Sources */,
-				9EA5E3C1C60C46B0B53BCB17 /* PushNotificationManager+Remote.swift in Sources */,
+				9EA5E3C1C60C46B0B53BCB17 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift in Sources */,
 				813A1F6E96FC5C01977EB19F /* NotificationIntegrationHooks.swift in Sources */,
 				EB16D928D10DF9D4D57DDA3A /* NotificationManager.swift in Sources */,
-				INC1001INC1001INC1001 /* WeeklyIncome.swift in Sources */,
-				INC1002INC1002INC1002 /* IncomeStore.swift in Sources */,
-				PURL1001PURL1001PURL1001 /* PaymentURLValidator.swift in Sources */,
-				CBKV1001CBKV1001CBKV1001 /* CloudBackedDefaults.swift in Sources */,
-				INC1003INC1003INC1003 /* AddEditIncomeView.swift in Sources */,
-				INC1004INC1004INC1004 /* IncomeListView.swift in Sources */,
-				CPA1001CPA1001CPA1001 /* CPAReportGenerator.swift in Sources */,
-				SHRE1001SHRE1001SHRE1001 /* BillShareService.swift in Sources */,
-				PDWN1001PDWN1001PDWN1001 /* PaydownPlanService.swift in Sources */,
-				CPA1002CPA1002CPA1002 /* CPAReadyExportView.swift in Sources */,
-				MPRO1001MPRO1001MPRO1001 /* ManagedProfile.swift in Sources */,
-				MPRO1002MPRO1002MPRO1002 /* ManagedProfileStore.swift in Sources */,
-				MPRO1003MPRO1003MPRO1003 /* ManagedProfilesView.swift in Sources */,
-				AUTH1001AUTH1001AUTH1001 /* AuthGateView.swift in Sources */,
-				AUTH1002AUTH1002AUTH1002 /* LoginView.swift in Sources */,
-				AUTH1003AUTH1003AUTH1003 /* CreateAccountView.swift in Sources */,
-				AUTH1004AUTH1004AUTH1004 /* SubscriptionGateView.swift in Sources */,
-				AUTH1005AUTH1005AUTH1005 /* ForgotPasswordView.swift in Sources */,
-				INCP1001INCP1001INCP1001 /* IncomePeriod.swift in Sources */,
-				INCT1001INCT1001INCT1001 /* IncomeType.swift in Sources */,
-				LEAFBG02LEAFBG02LEAFBG02 /* SacredLeafScrollBackground.swift in Sources */,
-				HEALTH02HEALTH02HEALTH02 /* BillHealthScore.swift in Sources */,
-				HCARD002HCARD002HCARD002 /* BillHealthScoreCard.swift in Sources */,
-				HATT1001HATT1001HATT1001 /* HealthAttentionListView.swift in Sources */,
-				SNAP0002SNAP0002SNAP0002 /* FinancialSnapshotView.swift in Sources */,
-				WGTB0103WGTB0103WGTB0103 /* WidgetSharedBillSnapshot.swift in Sources */,
-				WGTB0004WGTB0004WGTB0004 /* BillWidgetBridge.swift in Sources */,
+				INC1001INC1001INC1001,
+				INC1002INC1002INC1002,
+				PURL1001PURL1001PURL1001,
+				CBKV1001CBKV1001CBKV1001,
+				INC1003INC1003INC1003,
+				INC1004INC1004INC1004,
+				CPA1001CPA1001CPA1001,
+				SHRE1001SHRE1001SHRE1001,
+				PDWN1001PDWN1001PDWN1001,
+				CPA1002CPA1002CPA1002,
+				MPRO1001MPRO1001MPRO1001,
+				MPRO1002MPRO1002MPRO1002,
+				MPRO1003MPRO1003MPRO1003,
+				AUTH1001AUTH1001AUTH1001,
+				AUTH1002AUTH1002AUTH1002,
+				AUTH1003AUTH1003AUTH1003,
+				AUTH1004AUTH1004AUTH1004,
+				AUTH1005AUTH1005AUTH1005,
+				INCP1001INCP1001INCP1001,
+				INCT1001INCT1001INCT1001,
+				LEAFBG02LEAFBG02LEAFBG02,
+				HEALTH02HEALTH02HEALTH02,
+				HCARD002HCARD002HCARD002,
+				HATT1001HATT1001HATT1001,
+				SNAP0002SNAP0002SNAP0002,
+				WGTB0103WGTB0103WGTB0103,
+				WGTB0004WGTB0004WGTB0004,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		WGTSRC01WGTSRC01WGTSRC01 /* Sources */ = {
+		'WGTSRC01WGTSRC01WGTSRC01' = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				WGTB0001WGTB0001WGTB0001 /* SacredBillTrackerWidgetBundle.swift in Sources */,
-				WGTB0002WGTB0002WGTB0002 /* SacredBillTrackerWidget.swift in Sources */,
-				WGTB0003WGTB0003WGTB0003 /* WidgetSharedBillSnapshot.swift in Sources */,
+				WGTB0001WGTB0001WGTB0001,
+				WGTB0002WGTB0002WGTB0002,
+				WGTB0003WGTB0003WGTB0003,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		'WGTDEP01WGTDEP01WGTDEP01' = {
+			isa = PBXTargetDependency;
+			target = WGTTGT01WGTTGT01WGTTGT01;
+			targetProxy = WGTPRX01WGTPRX01WGTPRX01;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		56EA2DDD7EA6B62E92CB9329 /* Debug */ = {
@@ -976,6 +977,7 @@
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SacredBillTracker/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1001,60 +1003,6 @@
 			};
 			name = Debug;
 		};
-		WGTCFG01WGTCFG01WGTCFG01 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 27;
-				DEVELOPMENT_TEAM = DCCSGYD5A4;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Sacred Bill Tracker";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0.12;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		WGTCFG02WGTCFG02WGTCFG02 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 27;
-				DEVELOPMENT_TEAM = DCCSGYD5A4;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Sacred Bill Tracker";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0.12;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		C3348D6D1BB2E55F8B064448 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1066,6 +1014,7 @@
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SacredBillTracker/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1153,6 +1102,60 @@
 			};
 			name = Release;
 		};
+		'WGTCFG01WGTCFG01WGTCFG01' = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 27;
+				DEVELOPMENT_TEAM = DCCSGYD5A4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Sacred Bill Tracker";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.12;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		'WGTCFG02WGTCFG02WGTCFG02' = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 27;
+				DEVELOPMENT_TEAM = DCCSGYD5A4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Sacred Bill Tracker";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.12;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1174,11 +1177,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		WGTBCL01WGTBCL01WGTBCL01 /* Build configuration list for PBXNativeTarget "SacredBillTrackerWidgets" */ = {
+		'WGTBCL01WGTBCL01WGTBCL01' = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				WGTCFG01WGTCFG01WGTCFG01 /* Debug */,
-				WGTCFG02WGTCFG02WGTCFG02 /* Release */,
+				WGTCFG01WGTCFG01WGTCFG01,
+				WGTCFG02WGTCFG02WGTCFG02,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1186,7 +1189,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		SUPA0001SUPA0001SUPA0001 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+		DBDD4A7BB3EDAE01ABF70F4F /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AppsFlyerSDK/AppsFlyerFramework";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
+			};
+		};
+		'SUPA0001SUPA0001SUPA0001' = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase/supabase-swift";
 			requirement = {
@@ -1197,9 +1208,14 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		SUPA0002SUPA0002SUPA0002 /* Supabase */ = {
+		E3C14C9487C62B647B9B2B45 /* AppsFlyerLib */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = SUPA0001SUPA0001SUPA0001 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			package = DBDD4A7BB3EDAE01ABF70F4F /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */;
+			productName = AppsFlyerLib;
+		};
+		'SUPA0002SUPA0002SUPA0002' = {
+			isa = XCSwiftPackageProductDependency;
+			package = SUPA0001SUPA0001SUPA0001;
 			productName = Supabase;
 		};
 /* End XCSwiftPackageProductDependency section */

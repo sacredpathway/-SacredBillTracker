@@ -33,3 +33,6 @@ _RECOVERY_BACKUP_*/
 *.compfix.bak.*
 *.final.bak.*
 *.uiapp.bak
+
+# Secrets — never commit real keys (example file stays tracked)
+**/Secrets.xcconfig
