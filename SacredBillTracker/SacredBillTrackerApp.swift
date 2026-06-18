@@ -13,6 +13,18 @@
 
 import SwiftUI
 
+// MARK: - Attribution (AppsFlyer) — additive, off until the SPM package is linked
+//
+// Everything AppsFlyer-related is wrapped in `#if canImport(AppsFlyerLib)`.
+// Until you add the `AppsFlyerFramework` Swift Package, these blocks compile
+// to nothing, so the current build/behaviour is unchanged. After you add the
+// package + the Info.plist keys (see SacredBillTracker_iOS_AppsFlyer_Integration.md),
+// installs flow to TikTok via AppsFlyer. Touches no other app feature.
+#if canImport(AppsFlyerLib)
+import AppsFlyerLib
+import AppTrackingTransparency
+#endif
+
 // MARK: - Root scene
 //
 // Wraps the auth-routed view so we can attach `@Environment(\.requestReview)`
@@ -142,6 +154,12 @@ struct SacredBillTrackerApp: App {
         // (nav bars, tab bar, List/Form backgrounds) once at launch so
         // every screen adopts the green canvas + gold accents.
         ThemeAppearance.apply()
+
+        // AppsFlyer — set keys only (no network call yet). Inert until the
+        // AppsFlyerFramework SPM package is linked.
+        #if canImport(AppsFlyerLib)
+        AppsFlyerManager.shared.configure()
+        #endif
     }
 
     var body: some Scene {
@@ -187,6 +205,12 @@ struct SacredBillTrackerApp: App {
                     // foreground.
                     if newPhase == .active {
                         Task { await versionGate.refresh() }
+
+                        // AppsFlyer — request ATT once, then start the SDK once.
+                        // Guarded so it's a no-op until the package is linked.
+                        #if canImport(AppsFlyerLib)
+                        AppsFlyerManager.shared.requestATTThenStart()
+                        #endif
                     }
                 }
                 .onChange(of: auth.currentUserID) { _, newUserID in
@@ -299,3 +323,56 @@ struct SacredBillTrackerApp: App {
         incomeStore.applyProfileContext(context)
     }
 }
+
+// MARK: - AppsFlyer attribution manager
+//
+// Isolated, additive. Compiles only when the AppsFlyerFramework SPM package
+// is linked (`#if canImport(AppsFlyerLib)`); otherwise this whole block is
+// absent and the app behaves exactly as before. It does NOT touch billing,
+// auth, bills, profiles, reminders, exports, or attachments — it only reports
+// the install/launch to AppsFlyer, which posts back to TikTok.
+#if canImport(AppsFlyerLib)
+import UIKit
+
+final class AppsFlyerManager: NSObject {
+
+    static let shared = AppsFlyerManager()
+    private var didStart = false
+    private override init() { super.init() }
+
+    /// Call once, early (App.init). Sets keys; sends nothing yet.
+    func configure() {
+        let af = AppsFlyerLib.shared()
+        af.appsFlyerDevKey = "APPSFLYER_DEV_KEY_HERE"   // placeholder — inject the real key at build time, never commit it
+        af.appleAppID      = "6762890363"               // Sacred Bill Tracker iOS App ID
+        af.delegate        = self
+        // Hold the install postback until ATT is answered (or 60s) so the
+        // IDFA is included when the user grants tracking.
+        af.waitForATTUserAuthorization(timeoutInterval: 60)
+        // af.isDebug = true   // DEV ONLY — remove before release
+    }
+
+    /// Request ATT once, then start the SDK once. SKAdNetwork still works if
+    /// the user denies ATT.
+    func requestATTThenStart() {
+        if #available(iOS 14, *) {
+            ATTrackingManager.requestTrackingAuthorization { [weak self] _ in
+                DispatchQueue.main.async { self?.start() }
+            }
+        } else {
+            start()
+        }
+    }
+
+    private func start() {
+        guard !didStart else { return }
+        didStart = true
+        AppsFlyerLib.shared().start()
+    }
+}
+
+extension AppsFlyerManager: AppsFlyerLibDelegate {
+    func onConversionDataSuccess(_ conversionInfo: [AnyHashable: Any]) { /* deferred deep-link data (unused) */ }
+    func onConversionDataFail(_ error: Error) { /* no-op */ }
+}
+#endif

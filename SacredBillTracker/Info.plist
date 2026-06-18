@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  STAGED Info.plist for Sacred Bill Tracker (iOS) — NOT yet wired into the project.
+
+  PURPOSE: add the two attribution keys that cannot be expressed as generated
+  build settings: NSUserTrackingUsageDescription (ATT prompt copy) and
+  SKAdNetworkItems (an array — build-setting INFOPLIST_KEY_* cannot hold arrays).
+
+  HOW IT PRESERVES YOUR GENERATED KEYS:
+  This is a PARTIAL plist used in MERGE mode. You keep
+  GENERATE_INFOPLIST_FILE = YES and ALSO point INFOPLIST_FILE at this file.
+  Since Xcode 13+, the build system MERGES all generated keys
+  (CFBundleShortVersionString, CFBundleVersion, UIApplicationSceneManifest,
+  orientations, MinimumOSVersion, ITSAppUsesNonExemptEncryption, icons, etc.)
+  ON TOP OF this file. So you only list the EXTRA keys here; everything your
+  app already generates stays intact. Do NOT set GENERATE_INFOPLIST_FILE = NO
+  unless you intend to hand-maintain every key (see "Full switch" in the guide).
+
+  For reference, the keys your build currently GENERATES (from the shipped
+  v1.0.12 IPA) and that the merge preserves:
+    CFBundleIdentifier        com.sacredbilltracker.app
+    CFBundleShortVersionString $(MARKETING_VERSION)   (was 1.0.12)
+    CFBundleVersion           $(CURRENT_PROJECT_VERSION) (was 27)
+    MinimumOSVersion          17.0
+    UIApplicationSceneManifest (generated, multi-scene)
+    Supported orientations    iPhone + iPad
+    ITSAppUsesNonExemptEncryption  false
+    App icons / device family / launch screen
+  You do NOT need to copy those here — the merge keeps them.
+-->
+<plist version="1.0">
+<dict>
+	<!-- ATT prompt copy. Required because the app now requests tracking. -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Sacred Bill Tracker uses this to measure ad performance so we can keep improving the app. Your information is never sold.</string>
+
+	<!-- SKAdNetwork ad-network IDs. Apple sends install postbacks only to the
+	     networks listed here. The set below is a STARTER (AppsFlyer + TikTok).
+	     ⚠️ REPLACE THIS ENTIRE ARRAY with AppsFlyer's official, complete list:
+	        AppsFlyer dashboard → Configuration → SDK Integration → "SKAdNetwork IDs",
+	        or https://github.com/AppsFlyerSDK/AppsFlyer-SKAdNetwork-IDs
+	     AppsFlyer's list already includes the current TikTok/Bytedance IDs plus
+	     dozens of other networks, so future channels work without another release.
+	     Extra IDs are harmless; missing IDs just reduce coverage. -->
+	<key>SKAdNetworkItems</key>
+	<array>
+		<!-- AppsFlyer -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>v9wttpbfk9.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>n38lu8286q.skadnetwork</string>
+		</dict>
+		<!-- TikTok / Bytedance -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>238da6jt44.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>22mmun2rn5.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>ejvt5qm6ak.skadnetwork</string>
+		</dict>
+	</array>
+</dict>
+</plist>
