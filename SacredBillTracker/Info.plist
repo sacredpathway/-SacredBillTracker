@@ -37,9 +37,11 @@
 	<key>AppsFlyerDevKey</key>
 	<string>$(APPSFLYER_DEV_KEY)</string>
 
-	<!-- ATT prompt copy. Required because the app now requests tracking. -->
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Sacred Bill Tracker uses this to measure ad performance so we can keep improving the app. Your information is never sold.</string>
+	<!-- NSUserTrackingUsageDescription intentionally OMITTED for this release.
+	     The AppsFlyer SDK is present but dormant (placeholder Dev Key), so the
+	     app never requests App Tracking Transparency. Omitting this key keeps the
+	     binary consistent with the non-tracking App Privacy label. Re-add this key
+	     only when a real AppsFlyer Dev Key is set and tracking is declared. -->
 
 	<!-- SKAdNetwork ad-network IDs. Apple sends install postbacks only to the
 	     networks listed here. The set below is a STARTER (AppsFlyer + TikTok).

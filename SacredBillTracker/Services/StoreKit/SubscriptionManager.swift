@@ -135,6 +135,14 @@ final class SubscriptionManager: ObservableObject {
                 await transaction.finish()
                 await refreshEntitlements()
                 lastPurchaseSucceeded = true
+                // Attribution: subscription_started (no-op while AppsFlyer dormant).
+                #if canImport(AppsFlyerLib)
+                AppsFlyerManager.shared.logSubscriptionStarted(
+                    productID: product.id,
+                    revenue: NSDecimalNumber(decimal: product.price),
+                    currency: product.priceFormatStyle.currencyCode
+                )
+                #endif
                 return isPro
 
             case .userCancelled:

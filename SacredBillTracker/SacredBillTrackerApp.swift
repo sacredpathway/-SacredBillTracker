@@ -369,18 +369,31 @@ final class AppsFlyerManager: NSObject {
         af.appsFlyerDevKey = devKey
         af.appleAppID      = "6762890363"               // Sacred Bill Tracker iOS App ID
         af.delegate        = self
-        // Hold the install postback until ATT is answered (or 60s) so the
-        // IDFA is included when the user grants tracking.
-        af.waitForATTUserAuthorization(timeoutInterval: 60)
+        // Only hold the install postback for ATT when we actually present the
+        // ATT prompt (i.e. NSUserTrackingUsageDescription is declared). In the
+        // default SKAN-only posture (no usage string) we do NOT wait, so the
+        // SKAdNetwork postback fires promptly without an IDFA.
+        if Self.hasATTUsageString {
+            af.waitForATTUserAuthorization(timeoutInterval: 60)
+        }
         // af.isDebug = true   // DEV ONLY — remove before release
         isConfigured = true
     }
 
-    /// Request ATT once, then start the SDK once. SKAdNetwork still works if
-    /// the user denies ATT. No-op when the Dev Key is not configured.
+    /// True only when NSUserTrackingUsageDescription is present in the bundle.
+    /// Drives whether we present ATT (device-level IDFA path) or run SKAN-only.
+    private static var hasATTUsageString: Bool {
+        let s = (Bundle.main.object(forInfoDictionaryKey: "NSUserTrackingUsageDescription") as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return !s.isEmpty
+    }
+
+    /// If an ATT usage string is declared, request ATT once then start the SDK.
+    /// Otherwise (default SKAN-only posture) start directly without prompting —
+    /// SKAdNetwork attribution still works. No-op when the Dev Key is unset.
     func requestATTThenStart() {
         guard isConfigured else { return }
-        if #available(iOS 14, *) {
+        if #available(iOS 14, *), Self.hasATTUsageString {
             ATTrackingManager.requestTrackingAuthorization { [weak self] _ in
                 DispatchQueue.main.async { self?.start() }
             }
@@ -393,6 +406,40 @@ final class AppsFlyerManager: NSObject {
         guard isConfigured, !didStart else { return }
         didStart = true
         AppsFlyerLib.shared().start()
+    }
+
+    // MARK: - In-app events (additive)
+    //
+    // All event methods are safe no-ops while AppsFlyer is dormant (placeholder
+    // Dev Key → isConfigured == false). AppsFlyer queues events fired before
+    // `start()` and flushes them once the SDK starts, so call sites don't need
+    // to care about ordering. Event names use AppsFlyer's standard `af_` keys
+    // where one exists, plus a custom `bill_created`.
+
+    private func logEvent(_ name: String, values: [String: Any]? = nil) {
+        guard isConfigured else { return }
+        AppsFlyerLib.shared().logEvent(name, withValues: values)
+    }
+
+    /// Fired once when a new account is successfully created (signup_completed).
+    func logAccountCreated(method: String = "email") {
+        logEvent("af_complete_registration", values: ["af_registration_method": method])
+    }
+
+    /// Fired each time the user creates a bill.
+    func logBillCreated() {
+        logEvent("bill_created")
+    }
+
+    /// Fired when a subscription purchase succeeds (subscription_started).
+    func logSubscriptionStarted(productID: String? = nil,
+                                revenue: NSNumber? = nil,
+                                currency: String? = nil) {
+        var values: [String: Any] = [:]
+        if let productID { values["af_content_id"] = productID }
+        if let revenue { values["af_revenue"] = revenue }
+        if let currency { values["af_currency"] = currency }
+        logEvent("af_subscribe", values: values.isEmpty ? nil : values)
     }
 }
 

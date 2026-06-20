@@ -162,6 +162,10 @@ final class AuthService: NSObject, ObservableObject {
             if let session = response.session {
                 applySession(userID: session.user.id, email: session.user.email)
                 lastError = nil
+                // Attribution: signup_completed (no-op while AppsFlyer dormant).
+                #if canImport(AppsFlyerLib)
+                AppsFlyerManager.shared.logAccountCreated()
+                #endif
             } else {
                 lastError = "Account created — check your inbox to confirm your email before signing in."
                 return false

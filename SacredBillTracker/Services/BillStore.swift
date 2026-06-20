@@ -242,6 +242,10 @@ final class BillStore: ObservableObject {
         settlePayoffIfPaid(&new)
         storedBills.append(new)
         persist()
+        // Attribution: bill_created (no-op while AppsFlyer dormant).
+        #if canImport(AppsFlyerLib)
+        AppsFlyerManager.shared.logBillCreated()
+        #endif
         if !new.isPaid {
             Task { await notifications.scheduleReminder(for: new) }
         }
