@@ -99,7 +99,7 @@ struct AddEditBillView: View {
                         ForEach(BillType.allCases) { t in
                             HStack {
                                 Label(t.title, systemImage: t.systemImage)
-                                if t == .business && !subs.isPro && !FreeTierLimits.allowBusinessBills {
+                                if t == .business && !subs.canBusinessTracking && !FreeTierLimits.allowBusinessBills {
                                     Spacer()
                                     ProBadge()
                                 }
@@ -110,7 +110,7 @@ struct AddEditBillView: View {
                     .onChange(of: type) { oldValue, newValue in
                         // Block switching to business bills on free tier.
                         if newValue == .business
-                            && !subs.isPro
+                            && !subs.canBusinessTracking
                             && !FreeTierLimits.allowBusinessBills {
                             type = oldValue
                             showPaywall = true
@@ -130,7 +130,7 @@ struct AddEditBillView: View {
                 } header: {
                     Text("Classification")
                 } footer: {
-                    if type == .household && !subs.isPro && !FreeTierLimits.allowBusinessBills {
+                    if type == .household && !subs.canBusinessTracking && !FreeTierLimits.allowBusinessBills {
                         Text("Business tracking is a Pro feature.")
                             .font(.footnote)
                     }

@@ -1,0 +1,9 @@
+This update focuses on reliability, profile management, and overall performance improvements.
+
+• Improved support for managed financial profiles
+• Enhanced bill tracking accuracy and reporting
+• Improved account and profile management experience
+• Performance optimizations and stability improvements
+• Bug fixes and usability enhancements throughout the app
+
+Thank you for using Sacred Bill Tracker.

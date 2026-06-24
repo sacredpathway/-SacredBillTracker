@@ -1,23 +1,23 @@
 Sacred Pathway Weekly Audit
 
-🚨 Critical Issues: 1
+🚨 Critical Issues: 0
 
 ⚠️ High Priority:
 
-* Dispatch Hub active target may ship without its privacy manifest and can miss APNs token registration after login.
-* Driver Hub Android sells only Pro in UI while four subscription products exist; carrier revenue is hidden.
+* Driver Hub iOS still depends on Driver Monthly review/approval before safe release.
+* Bill Tracker Android remains blocked by screenshots, Pre-Launch, and billing validation.
 
 💰 Revenue Opportunity:
 
-* Add clear Driver/Owner/Carrier Android plan cards plus server entitlement validation.
+* Finish live subscription validation and store screenshots before wider rollout.
 
 📱 App Most Needing Attention:
 
-* Sacred Pathway Dispatch Hub
+* Sacred Pathway Driver Hub
 
 🎯 Recommended Next Action:
 
-* Make Dispatch Hub App Store-ready: active privacy manifest, APNs retry, release smoke test.
+* Verify Driver Monthly approval/status and align paywall products before release.
 
 📊 Overall Status:
 Yellow

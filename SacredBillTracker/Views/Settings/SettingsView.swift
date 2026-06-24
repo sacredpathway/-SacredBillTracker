@@ -22,6 +22,7 @@ struct SettingsView: View {
     @State private var isDeletingAccount = false
     @State private var showPaywall = false
     @State private var paywallReason: String?
+    @State private var showAutoTrackPaywall = false
 
     // Income-tracking preferences (v1.2.2). Persist via AppStorage so
     // every income-aware view (Dashboard, AddEditIncomeView,
@@ -66,12 +67,12 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    if subs.isPro {
+                    if subs.effectiveTier > .free {
                         HStack {
                             Label("Current plan", systemImage: "checkmark.seal.fill")
                                 .foregroundStyle(Color.appAccent)
                             Spacer()
-                            Text(subs.currentTier.displayName)
+                            Text(subs.effectiveTier.displayName)
                                 .foregroundStyle(.secondary)
                         }
                         Button {
@@ -116,7 +117,7 @@ struct SettingsView: View {
                         Text("Subscription")
                     }
                 } footer: {
-                    if subs.isPro {
+                    if subs.effectiveTier > .free {
                         Text("Thanks for supporting Sacred Bill Tracker.")
                             .font(.footnote)
                     } else {
@@ -126,9 +127,58 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    if subs.hasAutoTrack {
+                        HStack {
+                            Label("AutoTrack Premium", systemImage: "building.columns.fill")
+                                .foregroundStyle(Color.appAccent)
+                            Spacer()
+                            Text("Active").foregroundStyle(.secondary)
+                        }
+                        NavigationLink {
+                            AutoTrackConnectView()
+                        } label: {
+                            Label("Connect a bank account", systemImage: "link")
+                        }
+                        Button {
+                            Task { await subs.openManageSubscriptions() }
+                        } label: {
+                            Label("Manage Subscription", systemImage: "creditcard")
+                        }
+                    } else {
+                        Button {
+                            showAutoTrackPaywall = true
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("AutoTrack Premium").font(.headline)
+                                    Text("Connect your bank with Plaid to auto-detect bills, spending, and subscriptions.")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote.bold())
+                                    .foregroundStyle(.secondary)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    HStack {
+                        Image(systemName: "building.columns")
+                            .foregroundStyle(Color.appAccent)
+                        Text("AutoTrack Premium")
+                    }
+                } footer: {
+                    Text("Premium financial automation. Secure connection powered by Plaid; you stay in control before any suggested bill is confirmed.")
+                        .font(.footnote)
+                }
+
+                Section {
                     ProfileSwitcherBar()
 
-                    if subs.isPro {
+                    if subs.canManagedProfiles {
                         NavigationLink {
                             ManagedProfilesView()
                                 .environmentObject(profileStore)
@@ -321,6 +371,39 @@ struct SettingsView: View {
                     #endif
                 }
 
+                #if DEBUG
+                // QA-ONLY tier simulator. Compiled out of Release builds — used
+                // to exercise Essential/Business/Unlimited gates when local
+                // StoreKit Testing isn't engaging in the simulator. Sets the
+                // 3-tier plan only; Focus+ and AutoTrack stay separate.
+                Section {
+                    Picker("Simulated tier (DEBUG)", selection: Binding(
+                        get: { subs.debugTierOverride ?? .free },
+                        set: { subs.debugTierOverride = ($0 == .free ? nil : $0) }
+                    )) {
+                        Text("Free (off)").tag(PlanTier.free)
+                        Text("Essential").tag(PlanTier.essential)
+                        Text("Business").tag(PlanTier.business)
+                        Text("Unlimited").tag(PlanTier.unlimited)
+                    }
+                    HStack {
+                        Text("effectiveTier")
+                        Spacer()
+                        Text(subs.effectiveTier.displayName).foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("Focus+ / AutoTrack")
+                        Spacer()
+                        Text("\(subs.hasFocusPlus ? "F+" : "—") / \(subs.hasAutoTrack ? "AT" : "—")")
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Label("QA — Tier Override", systemImage: "ladybug")
+                } footer: {
+                    Text("DEBUG only. Promotes the 3-tier plan for gate testing. Not compiled into Release.")
+                }
+                #endif
+
                 Section {
                     if let name = auth.displayName {
                         HStack {
@@ -366,6 +449,19 @@ struct SettingsView: View {
                         .font(.footnote)
                 }
 
+                Section {
+                    NavigationLink {
+                        EarnRewardsView()
+                    } label: {
+                        Label("Earn Rewards", systemImage: "gift.fill")
+                            .foregroundStyle(Color.appAccentText)
+                    }
+                } header: {
+                    Text("Referrals")
+                } footer: {
+                    Text("Give $5, get $5 when friends subscribe with your code.")
+                }
+
                 Section("About") {
                     HStack {
                         Label("Version", systemImage: "info.circle")
@@ -376,6 +472,14 @@ struct SettingsView: View {
                         Label("Bills Stored", systemImage: "number")
                         Spacer()
                         Text("\(store.allStoredBills.count)").foregroundStyle(.secondary)
+                    }
+                    Link(destination: URL(string: "https://www.sacredpathwayllc.com")!) {
+                        HStack {
+                            Label("Visit Sacred Pathway LLC", systemImage: "globe")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     Link(destination: URL(string: "https://www.sacredpathway.org/sacred-bill-tracker-privacy")!) {
                         HStack {
@@ -478,6 +582,8 @@ struct SettingsView: View {
                 Text(message)
             }
             .paywallSheet(isPresented: $showPaywall, reason: paywallReason)
+            .autoTrackPaywallSheet(isPresented: $showAutoTrackPaywall)
+            .task { await subs.refreshAutoTrackEntitlementFromBackend() }
         }
     }
 

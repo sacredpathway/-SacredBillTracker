@@ -133,6 +133,8 @@ struct SacredBillTrackerApp: App {
     @StateObject private var notifications = NotificationManager.shared
     @StateObject private var auth = AuthService.shared
     @StateObject private var subscriptions = SubscriptionManager()
+    /// 3-tier plan entitlements (Essential / Business / Unlimited).
+    @StateObject private var tiers = TierEntitlementManager()
     @StateObject private var reviewPrompt = ReviewPromptService.shared
     @StateObject private var versionGate = VersionGateService.shared
     /// v1.0.9.x — Sacred Focus productivity system stores.
@@ -171,7 +173,9 @@ struct SacredBillTrackerApp: App {
                 .environmentObject(notifications)
                 .environmentObject(auth)
                 .environmentObject(subscriptions)
+                .environmentObject(tiers)
                 .environmentObject(reviewPrompt)
+                .task { await tiers.start() }
                 .environmentObject(versionGate)
                 .environmentObject(noteStore)
                 .environmentObject(scheduleStore)
@@ -186,7 +190,7 @@ struct SacredBillTrackerApp: App {
                     // anything else. Safe-fallback on failure (allowed).
                     await versionGate.refresh()
                     await subscriptions.refreshEntitlements()
-                    profileStore.applyPremiumAccess(subscriptions.isPro)
+                    profileStore.applyPremiumAccess(subscriptions.canManagedProfiles)
                     applyProfileContext()
 
                     // Once-per-cold-launch counter for the in-app review gate.
@@ -216,8 +220,8 @@ struct SacredBillTrackerApp: App {
                 .onChange(of: auth.currentUserID) { _, newUserID in
                     Task { await handleUserChange(newUserID) }
                 }
-                .onChange(of: subscriptions.isPro) { _, isPro in
-                    profileStore.applyPremiumAccess(isPro)
+                .onChange(of: subscriptions.canManagedProfiles) { _, canProfiles in
+                    profileStore.applyPremiumAccess(canProfiles)
                     applyProfileContext()
                 }
                 // Use onChange (fires AFTER the value updates) rather than
@@ -258,11 +262,23 @@ struct SacredBillTrackerApp: App {
             applyProfileContext()
             store.resetForSignedOutUser()
             subscriptions.clearForSignedOutUser()
+            // Reset the 3-tier entitlement state too, so the paywall never
+            // shows the previous account's tier / "CURRENT" badge after a
+            // sign-out → sign-in on the same device.
+            tiers.clearForSignedOutUser()
             if let caching = Self.repo as? CachingBillRepository {
                 await caching.clearLocalCache()
             }
             return
         }
+
+        // New user signed in — reset any stale 3-tier entitlement from the
+        // previous account, then re-resolve for THIS user from local StoreKit
+        // entitlements + the backend `current_subscription_tier` RPC. Without
+        // this, the paywall could show the prior account's tier/"CURRENT".
+        tiers.clearForSignedOutUser()
+        await tiers.refreshFromStoreKit()
+        await tiers.refreshFromBackend()
 
         await profileStore.loadForSignedInUser(userID: userID, displayName: auth.displayName)
         applyProfileContext()
@@ -342,6 +358,12 @@ final class AppsFlyerManager: NSObject {
     private var isConfigured = false
     private override init() { super.init() }
 
+    private func debugLog(_ message: String) {
+        #if DEBUG
+        print("[AppsFlyer] \(message)")
+        #endif
+    }
+
     /// Placeholder/sentinel values that must NOT be treated as a real key.
     private static let placeholderKeys: Set<String> = [
         "", "paste_real_key_here", "APPSFLYER_DEV_KEY_HERE", "$(APPSFLYER_DEV_KEY)"
@@ -360,8 +382,7 @@ final class AppsFlyerManager: NSObject {
     /// configure or start AppsFlyer.
     func configure() {
         guard let devKey = Self.resolvedDevKey() else {
-            print("[AppsFlyer] Dev Key not configured (placeholder). AppsFlyer will not start. " +
-                  "Set APPSFLYER_DEV_KEY in Secrets.xcconfig.")
+            debugLog("Dev Key not configured (placeholder). AppsFlyer will not start.")
             isConfigured = false
             return
         }
@@ -378,6 +399,7 @@ final class AppsFlyerManager: NSObject {
         }
         // af.isDebug = true   // DEV ONLY — remove before release
         isConfigured = true
+        debugLog("SDK configured")
     }
 
     /// True only when NSUserTrackingUsageDescription is present in the bundle.
@@ -392,7 +414,10 @@ final class AppsFlyerManager: NSObject {
     /// Otherwise (default SKAN-only posture) start directly without prompting —
     /// SKAdNetwork attribution still works. No-op when the Dev Key is unset.
     func requestATTThenStart() {
-        guard isConfigured else { return }
+        guard isConfigured else {
+            debugLog("SDK start skipped (not configured)")
+            return
+        }
         if #available(iOS 14, *), Self.hasATTUsageString {
             ATTrackingManager.requestTrackingAuthorization { [weak self] _ in
                 DispatchQueue.main.async { self?.start() }
@@ -403,8 +428,12 @@ final class AppsFlyerManager: NSObject {
     }
 
     private func start() {
-        guard isConfigured, !didStart else { return }
+        guard isConfigured, !didStart else {
+            debugLog("SDK start skipped (already started or not configured)")
+            return
+        }
         didStart = true
+        debugLog("SDK start requested")
         AppsFlyerLib.shared().start()
     }
 
@@ -414,10 +443,14 @@ final class AppsFlyerManager: NSObject {
     // Dev Key → isConfigured == false). AppsFlyer queues events fired before
     // `start()` and flushes them once the SDK starts, so call sites don't need
     // to care about ordering. Event names use AppsFlyer's standard `af_` keys
-    // where one exists, plus a custom `bill_created`.
+    // where one exists, plus custom app engagement events.
 
     private func logEvent(_ name: String, values: [String: Any]? = nil) {
-        guard isConfigured else { return }
+        guard isConfigured else {
+            debugLog("Event skipped (not configured): \(name)")
+            return
+        }
+        debugLog("Event requested: \(name)")
         AppsFlyerLib.shared().logEvent(name, withValues: values)
     }
 
@@ -431,6 +464,11 @@ final class AppsFlyerManager: NSObject {
         logEvent("bill_created")
     }
 
+    /// Fired each time the user creates an income entry.
+    func logIncomeCreated() {
+        logEvent("income_created")
+    }
+
     /// Fired when a subscription purchase succeeds (subscription_started).
     func logSubscriptionStarted(productID: String? = nil,
                                 revenue: NSNumber? = nil,
@@ -440,6 +478,17 @@ final class AppsFlyerManager: NSObject {
         if let revenue { values["af_revenue"] = revenue }
         if let currency { values["af_currency"] = currency }
         logEvent("af_subscribe", values: values.isEmpty ? nil : values)
+    }
+
+    /// Fired when StoreKit confirms a paid subscription purchase.
+    func logPurchase(productID: String? = nil,
+                     revenue: NSNumber? = nil,
+                     currency: String? = nil) {
+        var values: [String: Any] = [:]
+        if let productID { values["af_content_id"] = productID }
+        if let revenue { values["af_revenue"] = revenue }
+        if let currency { values["af_currency"] = currency }
+        logEvent("af_purchase", values: values.isEmpty ? nil : values)
     }
 }
 

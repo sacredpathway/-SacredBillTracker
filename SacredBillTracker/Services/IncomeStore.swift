@@ -29,6 +29,12 @@ final class IncomeStore: ObservableObject {
     private let storage: CloudBackedDefaults
     private var cloudObserver: NSObjectProtocol?
 
+    private func attributionDebugLog(_ message: String) {
+        #if DEBUG
+        print("[AppsFlyer][Income] \(message)")
+        #endif
+    }
+
     // MARK: - Init
 
     init(storage: CloudBackedDefaults = .shared) {
@@ -140,6 +146,11 @@ final class IncomeStore: ObservableObject {
         entries.insert(new, at: 0)
         sort()
         persist()
+        // Attribution: income_created (no-op while AppsFlyer is dormant).
+        #if canImport(AppsFlyerLib)
+        attributionDebugLog("Income add success path reached; requesting income_created")
+        AppsFlyerManager.shared.logIncomeCreated()
+        #endif
     }
 
     func update(_ entry: WeeklyIncome) {
@@ -171,6 +182,100 @@ final class IncomeStore: ObservableObject {
 
     private func sort() {
         entries.sort { $0.weekStart > $1.weekStart }
+    }
+
+    // MARK: - Bank-imported income (AutoTrack / Plaid)
+
+    /// Replaces ALL previously bank-imported entries with `imported`, while
+    /// leaving manually-entered income untouched. Idempotent: calling it
+    /// repeatedly with the latest server truth never duplicates deposits.
+    /// Imported entries are stamped to the current profile so they appear in
+    /// the dashboard income counter.
+    func syncBankIncome(_ imported: [WeeklyIncome]) {
+        let manual = entries.filter { $0.externalRef == nil }
+        var bank = imported
+        for idx in bank.indices { stampProfileIfNeeded(&bank[idx]) }
+        entries = manual + bank
+        sort()
+        persist()
+    }
+
+    /// Pulls INCOME-category deposits from connected banks (via the
+    /// premium-gated `autotrack_income_entries` RPC) and merges them into the
+    /// income counter. No-op if Supabase isn't linked or the user isn't
+    /// AutoTrack-entitled (the RPC simply returns no rows). Safe to call on
+    /// every dashboard appearance and after a Plaid sync.
+    func refreshBankIncome() async {
+        #if canImport(Supabase)
+        struct Row: Decodable {
+            let plaid_transaction_id: String
+            let txn_date: String
+            let amount: Double
+            let source_name: String?
+            let institution_name: String?
+            /// Source account's business/personal classification. Used so
+            /// business deposits never land in Personal totals.
+            let usage_type: String?
+
+            private enum K: String, CodingKey {
+                case plaid_transaction_id, txn_date, amount, source_name, institution_name, usage_type
+            }
+            init(from decoder: Decoder) throws {
+                let c = try decoder.container(keyedBy: K.self)
+                plaid_transaction_id = try c.decode(String.self, forKey: .plaid_transaction_id)
+                txn_date = try c.decode(String.self, forKey: .txn_date)
+                // numeric may arrive as a JSON number or string — accept both.
+                if let d = try? c.decode(Double.self, forKey: .amount) {
+                    amount = d
+                } else if let s = try? c.decode(String.self, forKey: .amount), let d = Double(s) {
+                    amount = d
+                } else {
+                    amount = 0
+                }
+                source_name = try c.decodeIfPresent(String.self, forKey: .source_name)
+                institution_name = try c.decodeIfPresent(String.self, forKey: .institution_name)
+                usage_type = try c.decodeIfPresent(String.self, forKey: .usage_type)
+            }
+        }
+
+        do {
+            let rows: [Row] = try await SupabaseConfig.client
+                .rpc("autotrack_income_entries")
+                .execute()
+                .value
+
+            let df = DateFormatter()
+            df.calendar = Calendar(identifier: .gregorian)
+            df.locale = Locale(identifier: "en_US_POSIX")
+            df.timeZone = TimeZone(identifier: "UTC")
+            df.dateFormat = "yyyy-MM-dd"
+
+            let imported: [WeeklyIncome] = rows.compactMap { r in
+                guard r.amount > 0, let day = df.date(from: r.txn_date) else { return nil }
+                let source = (r.source_name?.isEmpty == false) ? r.source_name! : "Bank deposit"
+                let note = r.institution_name.map { "Imported from \($0)" } ?? "Imported from bank"
+                // Route the deposit by its source account's classification so
+                // business income is never mixed into Personal totals. `unknown`
+                // accounts stay out of both Personal and Business (All only).
+                let usage = AccountUsageType(safe: r.usage_type)
+                return WeeklyIncome(
+                    amount: Decimal(r.amount),
+                    weekStart: day,
+                    weekEnd: day,
+                    type: usage.incomeType,
+                    sourceName: source,
+                    note: note,
+                    externalRef: r.plaid_transaction_id,
+                    bankUsage: usage
+                )
+            }
+            syncBankIncome(imported)
+        } catch {
+            #if DEBUG
+            print("[AutoTrack] income sync failed: \(error)")
+            #endif
+        }
+        #endif
     }
 
     // MARK: - Totals
@@ -263,6 +368,35 @@ final class IncomeStore: ObservableObject {
     func allTimeTotal(type: IncomeType) -> Decimal {
         profileEntries
             .filter { $0.type == type }
+            .reduce(Decimal(0)) { $0 + $1.amount }
+    }
+
+    // MARK: - All / Personal / Business tabs (v1.9 — account classification)
+    //
+    // These sum by the entry's `usageTab` (bank account classification for
+    // imported income, IncomeType for manual income). Business income is
+    // therefore NEVER counted under Personal, and `unknown` bank income only
+    // appears in the unfiltered ("All") totals — exactly the tab contract:
+    //   All      = personal + business + unknown
+    //   Personal = only personal-classified entries
+    //   Business = only business-classified entries
+
+    /// Entries for a tab. Pass `nil` (or `.unknown` is treated literally) —
+    /// `nil` means "All" and returns every entry.
+    func entries(usage: AccountUsageType?) -> [WeeklyIncome] {
+        guard let usage else { return profileEntries }
+        return profileEntries.filter { $0.usageTab == usage }
+    }
+
+    /// All-time total for a tab. `nil` = All.
+    func allTimeTotal(usage: AccountUsageType?) -> Decimal {
+        entries(usage: usage).reduce(Decimal(0)) { $0 + $1.amount }
+    }
+
+    /// Total within a date range for a tab. `nil` = All.
+    func total(in range: ClosedRange<Date>, usage: AccountUsageType?) -> Decimal {
+        entries(usage: usage)
+            .filter { range.contains($0.weekStart) }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
 

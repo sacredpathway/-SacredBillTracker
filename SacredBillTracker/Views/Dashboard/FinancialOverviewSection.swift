@@ -458,11 +458,17 @@ struct FinancialOverviewSection: View {
     }
 
     private func incomeTotal(for type: IncomeType) -> Decimal {
-        incomeStore.total(in: incomeRange, type: type)
+        // v1.9 — route by account classification (usageTab), not the raw income
+        // label, so business bank income never lands in the Personal tile and
+        // `unknown` bank income is excluded from BOTH tiles (it still counts in
+        // the combined/All total). Mirrors IncomeListView.
+        let usage: AccountUsageType = (type == .business) ? .business : .personal
+        return incomeStore.total(in: incomeRange, usage: usage)
     }
 
     private var combinedIncomeTotal: Decimal {
-        incomeTotal(for: .business) + incomeTotal(for: .personal)
+        // All income in the window — personal + business + unknown.
+        incomeStore.total(in: incomeRange, usage: nil)
     }
 
     private var billsThisMonth: [Bill] {

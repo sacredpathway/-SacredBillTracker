@@ -64,6 +64,13 @@
 		DDDD1001DDDD1001DDDD1001 /* ProductIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */; };
 		DDDD1002DDDD1002DDDD1002 /* Entitlements.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */; };
 		DDDD1003DDDD1003DDDD1003 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0003DDDD0003DDDD0003 /* SubscriptionManager.swift */; };
+		TIER1001TIER1001TIER1001 /* SubscriptionPlanTier.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */; };
+		TIER1002TIER1002TIER1002 /* TierEntitlementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */; };
+		ANLY1001ANLY1001ANLY1001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ANLY0001ANLY0001ANLY0001 /* AnalyticsService.swift */; };
+		RFRL1001RFRL1001RFRL1001 /* ReferralService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */; };
+		TPWL1001TPWL1001TPWL1001 /* ThreeTierPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TPWL0001TPWL0001TPWL0001 /* ThreeTierPaywallView.swift */; };
+		FGAT1001FGAT1001FGAT1001 /* FeatureGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FGAT0001FGAT0001FGAT0001 /* FeatureGate.swift */; };
+		ERWD1001ERWD1001ERWD1001 /* EarnRewardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ERWD0001ERWD0001ERWD0001 /* EarnRewardsView.swift */; };
 		DDDD1004DDDD1004DDDD1004 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0004DDDD0004DDDD0004 /* PaywallView.swift */; };
 		DDDD1005DDDD1005DDDD1005 /* ProLockCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0005DDDD0005DDDD0005 /* ProLockCard.swift */; };
 		DEF2AEDF119F54D45FBA74E1 /* Date+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43CCB5B4F5F9C24ED039DDF /* Date+Helpers.swift */; };
@@ -76,6 +83,7 @@
 		FEE5C6432C66F9E3A4EDCC76 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E9A96D326215ECD34DD55B /* NotificationSettingsView.swift */; };
 		FFC4C3B1CBF4FF8A63C5BD80 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A77C81C05D0A317538035A /* DashboardView.swift */; };
 		FOVS1001FOVS1001FOVS1001 /* FinancialOverviewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FOVS0001FOVS0001FOVS0001 /* FinancialOverviewSection.swift */; };
+		BDGT1001BDGT1001BDGT1001 /* BudgetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDGT0001BDGT0001BDGT0001 /* BudgetingView.swift */; };
 		FPEC1001FPEC1001FPEC1001 /* FocusPlusEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FPEC0001FPEC0001FPEC0001 /* FocusPlusEntryCard.swift */; };
 		FPPW1001FPPW1001FPPW1001 /* FocusPlusPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FPPW0001FPPW0001FPPW0001 /* FocusPlusPaywallView.swift */; };
 		FRR01001FRR01001FRR01001 /* FocusRepeatRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRR00001FRR00001FRR00001 /* FocusRepeatRule.swift */; };
@@ -212,6 +220,13 @@
 		DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductIdentifiers.swift; sourceTree = "<group>"; };
 		DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlements.swift; sourceTree = "<group>"; };
 		DDDD0003DDDD0003DDDD0003 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlanTier.swift; sourceTree = "<group>"; };
+		TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierEntitlementManager.swift; sourceTree = "<group>"; };
+		ANLY0001ANLY0001ANLY0001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferralService.swift; sourceTree = "<group>"; };
+		TPWL0001TPWL0001TPWL0001 /* ThreeTierPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeTierPaywallView.swift; sourceTree = "<group>"; };
+		FGAT0001FGAT0001FGAT0001 /* FeatureGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureGate.swift; sourceTree = "<group>"; };
+		ERWD0001ERWD0001ERWD0001 /* EarnRewardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EarnRewardsView.swift; sourceTree = "<group>"; };
 		DDDD0004DDDD0004DDDD0004 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		DDDD0005DDDD0005DDDD0005 /* ProLockCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProLockCard.swift; sourceTree = "<group>"; };
 		DDDD0006DDDD0006DDDD0006 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = file.storekit; path = Configuration.storekit; sourceTree = "<group>"; };
@@ -663,6 +678,7 @@
 		FDA8F8EA2F98336600A87244 /* SacredBillTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SacredBillTracker.entitlements; sourceTree = "<group>"; };
 		FDAC997A1DA889FDDBFE5ADD /* SupabaseBillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseBillRepository.swift; sourceTree = "<group>"; };
 		FOVS0001FOVS0001FOVS0001 /* FinancialOverviewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialOverviewSection.swift; sourceTree = "<group>"; };
+		BDGT0001BDGT0001BDGT0001 /* BudgetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetingView.swift; sourceTree = "<group>"; };
 		FPEC0001FPEC0001FPEC0001 /* FocusPlusEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPlusEntryCard.swift; sourceTree = "<group>"; };
 		FPPW0001FPPW0001FPPW0001 /* FocusPlusPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPlusPaywallView.swift; sourceTree = "<group>"; };
 		FRR00001FRR00001FRR00001 /* FocusRepeatRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusRepeatRule.swift; sourceTree = "<group>"; };
@@ -741,6 +757,7 @@
 			isa = PBXGroup;
 			children = (
 				DE079A04FBE544C87B570E6F /* SettingsView.swift */,
+				ERWD0001ERWD0001ERWD0001 /* EarnRewardsView.swift */,
 				CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */,
 			);
 			path = Settings;
@@ -791,6 +808,7 @@
 			children = (
 				06A77C81C05D0A317538035A /* DashboardView.swift */,
 				FOVS0001FOVS0001FOVS0001 /* FinancialOverviewSection.swift */,
+				BDGT0001BDGT0001BDGT0001 /* BudgetingView.swift */,
 				SDFC0001SDFC0001SDFC0001 /* SacredDailyFocusCard.swift */,
 				FPEC0001FPEC0001FPEC0001 /* FocusPlusEntryCard.swift */,
 				SIEV0001SIEV0001SIEV0001 /* ScheduleItemEditView.swift */,
@@ -828,6 +846,8 @@
 				SHRE0001SHRE0001SHRE0001 /* BillShareService.swift */,
 				PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */,
 				DDDD2001DDDD2001DDDD2001 /* StoreKit */,
+				ANLY0001ANLY0001ANLY0001 /* AnalyticsService.swift */,
+				RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */,
 				7C601944789BE0D7770B6162 /* NotificationManager.swift */,
 				HEALTH01HEALTH01HEALTH01 /* BillHealthScore.swift */,
 				WGTF0004WGTF0004WGTF0004 /* BillWidgetBridge.swift */,
@@ -973,6 +993,8 @@
 				DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */,
 				DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */,
 				DDDD0003DDDD0003DDDD0003 /* SubscriptionManager.swift */,
+				TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */,
+				TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */,
 			);
 			path = StoreKit;
 			sourceTree = "<group>";
@@ -981,6 +1003,8 @@
 			isa = PBXGroup;
 			children = (
 				DDDD0004DDDD0004DDDD0004 /* PaywallView.swift */,
+				TPWL0001TPWL0001TPWL0001 /* ThreeTierPaywallView.swift */,
+				FGAT0001FGAT0001FGAT0001 /* FeatureGate.swift */,
 				FPPW0001FPPW0001FPPW0001 /* FocusPlusPaywallView.swift */,
 				DDDD0005DDDD0005DDDD0005 /* ProLockCard.swift */,
 				AUTH0004AUTH0004AUTH0004 /* SubscriptionGateView.swift */,
@@ -2418,6 +2442,13 @@
 				DDDD1001DDDD1001DDDD1001 /* ProductIdentifiers.swift in Sources */,
 				DDDD1002DDDD1002DDDD1002 /* Entitlements.swift in Sources */,
 				DDDD1003DDDD1003DDDD1003 /* SubscriptionManager.swift in Sources */,
+				TIER1001TIER1001TIER1001 /* SubscriptionPlanTier.swift in Sources */,
+				TIER1002TIER1002TIER1002 /* TierEntitlementManager.swift in Sources */,
+				ANLY1001ANLY1001ANLY1001 /* AnalyticsService.swift in Sources */,
+				RFRL1001RFRL1001RFRL1001 /* ReferralService.swift in Sources */,
+				TPWL1001TPWL1001TPWL1001 /* ThreeTierPaywallView.swift in Sources */,
+				FGAT1001FGAT1001FGAT1001 /* FeatureGate.swift in Sources */,
+				ERWD1001ERWD1001ERWD1001 /* EarnRewardsView.swift in Sources */,
 				DDDD1004DDDD1004DDDD1004 /* PaywallView.swift in Sources */,
 				DDDD1005DDDD1005DDDD1005 /* ProLockCard.swift in Sources */,
 				PRTN1001PRTN1001PRTN1001 /* Theme.swift in Sources */,
@@ -2433,6 +2464,7 @@
 				BCKT1002BCKT1002BCKT1002 /* BucketBillsListView.swift in Sources */,
 				BBTL1001BBTL1001BBTL1001 /* BillsByTypeListView.swift in Sources */,
 				FOVS1001FOVS1001FOVS1001 /* FinancialOverviewSection.swift in Sources */,
+				BDGT1001BDGT1001BDGT1001 /* BudgetingView.swift in Sources */,
 				SDFC1001SDFC1001SDFC1001 /* SacredDailyFocusCard.swift in Sources */,
 				APRF1001APRF1001APRF1001 /* AppearancePreference.swift in Sources */,
 				FPPW1001FPPW1001FPPW1001 /* FocusPlusPaywallView.swift in Sources */,
@@ -2586,7 +2618,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 29;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2607,7 +2639,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.13;
+				MARKETING_VERSION = 1.0.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2624,7 +2656,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 29;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2645,7 +2677,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.13;
+				MARKETING_VERSION = 1.0.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2723,7 +2755,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 29;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
@@ -2735,7 +2767,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.13;
+				MARKETING_VERSION = 1.0.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2751,7 +2783,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 29;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
@@ -2763,7 +2795,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.13;
+				MARKETING_VERSION = 1.0.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

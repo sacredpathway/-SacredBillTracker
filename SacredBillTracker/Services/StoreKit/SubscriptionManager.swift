@@ -16,6 +16,10 @@ import StoreKit
 import SwiftUI
 import UIKit
 
+#if canImport(Supabase)
+import Supabase
+#endif
+
 @MainActor
 final class SubscriptionManager: ObservableObject {
 
@@ -43,10 +47,35 @@ final class SubscriptionManager: ObservableObject {
     /// for debug / settings displays.
     @Published private(set) var purchasedProductIDs: Set<String> = []
 
+    private func attributionDebugLog(_ message: String) {
+        #if DEBUG
+        print("[AppsFlyer][Subscription] \(message)")
+        #endif
+    }
+
     /// v1.0.9 — Sacred Focus+ add-on entitlement. Tracked independently
     /// of the Pro tier: Pro users still need to subscribe to Focus+ for
     /// this to be true.
     @Published private(set) var hasFocusPlus: Bool = false
+
+    /// Sacred AutoTrack Premium (Plaid-powered) entitlement. Independent of
+    /// Pro and Focus+. This reflects the StoreKit receipt locally AND is
+    /// reconciled against the server's `autotrack_entitlement()` RPC, which
+    /// is the authoritative source (it reflects App Store / Play webhook
+    /// updates for renewals, cancellations, refunds, and lapses).
+    @Published private(set) var hasAutoTrack: Bool = false
+
+    /// Highest 3-tier plan (Essential/Business/Unlimited) the user holds,
+    /// derived from StoreKit entitlements in `refreshEntitlements()`.
+    @Published private(set) var rawPlanTier: PlanTier = .free
+
+    #if DEBUG
+    /// QA ONLY — simulate a 3-tier plan for gate testing when local StoreKit
+    /// Testing isn't engaging in the simulator. Compiled out of Release builds
+    /// entirely (#if DEBUG), so it cannot affect App Store / TestFlight archives.
+    /// Set via the Debug section in Settings. nil = no override.
+    @Published var debugTierOverride: PlanTier? = nil
+    #endif
 
     #if DEBUG
     /// Debug-only owner allowlist for local QA. Release builds must unlock
@@ -58,13 +87,41 @@ final class SubscriptionManager: ObservableObject {
 
     // MARK: - Convenience
 
-    var isPro: Bool { currentTier.isPro }
+    /// Effective tier = max(new 3-tier plan, legacy Pro→Business, legacy
+    /// AutoTrack→Unlimited). Single source of truth for feature gating.
+    var effectiveTier: PlanTier {
+        var t = rawPlanTier
+        if currentTier.isPro { t = max(t, .business) }   // legacy Pro
+        if hasAutoTrack      { t = max(t, .unlimited) }  // legacy AutoTrack
+        #if DEBUG
+        if let o = debugTierOverride { t = max(t, o) }   // QA-only simulation
+        #endif
+        return t
+    }
+
+    // Tier-aware capabilities — gate features on THESE, not on `isPro`.
+    var canUnlimitedBills:    Bool { effectiveTier >= .essential }
+    var canIncomeTracking:    Bool { effectiveTier >= .essential }
+    var canBusinessTracking:  Bool { effectiveTier >= .business  }
+    var canBusinessReports:   Bool { effectiveTier >= .business  }
+    var canManagedProfiles:   Bool { effectiveTier >= .unlimited }
+    var canForecasting:       Bool { effectiveTier >= .unlimited }
+    var canAIInsights:        Bool { effectiveTier >= .unlimited }
+    var canAdvancedAnalytics: Bool { effectiveTier >= .unlimited }
+
+    /// Back-compat: any paid plan (Business+) counts as "Pro" for legacy call
+    /// sites not yet migrated to a specific capability above.
+    var isPro: Bool { effectiveTier >= .business }
 
     var monthlyProduct: Product? { products[ProductID.proMonthly] }
     var yearlyProduct:  Product? { products[ProductID.proYearly]  }
 
     /// Sacred Focus+ monthly add-on product (loaded from StoreKit).
     var focusPlusProduct: Product? { products[ProductID.focusPlusMonthly] }
+
+    /// Sacred AutoTrack Premium products (loaded from StoreKit).
+    var autoTrackMonthlyProduct: Product? { products[ProductID.autoTrackMonthly] }
+    var autoTrackYearlyProduct:  Product? { products[ProductID.autoTrackYearly]  }
 
     // MARK: - Private
 
@@ -123,21 +180,40 @@ final class SubscriptionManager: ObservableObject {
     /// completed and entitlement was granted, `false` otherwise
     /// (user cancelled, pending parental approval, etc.).
     @discardableResult
-    func purchase(_ product: Product) async -> Bool {
+    func purchase(_ product: Product, appAccountToken: UUID? = nil) async -> Bool {
         startTransactionListenerIfNeeded()
         lastError = nil
         do {
-            let result = try await product.purchase()
+            // For AutoTrack we bind the Apple transaction to the Supabase
+            // user id via appAccountToken so server notifications
+            // (renewals/cancels/refunds) attribute to the right account.
+            var options: Set<Product.PurchaseOption> = []
+            if let token = appAccountToken {
+                options.insert(.appAccountToken(token))
+            }
+            let result = try await product.purchase(options: options)
 
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
                 await transaction.finish()
                 await refreshEntitlements()
+                // AutoTrack: verify server-side immediately so the backend
+                // entitlement (authoritative) is seeded right after purchase.
+                if ProductID.autoTrack.contains(product.id) {
+                    await verifyAutoTrackOnBackend(transaction)
+                    await refreshAutoTrackEntitlementFromBackend()
+                }
                 lastPurchaseSucceeded = true
                 // Attribution: subscription_started (no-op while AppsFlyer dormant).
                 #if canImport(AppsFlyerLib)
+                attributionDebugLog("Verified purchase success path reached; requesting af_subscribe and af_purchase")
                 AppsFlyerManager.shared.logSubscriptionStarted(
+                    productID: product.id,
+                    revenue: NSDecimalNumber(decimal: product.price),
+                    currency: product.priceFormatStyle.currencyCode
+                )
+                AppsFlyerManager.shared.logPurchase(
                     productID: product.id,
                     revenue: NSDecimalNumber(decimal: product.price),
                     currency: product.priceFormatStyle.currencyCode
@@ -170,7 +246,10 @@ final class SubscriptionManager: ObservableObject {
         do {
             try await AppStore.sync()
             await refreshEntitlements()
-            if !isPro {
+            // Reconcile AutoTrack against the server (authoritative) too, so
+            // Restore re-grants AutoTrack from server-verified state.
+            await refreshAutoTrackEntitlementFromBackend()
+            if !isPro && !hasAutoTrack && !hasFocusPlus {
                 lastError = "No active subscription was found on this Apple ID."
             }
         } catch {
@@ -186,7 +265,9 @@ final class SubscriptionManager: ObservableObject {
         startTransactionListenerIfNeeded()
         var activeIDs: Set<String> = []
         var tier: SubscriptionTier = .free
+        var plan: PlanTier = .free
         var focusPlus = false
+        var autoTrack = false
 
         // Disambiguate: SwiftUI also ships a `Transaction` type (animations).
         for await result in StoreKit.Transaction.currentEntitlements {
@@ -208,6 +289,13 @@ final class SubscriptionManager: ObservableObject {
                 // v1.0.9 — Focus+ is independent of Pro; do not flip
                 // currentTier here.
                 focusPlus = true
+            case ProductID.autoTrackMonthly, ProductID.autoTrackYearly:
+                // AutoTrack is independent of Pro; do not flip currentTier.
+                autoTrack = true
+            case ProductID.essentialMonthly, ProductID.businessMonthly, ProductID.unlimitedMonthly:
+                // 3-tier plans drive `rawPlanTier` (not the legacy currentTier).
+                let t = PlanTier.from(productID: transaction.productID)
+                if t.rank > plan.rank { plan = t }
             default:
                 break
             }
@@ -224,6 +312,11 @@ final class SubscriptionManager: ObservableObject {
         self.purchasedProductIDs = activeIDs
         self.currentTier = tier
         self.hasFocusPlus = focusPlus
+        // Local (StoreKit) view of AutoTrack. The backend reconcile in
+        // refreshAutoTrackEntitlementFromBackend() is authoritative and may
+        // promote/demote this based on server-verified state.
+        self.hasAutoTrack = autoTrack
+        self.rawPlanTier = plan
     }
 
     /// Allow external callers (e.g. auth state changes) to re-evaluate
@@ -244,8 +337,10 @@ final class SubscriptionManager: ObservableObject {
     /// Apple's receipt stream intentionally.
     func clearForSignedOutUser() {
         currentTier = .free
+        rawPlanTier = .free
         purchasedProductIDs = []
         hasFocusPlus = false
+        hasAutoTrack = false
         lastPurchaseSucceeded = false
         lastError = nil
     }
@@ -303,6 +398,78 @@ final class SubscriptionManager: ObservableObject {
         } catch {
             lastError = "Couldn't open Manage Subscriptions: \(error.localizedDescription)"
         }
+    }
+
+    // MARK: - Sacred AutoTrack Premium (server-authoritative)
+
+    /// Purchase an AutoTrack product, binding the Apple transaction to the
+    /// signed-in Supabase user via `appAccountToken`, then verifying on the
+    /// backend. Returns the resulting (server-reconciled) entitlement.
+    @discardableResult
+    func purchaseAutoTrack(_ product: Product) async -> Bool {
+        let uid = AuthService.shared.currentUserID
+        _ = await purchase(product, appAccountToken: uid)
+        return hasAutoTrack
+    }
+
+    /// POST the verified transaction to the `verify-store-subscription` edge
+    /// function so the server records authoritative entitlement state. The
+    /// function re-fetches the truth from Apple using the original
+    /// transaction id — no signed blob or secret is sent from the client.
+    func verifyAutoTrackOnBackend(_ transaction: StoreKit.Transaction) async {
+        #if canImport(Supabase)
+        struct Body: Encodable {
+            let platform: String
+            let product_id: String
+            let original_transaction_id: String
+        }
+        let body = Body(
+            platform: "apple",
+            product_id: transaction.productID,
+            original_transaction_id: String(transaction.originalID)
+        )
+        do {
+            // verify_jwt=true on the function -> the SDK attaches the
+            // signed-in user's access token automatically.
+            try await SupabaseConfig.client.functions.invoke(
+                "verify-store-subscription",
+                options: FunctionInvokeOptions(body: body)
+            )
+        } catch {
+            #if DEBUG
+            print("[AutoTrack] verify-store-subscription failed: \(error)")
+            #endif
+        }
+        #endif
+    }
+
+    /// Reconcile AutoTrack entitlement against the server RPC
+    /// `autotrack_entitlement()` (reflects store webhook updates + cross-device).
+    ///
+    /// IMPORTANT: this only ever PROMOTES to unlocked — it never demotes a valid
+    /// local StoreKit entitlement. `refreshEntitlements()` (Apple's
+    /// `Transaction.currentEntitlements`) is the authoritative local signal and
+    /// already removes expired/revoked transactions, so locking on lapse is
+    /// handled there. Letting the backend force `false` here would wrongly lock
+    /// a user in the window right after purchase (before the receipt is recorded
+    /// server-side) and breaks local StoreKit-config testing entirely.
+    func refreshAutoTrackEntitlementFromBackend() async {
+        #if canImport(Supabase)
+        struct Entitlement: Decodable { let entitled: Bool? }
+        do {
+            let result: Entitlement = try await SupabaseConfig.client
+                .rpc("autotrack_entitlement")
+                .execute()
+                .value
+            if result.entitled == true {
+                self.hasAutoTrack = true
+            }
+        } catch {
+            #if DEBUG
+            print("[AutoTrack] autotrack_entitlement failed: \(error)")
+            #endif
+        }
+        #endif
     }
 }
 

@@ -137,8 +137,9 @@ struct BillsView: View {
     }
 
     /// True when the user can add another bill under their current tier.
+    /// Essential ($4.99) and up lift the free bill cap.
     private var canAddBill: Bool {
-        subs.isPro || store.allStoredBills.count < FreeTierLimits.maxBills
+        subs.canUnlimitedBills || store.allStoredBills.count < FreeTierLimits.maxBills
     }
 
     /// Native iOS share button — pipes a plain-text summary of the

@@ -108,13 +108,16 @@ struct IncomeListView: View {
                       tint: .appBusiness)
 
             // v1.0.9 — Business / Personal split of all-time totals.
+            // v1.9 — sums by account classification (`usageTab`), so business
+            // bank income never lands in Personal and `unknown` bank income is
+            // excluded from both cards (it still counts in All Time above).
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 totalCard(title: "Business",
-                          total: store.allTimeTotal(type: .business),
+                          total: store.allTimeTotal(usage: .business),
                           systemImage: IncomeType.business.systemImage,
                           tint: IncomeType.business.accent)
                 totalCard(title: "Personal",
-                          total: store.allTimeTotal(type: .personal),
+                          total: store.allTimeTotal(usage: .personal),
                           systemImage: IncomeType.personal.systemImage,
                           tint: IncomeType.personal.accent)
             }
@@ -180,7 +183,10 @@ struct IncomeListView: View {
     /// empty-state branch + the rendered list so they stay in sync.
     private var filteredEntries: [WeeklyIncome] {
         guard let typeFilter else { return store.profileEntries }
-        return store.profileEntries.filter { $0.type == typeFilter }
+        // Filter by account classification so a Business filter shows only
+        // business-classified income (and never `unknown` bank deposits).
+        let usage: AccountUsageType = (typeFilter == .business) ? .business : .personal
+        return store.profileEntries.filter { $0.usageTab == usage }
     }
 
     /// Navigation title that reflects the active filter.

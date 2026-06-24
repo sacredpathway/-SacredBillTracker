@@ -24,6 +24,13 @@ xcuserdata/
 
 # Swift Package Manager
 .swiftpm/
+.spm-cache/
+
+# pbxproj tier-merge backup (do not commit)
+*.bak_tiers
+
+# Nested marketing/assets folder (235MB; not part of the app target)
+/Sacred B ill Tracker/
 
 # Recovery backups & editor/script backup files (never commit)
 _RECOVERY_BACKUP_*/

@@ -19,6 +19,9 @@ struct ContentView: View {
             BillsView()
                 .tabItem { Label("Bills", systemImage: "list.bullet.rectangle.fill") }
 
+            BudgetDashboardView()
+                .tabItem { Label("Budget", systemImage: "chart.bar.fill") }
+
             CalendarView()
                 .tabItem { Label("Calendar", systemImage: "calendar") }
 

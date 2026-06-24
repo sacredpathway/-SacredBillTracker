@@ -138,6 +138,13 @@ struct DashboardView: View {
                 .ignoresSafeArea()
             )
             .navigationTitle("Dashboard")
+            // AutoTrack: pull bank deposits into the income counter when the
+            // user is entitled. No-op otherwise (RPC returns no rows).
+            .task(id: subs.hasAutoTrack) {
+                if subs.hasAutoTrack {
+                    await incomeStore.refreshBankIncome()
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if !store.bills.isEmpty {

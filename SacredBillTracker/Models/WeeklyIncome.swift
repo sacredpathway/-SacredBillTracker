@@ -40,6 +40,32 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
     /// Optional, separate from `sourceName`.
     var note: String
 
+    /// Stable external identifier for bank-imported income. Holds the Plaid
+    /// `plaid_transaction_id` for entries created automatically from a
+    /// connected bank via AutoTrack. `nil` for manually-entered income.
+    /// Used so re-syncing replaces bank entries cleanly instead of
+    /// duplicating them. v1.8+
+    var externalRef: String?
+
+    /// Business / personal classification of the *source bank account* for
+    /// imported income (mirrors `plaid_accounts.usage_type`). `nil` for
+    /// manually-entered income. Drives the All / Personal / Business tabs so
+    /// business income is never summed into Personal totals. v1.9+
+    var bankUsage: AccountUsageType?
+
+    /// True when this entry was imported from a connected bank account
+    /// (i.e. carries a Plaid transaction reference) rather than typed in.
+    var isBankImported: Bool { externalRef != nil }
+
+    /// Which dashboard tab (All / Personal / Business) this entry belongs to.
+    /// Bank-imported entries follow their account's classification; manual
+    /// entries follow their `type`. Ensures business income never lands in
+    /// Personal totals and `unknown` bank income only appears under "All".
+    var usageTab: AccountUsageType {
+        if isBankImported { return bankUsage ?? .unknown }
+        return type == .business ? .business : .personal
+    }
+
     /// Account-owned financial profile. Nil is treated as the owner's
     /// default profile for backward compatibility with older income JSON.
     var profileID: UUID?
@@ -62,6 +88,8 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
         type: IncomeType = .business,
         sourceName: String = "",
         note: String = "",
+        externalRef: String? = nil,
+        bankUsage: AccountUsageType? = nil,
         profileID: UUID? = nil,
         ownerUserID: UUID? = nil,
         createdAt: Date = Date(),
@@ -74,6 +102,8 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
         self.type = type
         self.sourceName = sourceName
         self.note = note
+        self.externalRef = externalRef
+        self.bankUsage = bankUsage
         self.profileID = profileID
         self.ownerUserID = ownerUserID
         self.createdAt = createdAt
@@ -87,7 +117,7 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
 
     private enum CodingKeys: String, CodingKey {
         case id, amount, weekStart, weekEnd, type, sourceName, note
-        case profileID, ownerUserID, createdAt, updatedAt
+        case externalRef, bankUsage, profileID, ownerUserID, createdAt, updatedAt
     }
 
     init(from decoder: Decoder) throws {
@@ -113,6 +143,8 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
         }
         self.sourceName = resolvedSource
         self.note = resolvedNote
+        self.externalRef = try c.decodeIfPresent(String.self, forKey: .externalRef)
+        self.bankUsage = try c.decodeIfPresent(AccountUsageType.self, forKey: .bankUsage)
         self.profileID = try c.decodeIfPresent(UUID.self, forKey: .profileID)
         self.ownerUserID = try c.decodeIfPresent(UUID.self, forKey: .ownerUserID)
 
@@ -194,5 +226,53 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
         // so subtract one second so weekEnd reads "Sun 23:59:59".
         let end = cal.date(byAdding: .second, value: -1, to: interval.end) ?? interval.end
         return (cal.startOfDay(for: interval.start), end)
+    }
+}
+
+// MARK: - AccountUsageType (v1.9 — bank account business/personal classification)
+
+/// Business vs personal classification of a *connected bank account*
+/// (mirrors `plaid_accounts.usage_type`). Distinct from `IncomeType`: an
+/// account can be `unknown` until the auto-classifier or the user decides,
+/// whereas every income entry still carries a binary Business/Personal label.
+/// This type drives the All / Personal / Business dashboard tabs.
+enum AccountUsageType: String, Codable, CaseIterable, Identifiable, Hashable {
+    case personal
+    case business
+    case unknown
+
+    var id: String { rawValue }
+
+    /// Decodes leniently — any unrecognized / missing value becomes `.unknown`.
+    init(safe raw: String?) {
+        self = AccountUsageType(rawValue: (raw ?? "").lowercased()) ?? .unknown
+    }
+
+    var title: String {
+        switch self {
+        case .personal: return "Personal"
+        case .business: return "Business"
+        case .unknown:  return "Needs review"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .personal: return "house.fill"
+        case .business: return "briefcase.fill"
+        case .unknown:  return "questionmark.circle.fill"
+        }
+    }
+
+    /// Binary income label used by the rest of the app. `unknown` falls back
+    /// to `.business` (the owner-operator default) only as a placeholder for
+    /// `WeeklyIncome.type`; tab filtering always uses `usageTab`, never this,
+    /// so unknown income is never counted as Business in the Business tab.
+    var incomeType: IncomeType {
+        switch self {
+        case .business: return .business
+        case .personal: return .personal
+        case .unknown:  return .business
+        }
     }
 }

@@ -58,6 +58,12 @@ final class AuthService: NSObject, ObservableObject {
 
     private let displayNameKey = "sacred.bill.tracker.auth.displayName.v1"
 
+    private func attributionDebugLog(_ message: String) {
+        #if DEBUG
+        print("[AppsFlyer][Auth] \(message)")
+        #endif
+    }
+
     override init() {
         super.init()
         displayName = UserDefaults.standard.string(forKey: displayNameKey)
@@ -164,6 +170,7 @@ final class AuthService: NSObject, ObservableObject {
                 lastError = nil
                 // Attribution: signup_completed (no-op while AppsFlyer dormant).
                 #if canImport(AppsFlyerLib)
+                attributionDebugLog("Registration success path reached; requesting af_complete_registration")
                 AppsFlyerManager.shared.logAccountCreated()
                 #endif
             } else {

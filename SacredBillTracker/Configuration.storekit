@@ -1,127 +1,285 @@
 {
-  "identifier" : "A1B2C3D4-1111-2222-3333-444455556666",
-  "nonRenewingSubscriptions" : [],
-  "products" : [],
-  "settings" : {
-    "_applicationInternalID" : "0",
-    "_developerTeamID" : "DCCSGYD5A4",
-    "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 0,
-    "_locale" : "en_US",
-    "_storefront" : "USA",
-    "_storeKitErrors" : [
-      { "current" : null, "enabled" : false, "name" : "Load Products" },
-      { "current" : null, "enabled" : false, "name" : "Purchase" },
-      { "current" : null, "enabled" : false, "name" : "Verification" },
-      { "current" : null, "enabled" : false, "name" : "App Store Sync" },
-      { "current" : null, "enabled" : false, "name" : "Subscription Status" },
-      { "current" : null, "enabled" : false, "name" : "App Transaction" },
-      { "current" : null, "enabled" : false, "name" : "Manage Subscriptions Sheet" },
-      { "current" : null, "enabled" : false, "name" : "Refund Request Sheet" },
-      { "current" : null, "enabled" : false, "name" : "Offer Code Redeem Sheet" }
+  "identifier": "A1B2C3D4-1111-2222-3333-444455556666",
+  "nonRenewingSubscriptions": [],
+  "products": [],
+  "settings": {
+    "_applicationInternalID": "0",
+    "_developerTeamID": "DCCSGYD5A4",
+    "_failTransactionsEnabled": false,
+    "_lastSynchronizedDate": 0,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": [
+      {
+        "current": null,
+        "enabled": false,
+        "name": "Load Products"
+      },
+      {
+        "current": null,
+        "enabled": false,
+        "name": "Purchase"
+      },
+      {
+        "current": null,
+        "enabled": false,
+        "name": "Verification"
+      },
+      {
+        "current": null,
+        "enabled": false,
+        "name": "App Store Sync"
+      },
+      {
+        "current": null,
+        "enabled": false,
+        "name": "Subscription Status"
+      },
+      {
+        "current": null,
+        "enabled": false,
+        "name": "App Transaction"
+      },
+      {
+        "current": null,
+        "enabled": false,
+        "name": "Manage Subscriptions Sheet"
+      },
+      {
+        "current": null,
+        "enabled": false,
+        "name": "Refund Request Sheet"
+      },
+      {
+        "current": null,
+        "enabled": false,
+        "name": "Offer Code Redeem Sheet"
+      }
     ]
   },
-  "subscriptionGroups" : [
+  "subscriptionGroups": [
     {
-      "id" : "22047990",
-      "localizations" : [
+      "id": "22047990",
+      "localizations": [
         {
-          "description" : "Sacred Bill Tracker Pro",
-          "displayName" : "Sacred Bill Tracker Pro",
-          "locale" : "en_US"
+          "description": "Sacred Bill Tracker Pro",
+          "displayName": "Sacred Bill Tracker Pro",
+          "locale": "en_US"
         }
       ],
-      "name" : "Sacred Bill Tracker Pro",
-      "subscriptions" : [
+      "name": "Sacred Bill Tracker Pro",
+      "subscriptions": [
         {
-          "adHocOffers" : [],
-          "codeOffers" : [],
-          "displayPrice" : "4.99",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "21627544",
-          "introductoryOffer" : {
-            "internalID" : "21627546",
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "4.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "21627544",
+          "introductoryOffer": {
+            "internalID": "21627546",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
           },
-          "localizations" : [
+          "localizations": [
             {
-              "description" : "Sacred Bill Tracker Pro — billed monthly.",
-              "displayName" : "Pro Monthly",
-              "locale" : "en_US"
+              "description": "Sacred Bill Tracker Pro \u2014 billed monthly.",
+              "displayName": "Pro Monthly",
+              "locale": "en_US"
             }
           ],
-          "productID" : "com.sacredbilltracker.app.pro.monthly",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Pro Monthly",
-          "subscriptionGroupID" : "22047990",
-          "type" : "RecurringSubscription"
+          "productID": "com.sacredbilltracker.app.pro.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Pro Monthly",
+          "subscriptionGroupID": "22047990",
+          "type": "RecurringSubscription"
         },
         {
-          "adHocOffers" : [],
-          "codeOffers" : [],
-          "displayPrice" : "39.99",
-          "familyShareable" : false,
-          "groupNumber" : 2,
-          "internalID" : "21627545",
-          "introductoryOffer" : {
-            "internalID" : "21627547",
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "39.99",
+          "familyShareable": false,
+          "groupNumber": 2,
+          "internalID": "21627545",
+          "introductoryOffer": {
+            "internalID": "21627547",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
           },
-          "localizations" : [
+          "localizations": [
             {
-              "description" : "Sacred Bill Tracker Pro — billed yearly. Best value.",
-              "displayName" : "Pro Yearly",
-              "locale" : "en_US"
+              "description": "Sacred Bill Tracker Pro \u2014 billed yearly. Best value.",
+              "displayName": "Pro Yearly",
+              "locale": "en_US"
             }
           ],
-          "productID" : "com.sacredbilltracker.app.pro.yearly",
-          "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Pro Yearly",
-          "subscriptionGroupID" : "22047990",
-          "type" : "RecurringSubscription"
+          "productID": "com.sacredbilltracker.app.pro.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Pro Yearly",
+          "subscriptionGroupID": "22047990",
+          "type": "RecurringSubscription"
         }
       ]
     },
     {
-      "id" : "sacred_focus_plus",
-      "localizations" : [
+      "id": "sacred_focus_plus",
+      "localizations": [
         {
-          "description" : "Sacred Focus+",
-          "displayName" : "Sacred Focus+",
-          "locale" : "en_US"
+          "description": "Sacred Focus+",
+          "displayName": "Sacred Focus+",
+          "locale": "en_US"
         }
       ],
-      "name" : "Sacred Focus+",
-      "subscriptions" : [
+      "name": "Sacred Focus+",
+      "subscriptions": [
         {
-          "adHocOffers" : [],
-          "codeOffers" : [],
-          "displayPrice" : "9.99",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "21627800",
-          "introductoryOffer" : null,
-          "localizations" : [
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "9.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "21627800",
+          "introductoryOffer": null,
+          "localizations": [
             {
-              "description" : "Unlock daily planning, focus quotes, to-do lists, and Schedule Buddy.",
-              "displayName" : "Sacred Focus+",
-              "locale" : "en_US"
+              "description": "Unlock daily planning, focus quotes, to-do lists, and Schedule Buddy.",
+              "displayName": "Sacred Focus+",
+              "locale": "en_US"
             }
           ],
-          "productID" : "sacred_focus_plus_monthly",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Sacred Focus+ Monthly",
-          "subscriptionGroupID" : "sacred_focus_plus",
-          "type" : "RecurringSubscription"
+          "productID": "sacred_focus_plus_monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Sacred Focus+ Monthly",
+          "subscriptionGroupID": "sacred_focus_plus",
+          "type": "RecurringSubscription"
+        }
+      ]
+    },
+    {
+      "id": "sacred_autotrack_premium",
+      "localizations": [
+        {
+          "description": "Sacred AutoTrack Premium",
+          "displayName": "Sacred AutoTrack Premium",
+          "locale": "en_US"
+        }
+      ],
+      "name": "Sacred AutoTrack Premium",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "14.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "21628100",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "Connect your accounts securely with Plaid to auto-detect spending, recurring bills, and subscriptions.",
+              "displayName": "AutoTrack Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.sacredbilltracker.app.autotrack.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "AutoTrack Monthly",
+          "subscriptionGroupID": "sacred_autotrack_premium",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "119.99",
+          "familyShareable": false,
+          "groupNumber": 2,
+          "internalID": "21628101",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "Sacred AutoTrack Premium \u2014 billed yearly. Best value.",
+              "displayName": "AutoTrack Annual",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.sacredbilltracker.app.autotrack.annual",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "AutoTrack Annual",
+          "subscriptionGroupID": "sacred_autotrack_premium",
+          "type": "RecurringSubscription"
+        }
+      ]
+    },
+    {
+      "id": "30010001",
+      "localizations": [],
+      "name": "Sacred Bill Tracker Plans",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "4.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "30010101",
+          "localizations": [
+            {
+              "description": "Take control of your finances in minutes.",
+              "displayName": "Essential",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "essential_monthly_499",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Essential",
+          "subscriptionGroupID": "30010001",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "9.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "30010102",
+          "localizations": [
+            {
+              "description": "Built for entrepreneurs, side hustles, truck drivers, and growing businesses.",
+              "displayName": "Business",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "business_monthly_999",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Business",
+          "subscriptionGroupID": "30010001",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "14.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "30010103",
+          "localizations": [
+            {
+              "description": "Your complete financial command center.",
+              "displayName": "Unlimited",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "unlimited_monthly_1499",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Unlimited",
+          "subscriptionGroupID": "30010001",
+          "type": "RecurringSubscription"
         }
       ]
     }
   ],
-  "version" : {
-    "major" : 4,
-    "minor" : 0
+  "version": {
+    "major": 4,
+    "minor": 0
   }
 }

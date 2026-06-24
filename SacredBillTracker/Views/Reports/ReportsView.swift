@@ -27,7 +27,7 @@ struct ReportsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                if subs.isPro || FreeTierLimits.allowReports {
+                if subs.canIncomeTracking || FreeTierLimits.allowReports {
                     VStack(alignment: .leading, spacing: 20) {
                         ProfileSwitcherBar()
                             .padding(.horizontal)

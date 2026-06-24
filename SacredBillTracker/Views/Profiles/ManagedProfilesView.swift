@@ -15,7 +15,7 @@ struct ProfileSwitcherBar: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            if subs.isPro {
+            if subs.canManagedProfiles {
                 Menu {
                     Button {
                         profiles.selectAllProfiles()
@@ -55,9 +55,9 @@ struct ProfileSwitcherBar: View {
             }
         }
         .onAppear {
-            profiles.applyPremiumAccess(subs.isPro)
+            profiles.applyPremiumAccess(subs.canManagedProfiles)
         }
-        .onChange(of: subs.isPro) { _, isPro in
+        .onChange(of: subs.canManagedProfiles) { _, isPro in
             profiles.applyPremiumAccess(isPro)
         }
         .sheet(isPresented: $showManageProfiles) {
@@ -123,7 +123,7 @@ struct ManagedProfilesView: View {
     var body: some View {
         NavigationStack {
             List {
-                if !subs.isPro {
+                if !subs.canManagedProfiles {
                     Section {
                         ProLockCard(
                             icon: "person.3.sequence.fill",
@@ -136,7 +136,7 @@ struct ManagedProfilesView: View {
                     }
                 }
 
-                if subs.isPro {
+                if subs.canManagedProfiles {
                     Section {
                     Button {
                         profiles.selectAllProfiles()
@@ -165,7 +165,7 @@ struct ManagedProfilesView: View {
                 Section {
                     ForEach(profiles.profiles) { profile in
                         Button {
-                            if subs.isPro {
+                            if subs.canManagedProfiles {
                                 editingProfile = profile
                             } else if profile.id != profiles.defaultProfile?.id {
                                 showPaywall = true
@@ -193,9 +193,9 @@ struct ManagedProfilesView: View {
             .navigationTitle("Profiles")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                profiles.applyPremiumAccess(subs.isPro)
+                profiles.applyPremiumAccess(subs.canManagedProfiles)
             }
-            .onChange(of: subs.isPro) { _, isPro in
+            .onChange(of: subs.canManagedProfiles) { _, isPro in
                 profiles.applyPremiumAccess(isPro)
             }
             .toolbar {
@@ -204,7 +204,7 @@ struct ManagedProfilesView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
-                        if subs.isPro {
+                        if subs.canManagedProfiles {
                             addingProfile = true
                         } else {
                             showPaywall = true
@@ -359,7 +359,7 @@ private struct AddEditManagedProfileSheet: View {
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                profiles.applyPremiumAccess(subs.isPro)
+                profiles.applyPremiumAccess(subs.canManagedProfiles)
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -395,7 +395,7 @@ private struct AddEditManagedProfileSheet: View {
     }
 
     private func save() async {
-        guard subs.isPro else {
+        guard subs.canManagedProfiles else {
             profiles.applyPremiumAccess(false)
             return
         }
@@ -411,7 +411,7 @@ private struct AddEditManagedProfileSheet: View {
     }
 
     private func archiveProfile() async {
-        guard subs.isPro else {
+        guard subs.canManagedProfiles else {
             profiles.applyPremiumAccess(false)
             return
         }
