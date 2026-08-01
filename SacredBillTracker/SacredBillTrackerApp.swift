@@ -469,26 +469,26 @@ final class AppsFlyerManager: NSObject {
         logEvent("income_created")
     }
 
-    /// Fired when a subscription purchase succeeds (subscription_started).
-    func logSubscriptionStarted(productID: String? = nil,
-                                revenue: NSNumber? = nil,
-                                currency: String? = nil) {
-        var values: [String: Any] = [:]
-        if let productID { values["af_content_id"] = productID }
-        if let revenue { values["af_revenue"] = revenue }
-        if let currency { values["af_currency"] = currency }
-        logEvent("af_subscribe", values: values.isEmpty ? nil : values)
-    }
-
-    /// Fired when StoreKit confirms a paid subscription purchase.
-    func logPurchase(productID: String? = nil,
-                     revenue: NSNumber? = nil,
-                     currency: String? = nil) {
-        var values: [String: Any] = [:]
-        if let productID { values["af_content_id"] = productID }
-        if let revenue { values["af_revenue"] = revenue }
-        if let currency { values["af_currency"] = currency }
-        logEvent("af_purchase", values: values.isEmpty ? nil : values)
+    /// Purchase events must use this acknowledged path through
+    /// PurchaseAttributionService. No StoreKit manager emits directly.
+    func logEventAcknowledged(_ name: String, values: [String: Any]) async throws {
+        guard isConfigured else {
+            throw PurchaseAttributionSenderError.appsFlyerNotConfigured
+        }
+        debugLog("Acknowledged event requested: \(name)")
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            AppsFlyerLib.shared().logEvent(
+                name: name,
+                values: values,
+                completionHandler: { _, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: ())
+                    }
+                }
+            )
+        }
     }
 }
 

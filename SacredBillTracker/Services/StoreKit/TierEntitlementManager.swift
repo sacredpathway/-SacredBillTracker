@@ -132,6 +132,12 @@ final class TierEntitlementManager: ObservableObject {
                     await AnalyticsService.shared.log(
                         purchased > previous ? .upgrade : (purchased < previous ? .downgrade : .purchase),
                         tier: purchased.rawValue, source: "paywall")
+                    await recordPurchaseAttribution(
+                        transaction: txn,
+                        product: product,
+                        tier: purchased,
+                        source: "three_tier_paywall"
+                    )
                     lastPurchaseSucceeded = true
                     return true
                 }
@@ -204,7 +210,44 @@ final class TierEntitlementManager: ObservableObject {
                 guard case .verified(let txn) = update else { continue }
                 await txn.finish()
                 await self?.refreshFromStoreKit()
+                guard ProductID.tierPlans.contains(txn.productID),
+                      PurchaseAttributionService.isAttributable(
+                        transactionRevocationDate: txn.revocationDate,
+                        expirationDate: txn.expirationDate
+                      ),
+                      let self,
+                      let product = await self.productForAttribution(id: txn.productID) else { continue }
+                await self.recordPurchaseAttribution(
+                    transaction: txn,
+                    product: product,
+                    tier: PlanTier.from(productID: txn.productID),
+                    source: "transaction_listener"
+                )
             }
+        }
+    }
+
+    private func productForAttribution(id: String) async -> Product? {
+        if let loaded = planProducts[id] { return loaded }
+        return try? await Product.products(for: [id]).first
+    }
+
+    private func recordPurchaseAttribution(
+        transaction: StoreKit.Transaction,
+        product: Product,
+        tier: PlanTier,
+        source: String
+    ) async {
+        let outcome = await PurchaseAttributionService.shared.recordVerifiedSubscriptionPurchase(
+            transaction: transaction,
+            product: product,
+            tier: tier.rawValue,
+            source: source
+        )
+        if case .deferred(let reason) = outcome {
+            #if DEBUG
+            print("[AppsFlyer][Tier] Attribution deferred from \(source): \(reason)")
+            #endif
         }
     }
 

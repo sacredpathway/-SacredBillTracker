@@ -205,20 +205,11 @@ final class SubscriptionManager: ObservableObject {
                     await refreshAutoTrackEntitlementFromBackend()
                 }
                 lastPurchaseSucceeded = true
-                // Attribution: subscription_started (no-op while AppsFlyer dormant).
-                #if canImport(AppsFlyerLib)
-                attributionDebugLog("Verified purchase success path reached; requesting af_subscribe and af_purchase")
-                AppsFlyerManager.shared.logSubscriptionStarted(
-                    productID: product.id,
-                    revenue: NSDecimalNumber(decimal: product.price),
-                    currency: product.priceFormatStyle.currencyCode
+                await recordPurchaseAttribution(
+                    transaction: transaction,
+                    product: product,
+                    source: "legacy_paywall"
                 )
-                AppsFlyerManager.shared.logPurchase(
-                    productID: product.id,
-                    revenue: NSDecimalNumber(decimal: product.price),
-                    currency: product.priceFormatStyle.currencyCode
-                )
-                #endif
                 return isPro
 
             case .userCancelled:
@@ -368,8 +359,50 @@ final class SubscriptionManager: ObservableObject {
             let transaction = try checkVerified(transactionResult)
             await transaction.finish()
             await refreshEntitlements()
+            guard PurchaseAttributionService.isAttributable(
+                transactionRevocationDate: transaction.revocationDate,
+                expirationDate: transaction.expirationDate
+            ),
+                  let product = await productForAttribution(id: transaction.productID) else { return }
+            await recordPurchaseAttribution(
+                transaction: transaction,
+                product: product,
+                source: "transaction_listener"
+            )
         } catch {
             // Un-verifiable transaction — ignore; entitlement won't be granted.
+        }
+    }
+
+    private func productForAttribution(id: String) async -> Product? {
+        if let loaded = products[id] { return loaded }
+        return try? await Product.products(for: [id]).first
+    }
+
+    private func recordPurchaseAttribution(
+        transaction: StoreKit.Transaction,
+        product: Product,
+        source: String
+    ) async {
+        let outcome = await PurchaseAttributionService.shared.recordVerifiedSubscriptionPurchase(
+            transaction: transaction,
+            product: product,
+            tier: attributionTier(for: product.id),
+            source: source
+        )
+        if case .deferred(let reason) = outcome {
+            attributionDebugLog("Attribution deferred from \(source): \(reason)")
+        }
+    }
+
+    private func attributionTier(for productID: String) -> String {
+        let planTier = PlanTier.from(productID: productID)
+        if planTier != .free { return planTier.rawValue }
+        switch productID {
+        case ProductID.proMonthly, ProductID.proYearly: return "pro"
+        case ProductID.focusPlusMonthly: return "focus_plus"
+        case ProductID.autoTrackMonthly, ProductID.autoTrackYearly: return "autotrack"
+        default: return "subscription"
         }
     }
 

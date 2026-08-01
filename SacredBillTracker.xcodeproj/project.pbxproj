@@ -29,8 +29,8 @@
 		8A894E6CCC217A0E466E6E58 /* BillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C569E9E53EEFE34D34F7F7EB /* BillsView.swift */; };
 		8C39F5CD344F415BC9C3F384 /* BillRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD309CBCB575F112EC23B203 /* BillRepository.swift */; };
 		8EFE50C7A81D432D29372160 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE079A04FBE544C87B570E6F /* SettingsView.swift */; };
-		95219A33275E5DAC1C979124 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5C1179848BC10A0F4DC45E /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift */; };
-		9EA5E3C1C60C46B0B53BCB17 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFEB813F963556ADC7B0B592 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift */; };
+		95219A33275E5DAC1C979124 /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5C1179848BC10A0F4DC45E /* PushNotificationManager.swift */; };
+		9EA5E3C1C60C46B0B53BCB17 /* PushNotificationManager+Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFEB813F963556ADC7B0B592 /* PushNotificationManager+Remote.swift */; };
 		A9E0CBEE23CCAEE822163E82 /* BillDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1801AA917BD014DE39336181 /* BillDetailView.swift */; };
 		AAAA0001AAAA0001AAAA0001 /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0001BBBB0001BBBB0001 /* SupabaseConfig.swift */; };
 		AAAA0002AAAA0002AAAA0002 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0002BBBB0002BBBB0002 /* AuthService.swift */; };
@@ -127,6 +127,8 @@
 		TIEV1001TIEV1001TIEV1001 /* TodoItemEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIEV0001TIEV0001TIEV0001 /* TodoItemEditView.swift */; };
 		TPRI1001TPRI1001TPRI1001 /* TodoPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = TPRI0001TPRI0001TPRI0001 /* TodoPriority.swift */; };
 		TRSH1001TRSH1001TRSH1001 /* TrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TRSH0001TRSH0001TRSH0001 /* TrashView.swift */; };
+		PATR1001PATR1001PATR1001 /* PurchaseAttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */; };
+		TSTBLD04TSTBLD04TSTBLD04 /* PurchaseAttributionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */; };
 		VGAT1001VGAT1001VGAT1001 /* AppVersionConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */; };
 		VGAT1002VGAT1002VGAT1002 /* VersionGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */; };
 		VGAT1003VGAT1003VGAT1003 /* ForceUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0003VGAT0003VGAT0003 /* ForceUpdateView.swift */; };
@@ -139,6 +141,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		TSTPRX01TSTPRX01TSTPRX01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1781F676DEDF5767F3243DB0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 730950AD798A77AD508AA9E2;
+			remoteInfo = SacredBillTracker;
+		};
 		WGTPRX01WGTPRX01WGTPRX01 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1781F676DEDF5767F3243DB0 /* Project object */;
@@ -172,7 +181,7 @@
 		1A350EB7AE0B70234B5BD784 /* NotificationPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
 		1C05C1D6B04AA364C1E06315 /* DeviceTokenSync.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceTokenSync.swift; sourceTree = "<group>"; };
 		20B21B9DB0B8F06E01D593C5 /* BillRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillRowView.swift; sourceTree = "<group>"; };
-		2F5C1179848BC10A0F4DC45E /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift"; sourceTree = "<absolute>"; };
+		2F5C1179848BC10A0F4DC45E /* PushNotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 		30F4E3119E425494C167EEA3 /* BrandHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandHeaderView.swift; sourceTree = "<group>"; };
 		34928484F15201D290FB9C1C /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		376520D3B996FD93D29274AF /* BillType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillType.swift; sourceTree = "<group>"; };
@@ -213,7 +222,7 @@
 		CBKV0001CBKV0001CBKV0001 /* CloudBackedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudBackedDefaults.swift; sourceTree = "<group>"; };
 		CD309CBCB575F112EC23B203 /* BillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillRepository.swift; sourceTree = "<group>"; };
 		CDDS0001CDDS0001CDDS0001 /* CategoryDetailDebugSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailDebugSeeder.swift; sourceTree = "<group>"; };
-		CFEB813F963556ADC7B0B592 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "/Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift"; sourceTree = "<absolute>"; };
+		CFEB813F963556ADC7B0B592 /* PushNotificationManager+Remote.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "PushNotificationManager+Remote.swift"; sourceTree = "<group>"; };
 		CPA0001CPA0001CPA0001 /* CPAReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPAReportGenerator.swift; sourceTree = "<group>"; };
 		CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPAReadyExportView.swift; sourceTree = "<group>"; };
 		D43CCB5B4F5F9C24ED039DDF /* Date+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helpers.swift"; sourceTree = "<group>"; };
@@ -708,6 +717,7 @@
 		PRTN0006PRTN0006PRTN0006 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		PRTN0007PRTN0007PRTN0007 /* DeleteAccountSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountSheet.swift; sourceTree = "<group>"; };
 		PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentURLValidator.swift; sourceTree = "<group>"; };
+		PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionService.swift; sourceTree = "<group>"; };
 		QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuotes.swift; sourceTree = "<group>"; };
 		QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteService.swift; sourceTree = "<group>"; };
 		RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptService.swift; sourceTree = "<group>"; };
@@ -718,6 +728,8 @@
 		SIEV0001SIEV0001SIEV0001 /* ScheduleItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleItemEditView.swift; sourceTree = "<group>"; };
 		SNAP0001SNAP0001SNAP0001 /* FinancialSnapshotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialSnapshotView.swift; sourceTree = "<group>"; };
 		SORT0001SORT0001SORT0001 /* BillSortOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillSortOption.swift; sourceTree = "<group>"; };
+		TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionServiceTests.swift; sourceTree = "<group>"; };
+		TSTXCT01TSTXCT01TSTXCT01 /* SacredBillTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SacredBillTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		TIEV0001TIEV0001TIEV0001 /* TodoItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemEditView.swift; sourceTree = "<group>"; };
 		TPRI0001TPRI0001TPRI0001 /* TodoPriority.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoPriority.swift; sourceTree = "<group>"; };
 		TRSH0001TRSH0001TRSH0001 /* TrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
@@ -740,6 +752,13 @@
 			files = (
 				SUPA0003SUPA0003SUPA0003 /* Supabase in Frameworks */,
 				21AF42C395C13CCBEE2DCE47 /* AppsFlyerLib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		TSTFRM01TSTFRM01TSTFRM01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -860,12 +879,12 @@
 			children = (
 				418C8109C7CC5C32CCB90766 /* NotificationCategories.swift */,
 				1A350EB7AE0B70234B5BD784 /* NotificationPreferences.swift */,
-				2F5C1179848BC10A0F4DC45E /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift */,
+				2F5C1179848BC10A0F4DC45E /* PushNotificationManager.swift */,
 				FC5B4DDC439940F06B2F726E /* AppDelegate.swift */,
 				F6E9A96D326215ECD34DD55B /* NotificationSettingsView.swift */,
 				3770D11D6E4AC732A53C284A /* DeepLinkRouter.swift */,
 				1C05C1D6B04AA364C1E06315 /* DeviceTokenSync.swift */,
-				CFEB813F963556ADC7B0B592 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift */,
+				CFEB813F963556ADC7B0B592 /* PushNotificationManager+Remote.swift */,
 				A035339CA64FB82C6F750F78 /* NotificationIntegrationHooks.swift */,
 			);
 			path = Notifications;
@@ -930,9 +949,10 @@
 		};
 		88932FD6DD0EDC80FBF1C921 = {
 			isa = PBXGroup;
-			children = (
-				B486A56F7720E0D638FD26E7 /* SacredBillTracker */,
-				WGTGRP01WGTGRP01WGTGRP01 /* SacredBillTracker/SacredBillTrackerWidgets */,
+				children = (
+					B486A56F7720E0D638FD26E7 /* SacredBillTracker */,
+					TSTGRP01TSTGRP01TSTGRP01 /* SacredBillTrackerTests */,
+					WGTGRP01WGTGRP01WGTGRP01 /* SacredBillTracker/SacredBillTrackerWidgets */,
 				D71BD8A0B6A6AA54EDBA6454 /* Products */,
 				C8E3EF4DBE49E56AD7B55F20 /* Frameworks */,
 				FD15934E2FE457070073BFCE /* Sacred B ill Tracker */,
@@ -991,9 +1011,10 @@
 			isa = PBXGroup;
 			children = (
 				DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */,
-				DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */,
-				DDDD0003DDDD0003DDDD0003 /* SubscriptionManager.swift */,
-				TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */,
+					DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */,
+					DDDD0003DDDD0003DDDD0003 /* SubscriptionManager.swift */,
+					PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */,
+					TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */,
 				TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */,
 			);
 			path = StoreKit;
@@ -1009,7 +1030,15 @@
 				DDDD0005DDDD0005DDDD0005 /* ProLockCard.swift */,
 				AUTH0004AUTH0004AUTH0004 /* SubscriptionGateView.swift */,
 			);
-			path = Paywall;
+				path = Paywall;
+				sourceTree = "<group>";
+			};
+		TSTGRP01TSTGRP01TSTGRP01 /* SacredBillTrackerTests */ = {
+			isa = PBXGroup;
+			children = (
+				TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */,
+			);
+			path = SacredBillTrackerTests;
 			sourceTree = "<group>";
 		};
 		E9BA4F553E026740D95DD517 /* Calendar */ = {
@@ -2282,6 +2311,24 @@
 			productReference = 5141EFFF35ACD6C51F274E4D /* SacredBillTracker.app */;
 			productType = "com.apple.product-type.application";
 		};
+		TSTTGT01TSTTGT01TSTTGT01 /* SacredBillTrackerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = TSTBCL01TSTBCL01TSTBCL01 /* Build configuration list for PBXNativeTarget "SacredBillTrackerTests" */;
+			buildPhases = (
+				TSTSRC01TSTSRC01TSTSRC01 /* Sources */,
+				TSTFRM01TSTFRM01TSTFRM01 /* Frameworks */,
+				TSTRES01TSTRES01TSTRES01 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				TSTDEP01TSTDEP01TSTDEP01 /* PBXTargetDependency */,
+			);
+			name = SacredBillTrackerTests;
+			productName = SacredBillTrackerTests;
+			productReference = TSTXCT01TSTXCT01TSTXCT01 /* SacredBillTrackerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		WGTTGT01WGTTGT01WGTTGT01 /* SacredBillTrackerWidgets */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = WGTBCL01WGTBCL01WGTBCL01 /* Build configuration list for PBXNativeTarget "SacredBillTrackerWidgets" */;
@@ -2309,8 +2356,8 @@
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					730950AD798A77AD508AA9E2 = {
-						CreatedOnToolsVersion = 15.0;
+						730950AD798A77AD508AA9E2 = {
+							CreatedOnToolsVersion = 15.0;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2321,9 +2368,13 @@
 							com.apple.iCloud = {
 								enabled = 1;
 							};
+							};
 						};
-					};
-					WGTTGT01WGTTGT01WGTTGT01 = {
+						TSTTGT01TSTTGT01TSTTGT01 = {
+							CreatedOnToolsVersion = 15.0;
+							TestTargetID = 730950AD798A77AD508AA9E2;
+						};
+						WGTTGT01WGTTGT01WGTTGT01 = {
 						CreatedOnToolsVersion = 15.0;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
@@ -2349,10 +2400,11 @@
 			productRefGroup = D71BD8A0B6A6AA54EDBA6454 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (
-				730950AD798A77AD508AA9E2 /* SacredBillTracker */,
-				WGTTGT01WGTTGT01WGTTGT01 /* SacredBillTrackerWidgets */,
-			);
+				targets = (
+					730950AD798A77AD508AA9E2 /* SacredBillTracker */,
+					WGTTGT01WGTTGT01WGTTGT01 /* SacredBillTrackerWidgets */,
+					TSTTGT01TSTTGT01TSTTGT01 /* SacredBillTrackerTests */,
+				);
 		};
 /* End PBXProject section */
 
@@ -2371,6 +2423,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		TSTRES01TSTRES01TSTRES01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2478,18 +2537,19 @@
 				TIEV1001TIEV1001TIEV1001 /* TodoItemEditView.swift in Sources */,
 				PRCM1001PRCM1001PRCM1001 /* PremiumComponents.swift in Sources */,
 				QUTS1001QUTS1001QUTS1001 /* QuoteService.swift in Sources */,
-				TRSH1001TRSH1001TRSH1001 /* TrashView.swift in Sources */,
-				VGAT1001VGAT1001VGAT1001 /* AppVersionConfig.swift in Sources */,
+					TRSH1001TRSH1001TRSH1001 /* TrashView.swift in Sources */,
+					PATR1001PATR1001PATR1001 /* PurchaseAttributionService.swift in Sources */,
+					VGAT1001VGAT1001VGAT1001 /* AppVersionConfig.swift in Sources */,
 				VGAT1002VGAT1002VGAT1002 /* VersionGateService.swift in Sources */,
 				VGAT1003VGAT1003VGAT1003 /* ForceUpdateView.swift in Sources */,
 				BB215241BAD98D92A8B51B57 /* NotificationCategories.swift in Sources */,
 				FE199C59C7F78EAC069184FA /* NotificationPreferences.swift in Sources */,
-				95219A33275E5DAC1C979124 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager.swift in Sources */,
+				95219A33275E5DAC1C979124 /* PushNotificationManager.swift in Sources */,
 				357D1BE8EA2B41116A5D2B80 /* AppDelegate.swift in Sources */,
 				FEE5C6432C66F9E3A4EDCC76 /* NotificationSettingsView.swift in Sources */,
 				CB3BBDDC5F62E22AAD2EE26A /* DeepLinkRouter.swift in Sources */,
 				1DD5733FC7E240CF70D691A9 /* DeviceTokenSync.swift in Sources */,
-				9EA5E3C1C60C46B0B53BCB17 /* /Users/demarquishinton/Documents/Claude/Projects/SACRED BILL TRACKER/SacredBillTracker/Notifications/PushNotificationManager+Remote.swift in Sources */,
+				9EA5E3C1C60C46B0B53BCB17 /* PushNotificationManager+Remote.swift in Sources */,
 				813A1F6E96FC5C01977EB19F /* NotificationIntegrationHooks.swift in Sources */,
 				EB16D928D10DF9D4D57DDA3A /* NotificationManager.swift in Sources */,
 				INC1001INC1001INC1001 /* WeeklyIncome.swift in Sources */,
@@ -2532,9 +2592,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		TSTSRC01TSTSRC01TSTSRC01 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				TSTBLD04TSTBLD04TSTBLD04 /* PurchaseAttributionServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		TSTDEP01TSTDEP01TSTDEP01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 730950AD798A77AD508AA9E2 /* SacredBillTracker */;
+			targetProxy = TSTPRX01TSTPRX01TSTPRX01 /* PBXContainerItemProxy */;
+		};
 		WGTDEP01WGTDEP01WGTDEP01 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = WGTTGT01WGTTGT01WGTTGT01 /* SacredBillTrackerWidgets */;
@@ -2748,6 +2821,46 @@
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
+			};
+		TSTCFG01TSTCFG01TSTCFG01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DCCSGYD5A4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SacredBillTracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SacredBillTracker";
+			};
+			name = Debug;
+		};
+		TSTCFG02TSTCFG02TSTCFG02 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DCCSGYD5A4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SacredBillTracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SacredBillTracker";
+			};
+			name = Release;
 		};
 		WGTCFG01WGTCFG01WGTCFG01 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -2822,6 +2935,15 @@
 			buildConfigurations = (
 				56EA2DDD7EA6B62E92CB9329 /* Debug */,
 				F8C11F1832EF84A327194F08 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		TSTBCL01TSTBCL01TSTBCL01 /* Build configuration list for PBXNativeTarget "SacredBillTrackerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				TSTCFG01TSTCFG01TSTCFG01 /* Debug */,
+				TSTCFG02TSTCFG02TSTCFG02 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
