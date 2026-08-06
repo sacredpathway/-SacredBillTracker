@@ -24,6 +24,13 @@ enum AnalyticsEvent: String {
     case referralShared      = "referral_shared"
     case upsellShown         = "upsell_shown"
     case upsellTapped        = "upsell_tapped"
+    // v1.1 (Milestone 1) — first-run / activation funnel.
+    case onboardingStarted   = "onboarding_started"
+    case onboardingCompleted = "onboarding_completed"
+    case onboardingSkipped   = "onboarding_skipped"
+    case sampleDataPreviewed = "sample_data_previewed"
+    case firstBillStarted    = "first_bill_started"
+    case firstBillCreated    = "first_bill_created"
 }
 
 final class AnalyticsService {

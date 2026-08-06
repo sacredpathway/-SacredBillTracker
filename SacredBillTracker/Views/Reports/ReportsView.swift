@@ -229,19 +229,24 @@ struct ReportsView: View {
     // MARK: - Computation helpers
 
     private func totalForMonth(_ type: BillType) -> Decimal {
-        store.bills(in: displayedMonth)
-            .filter { $0.type == type }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        BillTotalsCalculator.monthlyTotals(
+            from: store.bills.filter { $0.type == type },
+            in: displayedMonth
+        ).totalBills
     }
 
     private func unpaidForMonth(_ type: BillType) -> Decimal {
-        store.bills(in: displayedMonth)
-            .filter { $0.type == type && !$0.isPaid }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        BillTotalsCalculator.monthlyTotals(
+            from: store.bills.filter { $0.type == type },
+            in: displayedMonth
+        ).remaining
     }
 
     private func countForMonth(_ type: BillType) -> Int {
-        store.bills(in: displayedMonth).filter { $0.type == type }.count
+        BillTotalsCalculator.monthlyTotals(
+            from: store.bills.filter { $0.type == type },
+            in: displayedMonth
+        ).billCount
     }
 
     private func shiftMonth(by months: Int) {

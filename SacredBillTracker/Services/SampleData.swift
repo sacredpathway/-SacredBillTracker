@@ -41,9 +41,9 @@ enum SampleData {
                 status: .unpaid
             ),
 
-            // 2. Car Note — auto loan, unpaid, mid-month
+            // 2. Auto Loan — unpaid, mid-month
             Bill(
-                name: "Car Note",
+                name: "Auto Loan",
                 amount: 548.50,
                 dueDate: date(12),
                 category: .transportation,

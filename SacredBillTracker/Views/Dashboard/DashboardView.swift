@@ -67,6 +67,11 @@ struct DashboardView: View {
     /// Persists across launches via @AppStorage.
     @AppStorage("sbt.combinedTotals.v1") private var combinedTotals: Bool = false
 
+    /// v1.0.16 — Quick Stats collapse. Collapsed by default so the home
+    /// screen stays compact; a one-line preview shows the key counts and
+    /// tapping the header reveals the full 2x2 grid. Persisted across launches.
+    @AppStorage("sbt.quickStats.sectionExpanded.v1") private var quickStatsExpanded: Bool = false
+
     private let currency: NumberFormatter = {
         let f = NumberFormatter()
         f.numberStyle = .currency
@@ -91,16 +96,14 @@ struct DashboardView: View {
                         .padding(.horizontal)
 
                     if store.bills.isEmpty {
-                        // First-launch / empty-state: no bills exist at all.
-                        // Skip the rest of the dashboard widgets — they would
-                        // all show $0/0 and look broken to a brand-new user.
-                        EmptyStateView(
-                            systemImage: "tray",
-                            title: "Welcome to Sacred Bill Tracker",
-                            message: "Start tracking your bills to see your financial overview."
-                        )
-                        .padding(.top, 40)
-                        .padding(.horizontal)
+                        // First-launch / zero-state (v1.1 Milestone 1): a
+                        // premium, benefit-led first-run surface with a fast
+                        // path to the first bill and an optional sample-data
+                        // preview. Replaces the plain empty state so a brand-
+                        // new user sees the app's value immediately.
+                        PremiumZeroStateView()
+                            .padding(.top, 24)
+                            .padding(.horizontal)
                     } else {
                         FilterPicker(selection: $store.filter)
                             .padding(.horizontal)
@@ -522,7 +525,7 @@ struct DashboardView: View {
         // Average monthly.
         let total = filtered.reduce(Decimal(0)) { $0 + $1.amount }
         let monthBuckets = Set(filtered.map { entry -> String in
-            let c = cal.dateComponents([.year, .month], from: entry.weekStart)
+            let c = cal.dateComponents([.year, .month], from: entry.incomeDate)
             return "\(c.year ?? 0)-\(c.month ?? 0)"
         })
         let months = max(monthBuckets.count, 1)
@@ -687,6 +690,57 @@ struct DashboardView: View {
     */ // end __removed_incomeSection block
 
     // MARK: - Snapshot
+
+    /// Quick Stats as a collapsible dropdown (v1.0.16). Collapsed by default
+    /// to keep the home screen compact — a one-line preview shows the key
+    /// counts; tapping the header chevron reveals the full 2x2 grid. The
+    /// open/closed choice is persisted via `quickStatsExpanded`.
+    private var quickStatsWidget: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.22)) { quickStatsExpanded.toggle() }
+            } label: {
+                HStack {
+                    Text("Quick Stats")
+                        .font(.title3.bold())
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.appAccentText)
+                        .rotationEffect(.degrees(quickStatsExpanded ? 180 : 0))
+                }
+                .padding(.horizontal)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Quick Stats")
+            .accessibilityHint(quickStatsExpanded ? "Collapse quick stats" : "Expand quick stats")
+
+            if quickStatsExpanded {
+                snapshotGrid
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            } else {
+                quickStatsPreview
+            }
+        }
+        .animation(.easeInOut(duration: 0.22), value: quickStatsExpanded)
+    }
+
+    /// One-line summary shown when Quick Stats is collapsed.
+    private var quickStatsPreview: some View {
+        HStack(spacing: 8) {
+            Text("\(store.dueToday.count) due today")
+            Text("·").foregroundStyle(.secondary)
+            Text("\(store.overdue.count) overdue")
+            Text("·").foregroundStyle(.secondary)
+            Text("\(store.upcoming.count) upcoming")
+            Spacer()
+        }
+        .font(.caption.weight(.semibold))
+        .foregroundStyle(.secondary)
+        .padding(.horizontal)
+    }
 
     private var snapshotGrid: some View {
         let dueToday    = store.dueToday
@@ -975,10 +1029,7 @@ struct DashboardView: View {
             )
             .padding(.horizontal)
         case .quickStats:
-            VStack(alignment: .leading, spacing: 8) {
-                sectionHeader("Quick Stats")
-                snapshotGrid
-            }
+            quickStatsWidget
         case .riskAlerts:
             RiskAlertCard(flags: store.riskFlags())
                 .padding(.horizontal)

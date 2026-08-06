@@ -162,6 +162,14 @@ struct SacredBillTrackerApp: App {
         #if canImport(AppsFlyerLib)
         AppsFlyerManager.shared.configure()
         #endif
+
+        // TikTok — initialize the Business SDK. Install/launch events are sent
+        // AUTOMATICALLY by the SDK once initialized; we never hand-roll them.
+        // Inert until the TikTokBusinessSDK SPM package is linked AND real
+        // credentials exist in the git-ignored Secrets.xcconfig.
+        #if canImport(TikTokBusinessSDK)
+        TikTokEventsManager.shared.configureAndInitialize()
+        #endif
     }
 
     var body: some Scene {
@@ -215,10 +223,27 @@ struct SacredBillTrackerApp: App {
                         #if canImport(AppsFlyerLib)
                         AppsFlyerManager.shared.requestATTThenStart()
                         #endif
+
+                        // TikTok — the SDK never prompts for ATT itself, so we
+                        // request it here, once, only after the UI is active.
+                        // No-op unless NSUserTrackingUsageDescription exists.
+                        #if canImport(TikTokBusinessSDK)
+                        TikTokEventsManager.shared.requestATTOnce()
+                        #endif
                     }
                 }
                 .onChange(of: auth.currentUserID) { _, newUserID in
                     Task { await handleUserChange(newUserID) }
+                }
+                // Session restore finished. When `bootstrap()` finds NO session,
+                // `currentUserID` goes nil → nil, which is not a change, so the
+                // handler above never fires. Without this the stores would stay
+                // in the `.unresolved` restore window forever: the income profile
+                // partition would never re-engage, and a merely *expired* session
+                // (as opposed to an explicit signOut, which clears the cache)
+                // would keep the previous owner's income readable.
+                .onChange(of: auth.hasResolvedSession) { _, _ in
+                    applyProfileContext()
                 }
                 .onChange(of: subscriptions.canManagedProfiles) { _, canProfiles in
                     profileStore.applyPremiumAccess(canProfiles)
@@ -499,5 +524,172 @@ final class AppsFlyerManager: NSObject {
 extension AppsFlyerManager: AppsFlyerLibDelegate {
     func onConversionDataSuccess(_ conversionInfo: [AnyHashable: Any]) { /* deferred deep-link data (unused) */ }
     func onConversionDataFail(_ error: Error) { /* no-op */ }
+}
+#endif
+
+// MARK: - TikTok Business SDK attribution manager
+//
+// Isolated + additive, mirroring the AppsFlyer block above. Compiles only when
+// the `tiktok-business-ios-sdk` SPM package is linked (`#if canImport(TikTokBusinessSDK)`);
+// otherwise this whole block is absent and the app behaves exactly as before.
+//
+// Design notes (verified against the SDK headers, v1.6.1):
+//   • `configWithAccessToken:appId:tiktokAppId:` is the CURRENT initializer.
+//     The `initWithAppId:tiktokAppId:` form is DEPRECATED and is not used here.
+//   • InstallApp / LaunchAPP are sent AUTOMATICALLY after `initializeSdk`.
+//     We never hand-roll app-open or install events.
+//   • The SDK does NOT prompt for ATT. `requestTrackingAuthorization…` must be
+//     called by the app, after the UI is active.
+//   • Events use `trackTTEvent:` (the `trackEvent:` family is DEPRECATED).
+//
+// Runs dormant (never initializes, never sends) until BOTH the package is
+// linked AND real credentials exist in the git-ignored Secrets.xcconfig.
+#if canImport(TikTokBusinessSDK)
+import TikTokBusinessSDK
+
+final class TikTokEventsManager: NSObject {
+
+    static let shared = TikTokEventsManager()
+
+    /// True only once `initializeSdk` reported success.
+    private var didInitialize = false
+    /// Ensures ATT is presented at most once per process.
+    private var didRequestATT = false
+
+    private override init() { super.init() }
+
+    private func debugLog(_ message: String) {
+        #if DEBUG
+        print("[TikTok] \(message)")
+        #endif
+    }
+
+    /// Apple App Store ID — public identifier (same value AppsFlyer uses).
+    private static let appleAppID = "6762890363"
+
+    /// Sentinel values that must NOT be treated as real credentials. If the
+    /// build setting is undefined, `$(VAR)` substitutes to an empty string.
+    private static let placeholders: Set<String> = [
+        "",
+        "paste_real_value_here",
+        "TIKTOK_ACCESS_TOKEN_HERE",
+        "TIKTOK_APP_ID_HERE",
+        "$(TIKTOK_ACCESS_TOKEN)",
+        "$(TIKTOK_APP_ID)"
+    ]
+
+    /// Reads a value injected from Secrets.xcconfig via Info.plist.
+    /// Returns nil when missing or still a placeholder.
+    private static func infoValue(_ key: String) -> String? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: key) as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return placeholders.contains(raw) ? nil : raw
+    }
+
+    /// True only when NSUserTrackingUsageDescription is present in the bundle.
+    /// Drives whether we present ATT at all.
+    private static var hasATTUsageString: Bool {
+        let s = (Bundle.main.object(forInfoDictionaryKey: "NSUserTrackingUsageDescription") as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return !s.isEmpty
+    }
+
+    /// Call once, early (App.init). Initializes the SDK; sends nothing directly.
+    /// InstallApp/LaunchAPP flow automatically afterwards.
+    func configureAndInitialize() {
+        guard let accessToken = Self.infoValue("TikTokAccessToken"),
+              let tiktokAppId = Self.infoValue("TikTokAppID") else {
+            debugLog("Credentials not configured (placeholder/empty). SDK will NOT initialize.")
+            return
+        }
+        guard let config = TikTokConfig(accessToken: accessToken,
+                                        appId: Self.appleAppID,
+                                        tiktokAppId: tiktokAppId) else {
+            debugLog("TikTokConfig returned nil. SDK will NOT initialize.")
+            return
+        }
+
+        // OPTIONAL — deliberately NOT called (see below).
+        //
+        // The SDK can hold its first event flush until the user answers ATT, via
+        // the Objective-C selector `-setDelayForATTUserAuthorizationInSeconds:`.
+        // That header carries no NS_SWIFT_NAME, so the Swift spelling is derived
+        // by the Objective-C importer and could not be confirmed without a
+        // compiler. Rather than ship a guessed selector (a guaranteed build
+        // error), it is omitted.
+        //
+        // TO ENABLE (1 line, 10 seconds, inside this method, after `config` is
+        // created): type `config.setDelayFor` and accept Xcode's autocomplete,
+        // passing 30. Wrap it in `if Self.hasATTUsageString { … }`.
+        //
+        // Consequence of leaving it out: on the very first launch the automatic
+        // InstallApp/LaunchAPP events may flush before ATT is answered, so they
+        // can lack the IDFA. SKAdNetwork and TikTok's self-attributing network
+        // are unaffected, as are all later events (Subscribe / StartTrial).
+
+        #if DEBUG
+        // Enables TikTokBusiness.getTestEventCode() for Events Manager "Test event".
+        config.enableDebugMode()
+        #endif
+
+        TikTokBusiness.initializeSdk(config) { [weak self] success, error in
+            self?.didInitialize = success
+            if success {
+                self?.debugLog("SDK initialized (v\(TikTokBusiness.getSDKVersion()))")
+            } else {
+                self?.debugLog("SDK init FAILED: \(String(describing: error))")
+            }
+        }
+    }
+
+    /// Request ATT exactly once, after the UI is active. The SDK never prompts.
+    /// No-op when no usage string is declared (SKAN-only posture).
+    func requestATTOnce() {
+        guard Self.hasATTUsageString else {
+            debugLog("ATT skipped (no NSUserTrackingUsageDescription).")
+            return
+        }
+        guard !didRequestATT else { return }
+        didRequestATT = true
+        TikTokBusiness.requestTrackingAuthorization { [weak self] status in
+            self?.debugLog("ATT authorization status: \(status)")
+        }
+    }
+
+    // MARK: - Events
+    //
+    // Only ever called from a VERIFIED StoreKit transaction. Never from a
+    // paywall view, a button tap, or unverified local state.
+
+    private func track(_ name: String, properties: [String: Any]) {
+        guard TikTokBusiness.isInitialized() else {
+            debugLog("Event skipped (SDK not initialized): \(name)")
+            return
+        }
+        let event = TikTokBaseEvent(eventName: name)
+        for (key, value) in properties {
+            _ = event.addProperty(withKey: key, value: value)
+        }
+        TikTokBusiness.trackTTEvent(event)
+        debugLog("Event sent: \(name) \(properties)")
+    }
+
+    /// Fired when a verified transaction applied an introductory (free-trial) offer.
+    func logStartTrial(productID: String, value: Decimal, currency: String) {
+        track("StartTrial", properties: [
+            "content_id": productID,
+            "value": NSDecimalNumber(decimal: value),
+            "currency": currency
+        ])
+    }
+
+    /// Fired when a verified transaction started a paid subscription.
+    func logSubscribe(productID: String, value: Decimal, currency: String) {
+        track("Subscribe", properties: [
+            "content_id": productID,
+            "value": NSDecimalNumber(decimal: value),
+            "currency": currency
+        ])
+    }
 }
 #endif

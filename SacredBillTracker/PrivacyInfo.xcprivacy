@@ -43,10 +43,65 @@
 				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
 			</array>
 		</dict>
+		<!-- Device ID (IDFA) — collected by the TikTok Business SDK for
+		     advertising attribution. NOT linked to the user's account identity,
+		     and USED FOR TRACKING. Only collected after the user grants App
+		     Tracking Transparency; declining ATT limits no app feature. -->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeDeviceID</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising</string>
+			</array>
+		</dict>
+		<!-- Purchase History — the TikTok `Subscribe` / `StartTrial` events carry
+		     `content_id` (product identifier), `value` and `currency`. That is
+		     purchase data shared with an advertising network, so it is declared
+		     as USED FOR TRACKING.
+		     NOT linked to the user: no account id, email, or appAccountToken is
+		     sent to TikTok — `identifyWithExternalID:` is deliberately never
+		     called. If that ever changes, flip Linked to <true/>. -->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypePurchaseHistory</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising</string>
+			</array>
+		</dict>
 	</array>
+	<!-- The app now uses data (Device ID / IDFA) for tracking, via the TikTok
+	     Business SDK. Must stay consistent with NSUserTrackingUsageDescription
+	     in Info.plist and with the App Store Privacy Label. -->
 	<key>NSPrivacyTracking</key>
-	<false/>
+	<true/>
 	<key>NSPrivacyTrackingDomains</key>
-	<array/>
+	<array>
+		<string>att.attr.whappsflyer.com</string>
+		<string>att.attr.appsflyer-cn.com</string>
+		<string>att.attr.hevents.appsflyer-cn.com</string>
+		<string>att.launches.whappsflyer.com</string>
+		<string>att.launches.appsflyer-cn.com</string>
+		<string>att.launches.hevents.appsflyer-cn.com</string>
+		<string>att.conversions.hevents.appsflyer-cn.com</string>
+		<string>att.conversions.appsflyer-cn.com</string>
+		<string>att.conversions.whappsflyer.com</string>
+		<string>att.dlsdk.hevents.appsflyer-cn.com</string>
+		<string>att.dlsdk.appsflyer-cn.com</string>
+		<string>att.dlsdk.whappsflyer.com</string>
+		<string>att.dlsdk.appsflyersdk.com</string>
+		<string>att.conversions.appsflyersdk.com</string>
+		<string>att.launches.appsflyersdk.com</string>
+		<string>att.attr.appsflyersdk.com</string>
+	</array>
 </dict>
 </plist>

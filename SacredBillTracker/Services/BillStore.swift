@@ -9,6 +9,71 @@
 import Foundation
 import SwiftUI
 
+struct MonthlyBillTotals: Hashable {
+    let totalBills: Decimal
+    let paid: Decimal
+    let remaining: Decimal
+    let pending: Decimal
+    let overdue: Decimal
+    let autoPayCount: Int
+    let billCount: Int
+    let paidCount: Int
+    let unpaidCount: Int
+}
+
+enum BillTotalsCalculator {
+    static func bills(
+        from bills: [Bill],
+        in month: Date = Date(),
+        calendar: Calendar = .current
+    ) -> [Bill] {
+        guard let interval = calendar.dateInterval(of: .month, for: month) else {
+            return []
+        }
+
+        return bills.filter { bill in
+            bill.deletedAt == nil
+                && bill.dueDate >= interval.start
+                && bill.dueDate < interval.end
+        }
+    }
+
+    /// Single source of truth for the user's full monthly bill obligation.
+    /// `totalBills` always sums original bill amounts due for the month;
+    /// paid status, remaining balance, and Auto Pay never reduce it.
+    static func monthlyTotals(
+        from bills: [Bill],
+        in month: Date = Date(),
+        calendar: Calendar = .current
+    ) -> MonthlyBillTotals {
+        let monthBills = self.bills(from: bills, in: month, calendar: calendar)
+        let totalBills = monthBills.reduce(Decimal(0)) { $0 + $1.amount }
+        let paid = monthBills
+            .filter { $0.isPaid }
+            .reduce(Decimal(0)) { $0 + $1.amount }
+        let overdue = monthBills
+            .filter { $0.isOverdue }
+            .reduce(Decimal(0)) { $0 + $1.amount }
+        let pending = monthBills
+            .filter { !$0.isPaid && !$0.isOverdue }
+            .reduce(Decimal(0)) { $0 + $1.amount }
+        let rawRemaining = totalBills - paid
+        let remaining = rawRemaining > 0 ? rawRemaining : Decimal(0)
+
+        return MonthlyBillTotals(
+            totalBills: totalBills,
+            paid: paid,
+            remaining: remaining,
+            pending: pending,
+            overdue: overdue,
+            autoPayCount: monthBills.filter { $0.autoPay }.count,
+            billCount: monthBills.count,
+            paidCount: monthBills.filter(\.isPaid).count,
+            unpaidCount: monthBills.filter { !$0.isPaid }.count
+        )
+    }
+}
+
 @MainActor
 final class BillStore: ObservableObject {
 
@@ -23,6 +88,11 @@ final class BillStore: ObservableObject {
     /// Trash screen is the only consumer.
     @Published private(set) var deletedBills: [Bill] = []
     @Published var isLoadingTrash: Bool = false
+
+    /// v1.1 (Milestone 1) — set true for one render when the account's first
+    /// bill is created, so the signed-in root view can present a one-time
+    /// celebration. The presenter resets it to false after showing it.
+    @Published var didCreateFirstBill: Bool = false
 
     /// Profile-scoped active bills. Existing views use this property,
     /// which keeps bills from different managed profiles separated unless
@@ -235,6 +305,11 @@ final class BillStore: ObservableObject {
     // MARK: - CRUD
 
     func add(_ bill: Bill) {
+        // v1.1 (Milestone 1) — capture whether this is the account's very
+        // first bill BEFORE the append. `add(_:)` is the single choke point
+        // for BOTH the template and start-from-scratch paths, so first-bill
+        // detection lives here (no duplicated logic in the views).
+        let isFirstBill = storedBills.isEmpty
         var new = bill
         stampProfileIfNeeded(&new)
         new.createdAt = Date()
@@ -242,6 +317,10 @@ final class BillStore: ObservableObject {
         settlePayoffIfPaid(&new)
         storedBills.append(new)
         persist()
+        if isFirstBill {
+            didCreateFirstBill = true
+            AnalyticsService.shared.track(.firstBillCreated, source: "bill_store")
+        }
         // Attribution: bill_created (no-op while AppsFlyer dormant).
         #if canImport(AppsFlyerLib)
         AppsFlyerManager.shared.logBillCreated()
@@ -424,9 +503,10 @@ final class BillStore: ObservableObject {
         var updated = bill
         updated.reversePayoffPaymentForCurrentCycle()
         updated.status = .unpaid
-        // Auto-pay covers the current cycle, so it must be off for the bill
-        // to become semantically unpaid.
-        updated.autoPay = false
+        // `isPaid` now keys off `.paid` status alone (see `Bill.isPaid`), so
+        // clearing the status is enough to make the bill unpaid. Leave
+        // `autoPay` untouched so marking a bill unpaid never silently wipes
+        // the user's autopay setting.
         update(updated)
     }
 
@@ -456,16 +536,31 @@ final class BillStore: ObservableObject {
 
     // MARK: - Totals
 
+    func monthlyTotals(
+        in month: Date = Date(),
+        for scope: BillTypeFilter = .all
+    ) -> MonthlyBillTotals {
+        BillTotalsCalculator.monthlyTotals(
+            from: bills.filter { scope.matches($0.type) },
+            in: month
+        )
+    }
+
     func totalThisMonth(for type: BillType) -> Decimal {
-        bills
-            .filter { $0.type == type && $0.isDueThisMonth }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        monthlyTotals(for: filter(for: type)).totalBills
     }
 
     func totalUnpaidThisMonth(for type: BillType) -> Decimal {
-        bills
-            .filter { $0.type == type && $0.isDueThisMonth && !$0.isPaid }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        monthlyTotals(for: filter(for: type)).remaining
+    }
+
+    private func filter(for type: BillType) -> BillTypeFilter {
+        switch type {
+        case .household:
+            return .household
+        case .business:
+            return .business
+        }
     }
 
     // MARK: - Combined Totals (v1.3)
@@ -501,23 +596,17 @@ final class BillStore: ObservableObject {
 
     /// Total due across both Personal AND Business bills this month.
     func combinedTotalThisMonth() -> Decimal {
-        bills
-            .filter { $0.isDueThisMonth }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        monthlyTotals().totalBills
     }
 
     /// Total UNPAID across both types this month.
     func combinedUnpaidThisMonth() -> Decimal {
-        bills
-            .filter { $0.isDueThisMonth && !$0.isPaid }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        monthlyTotals().remaining
     }
 
     /// Total PAID across both types this month.
     func combinedPaidThisMonth() -> Decimal {
-        bills
-            .filter { $0.isDueThisMonth && $0.isPaid }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        monthlyTotals().paid
     }
 
     /// Sum of every overdue bill (no time limit), both types.
@@ -597,21 +686,15 @@ final class BillStore: ObservableObject {
     }
 
     func bills(in month: Date) -> [Bill] {
-        let cal = Calendar.current
-        return filteredBills.filter {
-            cal.component(.month, from: $0.dueDate) == cal.component(.month, from: month) &&
-            cal.component(.year,  from: $0.dueDate) == cal.component(.year,  from: month)
-        }
+        BillTotalsCalculator.bills(from: filteredBills, in: month)
     }
 
     /// Category breakdown for the given type in the given month.
     func categoryBreakdown(for type: BillType, in month: Date) -> [(category: BillCategory, total: Decimal)] {
-        let cal = Calendar.current
-        let filtered = bills.filter {
-            $0.type == type
-            && cal.component(.month, from: $0.dueDate) == cal.component(.month, from: month)
-            && cal.component(.year,  from: $0.dueDate) == cal.component(.year,  from: month)
-        }
+        let filtered = BillTotalsCalculator.bills(
+            from: bills.filter { $0.type == type },
+            in: month
+        )
         let grouped = Dictionary(grouping: filtered, by: { $0.category })
         return grouped
             .map { (category: $0.key, total: $0.value.reduce(Decimal(0)) { $0 + $1.amount }) }
@@ -645,24 +728,20 @@ final class BillStore: ObservableObject {
     }
 
     func cashFlow() -> CashFlow {
-        let scope = filteredBills.filter { $0.isDueThisMonth }
-        let due  = scope.reduce(Decimal(0)) { $0 + $1.amount }
-        let paid = scope.filter { $0.isPaid }.reduce(Decimal(0)) { $0 + $1.amount }
-        let remaining = due - paid
+        let totals = BillTotalsCalculator.monthlyTotals(from: filteredBills)
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let end   = cal.date(byAdding: .day, value: 7, to: today) ?? today
         let next7 = filteredBills
             .filter { !$0.isPaid && $0.dueDate >= today && $0.dueDate < end }
             .reduce(Decimal(0)) { $0 + $1.amount }
-        let unpaidCount = scope.filter { !$0.isPaid }.count
         return CashFlow(
-            dueThisMonth: due,
-            paidThisMonth: paid,
-            remainingThisMonth: remaining,
+            dueThisMonth: totals.totalBills,
+            paidThisMonth: totals.paid,
+            remainingThisMonth: totals.remaining,
             nextSevenDays: next7,
-            projectedLeftover: -remaining,
-            unpaidCount: unpaidCount
+            projectedLeftover: -totals.remaining,
+            unpaidCount: totals.unpaidCount
         )
     }
 

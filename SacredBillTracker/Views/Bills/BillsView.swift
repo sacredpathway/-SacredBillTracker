@@ -319,17 +319,17 @@ struct BillsView: View {
     }
 
     private var emptyMineTitle: String {
-        if store.allStoredBills.isEmpty { return "No bills yet" }
-        if profileStore.selection == .allProfiles { return "No bills yet" }
+        if store.allStoredBills.isEmpty { return "Add your first bill in under a minute" }
+        if profileStore.selection == .allProfiles { return "Add your first bill in under a minute" }
         return "No bills in this profile"
     }
 
     private var emptyMineMessage: String {
         if store.allStoredBills.isEmpty {
-            return "No bills yet — tap + to add your first one."
+            return "Pick a template — Rent, Electric, Insurance — and you're set."
         }
         if profileStore.selection == .allProfiles {
-            return "No bills yet — tap + to add your first one."
+            return "Pick a template — Rent, Electric, Insurance — and you're set."
         }
         return "Add a bill here or switch to All Profiles."
     }

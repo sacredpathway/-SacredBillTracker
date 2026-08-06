@@ -74,11 +74,13 @@ enum BillShareService {
         // -------- Bill aggregates --------
         let count = live.count
 
-        // "Monthly total" = sum of bills whose due date falls inside the
-        // current month, matching the in-app dashboard semantics.
-        let monthlyTotal = live
-            .filter { isInCurrentMonth($0.dueDate, calendar: cal) }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        // "Monthly total" = full current-month bill obligation, matching
+        // the in-app dashboard's Total Bills semantics.
+        let monthlyTotal = BillTotalsCalculator.monthlyTotals(
+            from: live,
+            in: generatedAt,
+            calendar: cal
+        ).totalBills
 
         let paid    = live.filter { $0.effectiveStatus == .paid }
                           .reduce(Decimal(0)) { $0 + $1.amount }
@@ -210,11 +212,4 @@ enum BillShareService {
         }
     }
 
-    /// True when `date` falls inside the calendar month containing
-    /// "now" (per the supplied calendar's current time).
-    private static func isInCurrentMonth(_ date: Date, calendar cal: Calendar) -> Bool {
-        let now = Date()
-        return cal.component(.month, from: date) == cal.component(.month, from: now)
-            && cal.component(.year,  from: date) == cal.component(.year,  from: now)
-    }
 }

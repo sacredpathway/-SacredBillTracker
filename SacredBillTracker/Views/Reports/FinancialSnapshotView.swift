@@ -65,12 +65,16 @@ struct FinancialSnapshotView: View {
     }
 
     private var thisMonthBills: [Bill] {
-        liveBills.filter { $0.isDueThisMonth }
+        BillTotalsCalculator.bills(from: liveBills)
     }
 
-    private var totalThisMonth:  Decimal { sum(thisMonthBills) }
-    private var paidThisMonth:   Decimal { sum(thisMonthBills.filter { $0.isPaid }) }
-    private var unpaidThisMonth: Decimal { sum(thisMonthBills.filter { !$0.isPaid }) }
+    private var monthlyTotals: MonthlyBillTotals {
+        BillTotalsCalculator.monthlyTotals(from: liveBills)
+    }
+
+    private var totalThisMonth:  Decimal { monthlyTotals.totalBills }
+    private var paidThisMonth:   Decimal { monthlyTotals.paid }
+    private var unpaidThisMonth: Decimal { monthlyTotals.remaining }
 
     private var overdueAmount: Decimal {
         sum(liveBills.filter { !$0.isPaid && $0.effectiveStatus == .overdue })

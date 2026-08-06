@@ -194,7 +194,7 @@ struct CPAReadyExportView: View {
 
     private var filteredIncome: [WeeklyIncome] {
         let range = resolvedRange.closedRange
-        return incomeStore.profileEntries.filter { range.contains($0.weekStart) }
+        return incomeStore.profileEntries.filter { range.contains($0.incomeDate) }
     }
 
     private var estimatedNet: Decimal {

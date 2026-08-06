@@ -38,6 +38,7 @@
 		AAAA0004AAAA0004AAAA0004 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0004BBBB0004BBBB0004 /* SignInView.swift */; };
 		AAAA0005AAAA0005AAAA0005 /* BillsRealtimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0005BBBB0005BBBB0005 /* BillsRealtimeService.swift */; };
 		AAAA0011AAAA0011AAAA0011 /* LegacyDemoBills.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA0010AAAA0010AAAA0010 /* LegacyDemoBills.swift */; };
+		ANLY1001ANLY1001ANLY1001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ANLY0001ANLY0001ANLY0001 /* AnalyticsService.swift */; };
 		APRF1001APRF1001APRF1001 /* AppearancePreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = APRF0001APRF0001APRF0001 /* AppearancePreference.swift */; };
 		AUTH1001AUTH1001AUTH1001 /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0001AUTH0001AUTH0001 /* AuthGateView.swift */; };
 		AUTH1002AUTH1002AUTH1002 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH0002AUTH0002AUTH0002 /* LoginView.swift */; };
@@ -51,6 +52,7 @@
 		BBTL1001BBTL1001BBTL1001 /* BillsByTypeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBTL0001BBTL0001BBTL0001 /* BillsByTypeListView.swift */; };
 		BCKT1001BCKT1001BCKT1001 /* BillBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCKT0001BCKT0001BCKT0001 /* BillBucket.swift */; };
 		BCKT1002BCKT1002BCKT1002 /* BucketBillsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCKT0002BCKT0002BCKT0002 /* BucketBillsListView.swift */; };
+		BDGT1001BDGT1001BDGT1001 /* BudgetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDGT0001BDGT0001BDGT0001 /* BudgetingView.swift */; };
 		C75585103A20F74CD74D26B4 /* BillType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376520D3B996FD93D29274AF /* BillType.swift */; };
 		C79D9F60D27D3C87CD689471 /* BrandHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30F4E3119E425494C167EEA3 /* BrandHeaderView.swift */; };
 		CATD1001CATD1001CATD1001 /* CategoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CATD0001CATD0001CATD0001 /* CategoryDetailView.swift */; };
@@ -64,28 +66,20 @@
 		DDDD1001DDDD1001DDDD1001 /* ProductIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */; };
 		DDDD1002DDDD1002DDDD1002 /* Entitlements.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */; };
 		DDDD1003DDDD1003DDDD1003 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0003DDDD0003DDDD0003 /* SubscriptionManager.swift */; };
-		PATR1001PATR1001PATR1001 /* PurchaseAttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */; };
-		TSTBLD04TSTBLD04TSTBLD04 /* PurchaseAttributionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */; };
-		TIER1001TIER1001TIER1001 /* SubscriptionPlanTier.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */; };
-		TIER1002TIER1002TIER1002 /* TierEntitlementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */; };
-		ANLY1001ANLY1001ANLY1001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ANLY0001ANLY0001ANLY0001 /* AnalyticsService.swift */; };
-		RFRL1001RFRL1001RFRL1001 /* ReferralService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */; };
-		TPWL1001TPWL1001TPWL1001 /* ThreeTierPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TPWL0001TPWL0001TPWL0001 /* ThreeTierPaywallView.swift */; };
-		FGAT1001FGAT1001FGAT1001 /* FeatureGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FGAT0001FGAT0001FGAT0001 /* FeatureGate.swift */; };
-		ERWD1001ERWD1001ERWD1001 /* EarnRewardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ERWD0001ERWD0001ERWD0001 /* EarnRewardsView.swift */; };
 		DDDD1004DDDD1004DDDD1004 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0004DDDD0004DDDD0004 /* PaywallView.swift */; };
 		DDDD1005DDDD1005DDDD1005 /* ProLockCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0005DDDD0005DDDD0005 /* ProLockCard.swift */; };
 		DEF2AEDF119F54D45FBA74E1 /* Date+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43CCB5B4F5F9C24ED039DDF /* Date+Helpers.swift */; };
 		E4924F7A92B2B789B4C21777 /* PrioritySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724E49A6BA33D00F3C5A00AE /* PrioritySection.swift */; };
 		E79E495EB32A3A4DEDA9E64C /* CashFlowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB54A10B9C7128808E6CD0B /* CashFlowCard.swift */; };
 		EB16D928D10DF9D4D57DDA3A /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C601944789BE0D7770B6162 /* NotificationManager.swift */; };
+		ERWD1001ERWD1001ERWD1001 /* EarnRewardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ERWD0001ERWD0001ERWD0001 /* EarnRewardsView.swift */; };
 		F359346B60A9B00987A17785 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34928484F15201D290FB9C1C /* SampleData.swift */; };
 		F4ED483D8CBDDD887D7A2072 /* RiskAlertCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F540ED935D7FED2E7AE5D9 /* RiskAlertCard.swift */; };
 		FE199C59C7F78EAC069184FA /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A350EB7AE0B70234B5BD784 /* NotificationPreferences.swift */; };
 		FEE5C6432C66F9E3A4EDCC76 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E9A96D326215ECD34DD55B /* NotificationSettingsView.swift */; };
 		FFC4C3B1CBF4FF8A63C5BD80 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A77C81C05D0A317538035A /* DashboardView.swift */; };
+		FGAT1001FGAT1001FGAT1001 /* FeatureGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FGAT0001FGAT0001FGAT0001 /* FeatureGate.swift */; };
 		FOVS1001FOVS1001FOVS1001 /* FinancialOverviewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FOVS0001FOVS0001FOVS0001 /* FinancialOverviewSection.swift */; };
-		BDGT1001BDGT1001BDGT1001 /* BudgetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDGT0001BDGT0001BDGT0001 /* BudgetingView.swift */; };
 		FPEC1001FPEC1001FPEC1001 /* FocusPlusEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FPEC0001FPEC0001FPEC0001 /* FocusPlusEntryCard.swift */; };
 		FPPW1001FPPW1001FPPW1001 /* FocusPlusPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FPPW0001FPPW0001FPPW0001 /* FocusPlusPaywallView.swift */; };
 		FRR01001FRR01001FRR01001 /* FocusRepeatRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRR00001FRR00001FRR00001 /* FocusRepeatRule.swift */; };
@@ -107,7 +101,7 @@
 		PDWN1001PDWN1001PDWN1001 /* PaydownPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */; };
 		PRCM1001PRCM1001PRCM1001 /* PremiumComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRCM0001PRCM0001PRCM0001 /* PremiumComponents.swift */; };
 		PRIV1001PRIV1001PRIV1001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */; };
-		PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */; };
+		PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1390001A1390001A1390001 /* PrivacyInfo.xcprivacy */; };
 		PRTN1001PRTN1001PRTN1001 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0001PRTN0001PRTN0001 /* Theme.swift */; };
 		PRTN1002PRTN1002PRTN1002 /* BillScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0002PRTN0002PRTN0002 /* BillScope.swift */; };
 		PRTN1003PRTN1003PRTN1003 /* PartnerInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0003PRTN0003PRTN0003 /* PartnerInvite.swift */; };
@@ -118,6 +112,7 @@
 		PURL1001PURL1001PURL1001 /* PaymentURLValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */; };
 		QUOT1001QUOT1001QUOT1001 /* DailyQuotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */; };
 		QUTS1001QUTS1001QUTS1001 /* QuoteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */; };
+		RFRL1001RFRL1001RFRL1001 /* ReferralService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */; };
 		RVWX1001RVWX1001RVWX1001 /* ReviewPromptService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */; };
 		SCHI1001SCHI1001SCHI1001 /* ScheduleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCHI0001SCHI0001SCHI0001 /* ScheduleItem.swift */; };
 		SDFC1001SDFC1001SDFC1001 /* SacredDailyFocusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = SDFC0001SDFC0001SDFC0001 /* SacredDailyFocusCard.swift */; };
@@ -126,9 +121,17 @@
 		SNAP0002SNAP0002SNAP0002 /* FinancialSnapshotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SNAP0001SNAP0001SNAP0001 /* FinancialSnapshotView.swift */; };
 		SORT1001SORT1001SORT1001 /* BillSortOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = SORT0001SORT0001SORT0001 /* BillSortOption.swift */; };
 		SUPA0003SUPA0003SUPA0003 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = SUPA0002SUPA0002SUPA0002 /* Supabase */; };
+		TIER1001TIER1001TIER1001 /* SubscriptionPlanTier.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */; };
+		TIER1002TIER1002TIER1002 /* TierEntitlementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */; };
 		TIEV1001TIEV1001TIEV1001 /* TodoItemEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TIEV0001TIEV0001TIEV0001 /* TodoItemEditView.swift */; };
 		TPRI1001TPRI1001TPRI1001 /* TodoPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = TPRI0001TPRI0001TPRI0001 /* TodoPriority.swift */; };
+		TPWL1001TPWL1001TPWL1001 /* ThreeTierPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TPWL0001TPWL0001TPWL0001 /* ThreeTierPaywallView.swift */; };
 		TRSH1001TRSH1001TRSH1001 /* TrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TRSH0001TRSH0001TRSH0001 /* TrashView.swift */; };
+		TSTBLD01TSTBLD01TSTBLD01 /* BillTotalsCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL01TSTFIL01TSTFIL01 /* BillTotalsCalculatorTests.swift */; };
+		TSTBLD02TSTBLD02TSTBLD02 /* IncomeMonthlyAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL02TSTFIL02TSTFIL02 /* IncomeMonthlyAttributionTests.swift */; };
+		TSTBLD03TSTBLD03TSTBLD03 /* IncomeOwnershipAuthLoadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL03TSTFIL03TSTFIL03 /* IncomeOwnershipAuthLoadingTests.swift */; };
+		PATR1001PATR1001PATR1001 /* PurchaseAttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */; };
+		TSTBLD04TSTBLD04TSTBLD04 /* PurchaseAttributionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */; };
 		VGAT1001VGAT1001VGAT1001 /* AppVersionConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */; };
 		VGAT1002VGAT1002VGAT1002 /* VersionGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */; };
 		VGAT1003VGAT1003VGAT1003 /* ForceUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0003VGAT0003VGAT0003 /* ForceUpdateView.swift */; };
@@ -201,6 +204,7 @@
 		8962CA11470A1C4878619F8F /* Color+Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
 		A035339CA64FB82C6F750F78 /* NotificationIntegrationHooks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationIntegrationHooks.swift; sourceTree = "<group>"; };
 		AAAA0010AAAA0010AAAA0010 /* LegacyDemoBills.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDemoBills.swift; sourceTree = "<group>"; };
+		ANLY0001ANLY0001ANLY0001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		APRF0001APRF0001APRF0001 /* AppearancePreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearancePreference.swift; sourceTree = "<group>"; };
 		AUTH0001AUTH0001AUTH0001 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGateView.swift; sourceTree = "<group>"; };
 		AUTH0002AUTH0002AUTH0002 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -216,6 +220,7 @@
 		BBTL0001BBTL0001BBTL0001 /* BillsByTypeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillsByTypeListView.swift; sourceTree = "<group>"; };
 		BCKT0001BCKT0001BCKT0001 /* BillBucket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillBucket.swift; sourceTree = "<group>"; };
 		BCKT0002BCKT0002BCKT0002 /* BucketBillsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketBillsListView.swift; sourceTree = "<group>"; };
+		BDGT0001BDGT0001BDGT0001 /* BudgetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetingView.swift; sourceTree = "<group>"; };
 		C569E9E53EEFE34D34F7F7EB /* BillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillsView.swift; sourceTree = "<group>"; };
 		C9D049148AF854EB24C2B2E5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CATD0001CATD0001CATD0001 /* CategoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailView.swift; sourceTree = "<group>"; };
@@ -229,16 +234,6 @@
 		DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductIdentifiers.swift; sourceTree = "<group>"; };
 		DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlements.swift; sourceTree = "<group>"; };
 		DDDD0003DDDD0003DDDD0003 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
-		PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionService.swift; sourceTree = "<group>"; };
-		TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionServiceTests.swift; sourceTree = "<group>"; };
-		TSTXCT01TSTXCT01TSTXCT01 /* SacredBillTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SacredBillTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlanTier.swift; sourceTree = "<group>"; };
-		TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierEntitlementManager.swift; sourceTree = "<group>"; };
-		ANLY0001ANLY0001ANLY0001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
-		RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferralService.swift; sourceTree = "<group>"; };
-		TPWL0001TPWL0001TPWL0001 /* ThreeTierPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeTierPaywallView.swift; sourceTree = "<group>"; };
-		FGAT0001FGAT0001FGAT0001 /* FeatureGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureGate.swift; sourceTree = "<group>"; };
-		ERWD0001ERWD0001ERWD0001 /* EarnRewardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EarnRewardsView.swift; sourceTree = "<group>"; };
 		DDDD0004DDDD0004DDDD0004 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		DDDD0005DDDD0005DDDD0005 /* ProLockCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProLockCard.swift; sourceTree = "<group>"; };
 		DDDD0006DDDD0006DDDD0006 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = file.storekit; path = Configuration.storekit; sourceTree = "<group>"; };
@@ -246,6 +241,7 @@
 		E1F540ED935D7FED2E7AE5D9 /* RiskAlertCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RiskAlertCard.swift; path = SacredBillTracker/Views/Components/RiskAlertCard.swift; sourceTree = SOURCE_ROOT; };
 		E998C8199BE79A32DCF860CC /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		EB01615D42EF75D6C9FD2114 /* FilterPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPicker.swift; sourceTree = "<group>"; };
+		ERWD0001ERWD0001ERWD0001 /* EarnRewardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EarnRewardsView.swift; sourceTree = "<group>"; };
 		F6E9A96D326215ECD34DD55B /* NotificationSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 		F9B1EA6AF0D6D8B5AE5D1348 /* BillCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillCategory.swift; sourceTree = "<group>"; };
 		FAB54A10B9C7128808E6CD0B /* CashFlowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CashFlowCard.swift; path = SacredBillTracker/Views/Components/CashFlowCard.swift; sourceTree = SOURCE_ROOT; };
@@ -689,8 +685,8 @@
 		FD15934D2FE457070073BFCE /* VIRAL_AD_PLAN_v7_SAFE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = VIRAL_AD_PLAN_v7_SAFE.md; sourceTree = "<group>"; };
 		FDA8F8EA2F98336600A87244 /* SacredBillTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SacredBillTracker.entitlements; sourceTree = "<group>"; };
 		FDAC997A1DA889FDDBFE5ADD /* SupabaseBillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseBillRepository.swift; sourceTree = "<group>"; };
+		FGAT0001FGAT0001FGAT0001 /* FeatureGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureGate.swift; sourceTree = "<group>"; };
 		FOVS0001FOVS0001FOVS0001 /* FinancialOverviewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialOverviewSection.swift; sourceTree = "<group>"; };
-		BDGT0001BDGT0001BDGT0001 /* BudgetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetingView.swift; sourceTree = "<group>"; };
 		FPEC0001FPEC0001FPEC0001 /* FocusPlusEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPlusEntryCard.swift; sourceTree = "<group>"; };
 		FPPW0001FPPW0001FPPW0001 /* FocusPlusPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPlusPaywallView.swift; sourceTree = "<group>"; };
 		FRR00001FRR00001FRR00001 /* FocusRepeatRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusRepeatRule.swift; sourceTree = "<group>"; };
@@ -712,6 +708,7 @@
 		PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaydownPlanService.swift; sourceTree = "<group>"; };
 		PRCM0001PRCM0001PRCM0001 /* PremiumComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumComponents.swift; sourceTree = "<group>"; };
 		PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A1390001A1390001A1390001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		PRTN0001PRTN0001PRTN0001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		PRTN0002PRTN0002PRTN0002 /* BillScope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillScope.swift; sourceTree = "<group>"; };
 		PRTN0003PRTN0003PRTN0003 /* PartnerInvite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerInvite.swift; sourceTree = "<group>"; };
@@ -722,6 +719,7 @@
 		PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentURLValidator.swift; sourceTree = "<group>"; };
 		QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuotes.swift; sourceTree = "<group>"; };
 		QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteService.swift; sourceTree = "<group>"; };
+		RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferralService.swift; sourceTree = "<group>"; };
 		RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptService.swift; sourceTree = "<group>"; };
 		SCHI0001SCHI0001SCHI0001 /* ScheduleItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleItem.swift; sourceTree = "<group>"; };
 		SDFC0001SDFC0001SDFC0001 /* SacredDailyFocusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SacredDailyFocusCard.swift; sourceTree = "<group>"; };
@@ -730,9 +728,18 @@
 		SIEV0001SIEV0001SIEV0001 /* ScheduleItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleItemEditView.swift; sourceTree = "<group>"; };
 		SNAP0001SNAP0001SNAP0001 /* FinancialSnapshotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialSnapshotView.swift; sourceTree = "<group>"; };
 		SORT0001SORT0001SORT0001 /* BillSortOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillSortOption.swift; sourceTree = "<group>"; };
+		TIER0001TIER0001TIER0001 /* SubscriptionPlanTier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlanTier.swift; sourceTree = "<group>"; };
+		TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierEntitlementManager.swift; sourceTree = "<group>"; };
 		TIEV0001TIEV0001TIEV0001 /* TodoItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemEditView.swift; sourceTree = "<group>"; };
 		TPRI0001TPRI0001TPRI0001 /* TodoPriority.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoPriority.swift; sourceTree = "<group>"; };
+		TPWL0001TPWL0001TPWL0001 /* ThreeTierPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeTierPaywallView.swift; sourceTree = "<group>"; };
 		TRSH0001TRSH0001TRSH0001 /* TrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
+		TSTFIL01TSTFIL01TSTFIL01 /* BillTotalsCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillTotalsCalculatorTests.swift; sourceTree = "<group>"; };
+		TSTFIL02TSTFIL02TSTFIL02 /* IncomeMonthlyAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeMonthlyAttributionTests.swift; sourceTree = "<group>"; };
+		TSTFIL03TSTFIL03TSTFIL03 /* IncomeOwnershipAuthLoadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeOwnershipAuthLoadingTests.swift; sourceTree = "<group>"; };
+		PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionService.swift; sourceTree = "<group>"; };
+		TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionServiceTests.swift; sourceTree = "<group>"; };
+		TSTXCT01TSTXCT01TSTXCT01 /* SacredBillTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SacredBillTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionConfig.swift; sourceTree = "<group>"; };
 		VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionGateService.swift; sourceTree = "<group>"; };
 		VGAT0003VGAT0003VGAT0003 /* ForceUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForceUpdateView.swift; sourceTree = "<group>"; };
@@ -1019,14 +1026,6 @@
 				TIER0002TIER0002TIER0002 /* TierEntitlementManager.swift */,
 			);
 			path = StoreKit;
-			sourceTree = "<group>";
-		};
-		TSTGRP01TSTGRP01TSTGRP01 /* SacredBillTrackerTests */ = {
-			isa = PBXGroup;
-			children = (
-				TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */,
-			);
-			path = SacredBillTrackerTests;
 			sourceTree = "<group>";
 		};
 		DDDD2002DDDD2002DDDD2002 /* Paywall */ = {
@@ -2265,6 +2264,17 @@
 			path = Account;
 			sourceTree = "<group>";
 		};
+		TSTGRP01TSTGRP01TSTGRP01 /* SacredBillTrackerTests */ = {
+			isa = PBXGroup;
+			children = (
+				TSTFIL01TSTFIL01TSTFIL01 /* BillTotalsCalculatorTests.swift */,
+				TSTFIL02TSTFIL02TSTFIL02 /* IncomeMonthlyAttributionTests.swift */,
+				TSTFIL03TSTFIL03TSTFIL03 /* IncomeOwnershipAuthLoadingTests.swift */,
+				TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */,
+			);
+			path = SacredBillTrackerTests;
+			sourceTree = "<group>";
+		};
 		VGAT2001VGAT2001VGAT2001 /* ForceUpdate */ = {
 			isa = PBXGroup;
 			children = (
@@ -2281,6 +2291,7 @@
 				WGTF0003WGTF0003WGTF0003 /* WidgetSharedBillSnapshot.swift */,
 				WGTF0005WGTF0005WGTF0005 /* Info.plist */,
 				WGTF0006WGTF0006WGTF0006 /* SacredBillTrackerWidgets.entitlements */,
+				A1390001A1390001A1390001 /* PrivacyInfo.xcprivacy */,
 			);
 			path = SacredBillTracker/SacredBillTrackerWidgets;
 			sourceTree = "<group>";
@@ -2587,6 +2598,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				TSTBLD01TSTBLD01TSTBLD01 /* BillTotalsCalculatorTests.swift in Sources */,
+				TSTBLD02TSTBLD02TSTBLD02 /* IncomeMonthlyAttributionTests.swift in Sources */,
+				TSTBLD03TSTBLD03TSTBLD03 /* IncomeOwnershipAuthLoadingTests.swift in Sources */,
 				TSTBLD04TSTBLD04TSTBLD04 /* PurchaseAttributionServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2692,7 +2706,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2713,7 +2727,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.14;
+				MARKETING_VERSION = 1.0.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2730,7 +2744,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2751,7 +2765,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.14;
+				MARKETING_VERSION = 1.0.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2869,7 +2883,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
@@ -2881,7 +2895,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.14;
+				MARKETING_VERSION = 1.0.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2897,7 +2911,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
@@ -2909,7 +2923,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.14;
+				MARKETING_VERSION = 1.0.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

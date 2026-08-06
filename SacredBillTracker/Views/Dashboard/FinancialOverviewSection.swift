@@ -39,6 +39,12 @@ struct FinancialOverviewSection: View {
 
     @State private var expanded: Bool = false
 
+    /// v1.0.16 — Section-level collapse. The dashboard shows only a compact
+    /// preview (headline total + one-line summary) until the user taps the
+    /// header chevron to reveal the full overview. Persisted so the user's
+    /// space-saving choice sticks across launches.
+    @AppStorage("sbt.financialOverview.sectionExpanded.v1") private var sectionExpanded: Bool = false
+
     private let currency: NumberFormatter = {
         let f = NumberFormatter()
         f.numberStyle = .currency
@@ -52,17 +58,23 @@ struct FinancialOverviewSection: View {
         VStack(alignment: .leading, spacing: 12) {
             header
 
-            // Compact 2x2 grid — always visible.
-            compactGrid
+            if sectionExpanded {
+                // Full overview — compact 2x2 grid + optional deep details.
+                compactGrid
 
-            // Expand / collapse chrome.
-            detailsChevron
+                // Expand / collapse chrome for the deeper breakdown.
+                detailsChevron
 
-            // Expanded details — only mounted when open so the default
-            // dashboard remains tight.
-            if expanded {
-                expandedDetails
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                // Expanded details — only mounted when open so the default
+                // dashboard remains tight.
+                if expanded {
+                    expandedDetails
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            } else {
+                // Space-saving preview — headline total + one-line summary.
+                previewContent
+                    .transition(.opacity)
             }
         }
         .padding(18)
@@ -72,17 +84,57 @@ struct FinancialOverviewSection: View {
         )
         .shadow(color: Color.black.opacity(0.06), radius: 14, x: 0, y: 6)
         .padding(.horizontal)
+        .animation(.easeInOut(duration: 0.22), value: sectionExpanded)
         .animation(.easeInOut(duration: 0.22), value: expanded)
         .animation(.easeInOut(duration: 0.22), value: combineIncome)
     }
 
-    // MARK: - Header
+    // MARK: - Header (dropdown toggle)
 
     private var header: some View {
-        Text("Financial Overview")
-            .font(.system(.title2, design: .rounded).weight(.bold))
-            .tracking(-0.2)
-            .foregroundStyle(.primary)
+        Button {
+            withAnimation(.easeInOut(duration: 0.22)) { sectionExpanded.toggle() }
+        } label: {
+            HStack(spacing: 8) {
+                Text("Financial Overview")
+                    .font(.system(.title2, design: .rounded).weight(.bold))
+                    .tracking(-0.2)
+                    .foregroundStyle(.primary)
+                Spacer()
+                Image(systemName: "chevron.down")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(Color.appAccentText)
+                    .rotationEffect(.degrees(sectionExpanded ? 180 : 0))
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Financial Overview")
+        .accessibilityHint(sectionExpanded ? "Collapse to preview" : "Expand full overview")
+    }
+
+    // MARK: - Preview (collapsed section)
+
+    /// Space-saving glance shown when the section is collapsed: the headline
+    /// monthly total plus a one-line summary. Tapping the header chevron
+    /// reveals the full grid + details.
+    private var previewContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            totalBillsCounter(
+                title: totalBillsTitle,
+                amount: monthlyBillTotals.totalBills,
+                tint: scopeTint,
+                icon: "tray.full.fill"
+            )
+
+            HStack(spacing: 6) {
+                Text("\(billsThisMonthCount) bill\(billsThisMonthCount == 1 ? "" : "s") this month")
+                Text("•").foregroundStyle(.secondary)
+                Text("\(currency.string(from: monthlyBillTotals.remaining as NSDecimalNumber) ?? "$0") remaining")
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+        }
     }
 
     // MARK: - Compact grid (always visible)
@@ -92,6 +144,13 @@ struct FinancialOverviewSection: View {
             Text("This Month")
                 .font(.headline.weight(.bold))
                 .foregroundStyle(.primary)
+
+            totalBillsCounter(
+                title: totalBillsTitle,
+                amount: monthlyBillTotals.totalBills,
+                tint: scopeTint,
+                icon: "tray.full.fill"
+            )
 
             switch scope {
             case .all:
@@ -211,9 +270,15 @@ struct FinancialOverviewSection: View {
         subsectionHeader("Bills — This Month")
 
         HStack(spacing: 8) {
+            statTile(label: "Total",
+                     value: currency.string(from: monthlyBillTotals.totalBills as NSDecimalNumber) ?? "$0",
+                     tint: Color.appAccentText)
             statTile(label: "Paid",
                      value: currency.string(from: paidThisMonth as NSDecimalNumber) ?? "$0",
                      tint: .green)
+        }
+
+        HStack(spacing: 8) {
             statTile(label: "Pending",
                      value: currency.string(from: pendingThisMonth as NSDecimalNumber) ?? "$0",
                      tint: Color.appAccentText)
@@ -348,7 +413,7 @@ struct FinancialOverviewSection: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.68)
 
-                Text("Total due this month")
+                Text("Full monthly bill obligation")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -361,6 +426,41 @@ struct FinancialOverviewSection: View {
         .buttonStyle(.plain)
         .frame(maxWidth: fullWidth ? .infinity : nil)
         .accessibilityHint("Open \(title.lowercased()) bill details")
+    }
+
+    private func totalBillsCounter(
+        title: String,
+        amount: Decimal,
+        tint: Color,
+        icon: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: 7) {
+                Image(systemName: icon)
+                    .font(.caption.weight(.bold))
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundStyle(tint)
+
+            Text(currency.string(from: amount as NSDecimalNumber) ?? "$0")
+                .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
+                .foregroundStyle(Color(.label))
+                .lineLimit(1)
+                .minimumScaleFactor(0.68)
+
+            Text("Full monthly bill obligation")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title), \(currency.string(from: amount as NSDecimalNumber) ?? "$0"), full monthly bill obligation")
     }
 
     /// Tappable income counter that visually matches the classic bill
@@ -472,22 +572,31 @@ struct FinancialOverviewSection: View {
     }
 
     private var billsThisMonth: [Bill] {
-        store.bills.filter { bill in
-            bill.isDueThisMonth && scope.matches(bill.type)
-        }
+        BillTotalsCalculator.bills(from: store.bills.filter { scope.matches($0.type) })
     }
     private var billsThisMonthCount: Int { billsThisMonth.count }
+    private var monthlyBillTotals: MonthlyBillTotals {
+        store.monthlyTotals(for: scope)
+    }
     private var paidThisMonth: Decimal {
-        billsThisMonth.filter { $0.isPaid }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        monthlyBillTotals.paid
     }
     private var overdueThisMonth: Decimal {
-        billsThisMonth.filter { $0.isOverdue }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        monthlyBillTotals.overdue
     }
     private var pendingThisMonth: Decimal {
-        billsThisMonth.filter { !$0.isPaid && !$0.isOverdue }
-            .reduce(Decimal(0)) { $0 + $1.amount }
+        monthlyBillTotals.pending
+    }
+
+    private var totalBillsTitle: String {
+        switch scope {
+        case .all:
+            return "Total Bills"
+        case .household:
+            return "Personal Bills"
+        case .business:
+            return "Business Bills"
+        }
     }
 
     private func percentage(of part: Decimal, in whole: Decimal) -> Int? {

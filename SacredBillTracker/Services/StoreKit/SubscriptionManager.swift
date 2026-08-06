@@ -215,6 +215,41 @@ final class SubscriptionManager: ObservableObject {
                     await refreshAutoTrackEntitlementFromBackend()
                 }
                 lastPurchaseSucceeded = true
+
+                // Attribution: TikTok — fired ONLY here, inside the verified
+                // transaction path (immediately after `checkVerified`). Never
+                // from a paywall view or a button tap.
+                //
+                // `StartTrial` when the verified transaction applied an
+                // introductory (free-trial) offer, otherwise `Subscribe`.
+                // Renewals are deliberately NOT reported: they arrive via
+                // `Transaction.updates` and reporting them would over-count.
+                // Entitlement logic below is untouched — this block only reads.
+                #if canImport(TikTokBusinessSDK)
+                let usedIntroOffer: Bool = {
+                    if #available(iOS 17.2, *) {
+                        return transaction.offer?.type == .introductory
+                    } else {
+                        return transaction.offerType == .introductory
+                    }
+                }()
+                let ttCurrency = product.priceFormatStyle.currencyCode
+                attributionDebugLog("Verified purchase; TikTok event = \(usedIntroOffer ? "StartTrial" : "Subscribe")")
+                if usedIntroOffer {
+                    TikTokEventsManager.shared.logStartTrial(
+                        productID: product.id,
+                        value: product.price,
+                        currency: ttCurrency
+                    )
+                } else {
+                    TikTokEventsManager.shared.logSubscribe(
+                        productID: product.id,
+                        value: product.price,
+                        currency: ttCurrency
+                    )
+                }
+                #endif
+
                 return isPro
 
             case .userCancelled:

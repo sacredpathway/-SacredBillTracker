@@ -28,6 +28,32 @@ import Supabase
 import Auth   // exposes OpenIDConnectCredentials, Provider, UserAttributes
 #endif
 
+// MARK: - Session owner cache
+
+/// Remembers the last signed-in owner ID **solely** so that the cold-launch
+/// window — after `AuthService.bootstrap()` starts but before the Supabase
+/// session comes back — can keep showing that user's locally cached income
+/// instead of collapsing every total to $0.
+///
+/// Cleared on sign-out and on account deletion, so a signed-out device never
+/// reveals the previous user's rows.
+enum SessionOwnerCache {
+
+    private static let key = "sacred.bill.tracker.auth.lastOwnerID.v1"
+
+    static var lastKnownOwnerID: UUID? {
+        UserDefaults.standard.string(forKey: key).flatMap(UUID.init(uuidString:))
+    }
+
+    static func remember(_ id: UUID) {
+        UserDefaults.standard.set(id.uuidString, forKey: key)
+    }
+
+    static func clear() {
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+}
+
 // MARK: - Public API
 
 @MainActor
@@ -38,6 +64,14 @@ final class AuthService: NSObject, ObservableObject {
 
     /// The Supabase-assigned user ID. `nil` while signed out.
     @Published private(set) var currentUserID: UUID?
+
+    /// `false` until the initial session restore (`bootstrap()`) finishes —
+    /// success, no session, or error alike.
+    ///
+    /// Consumers MUST NOT treat `currentUserID == nil` as "signed out" until
+    /// this is `true`. Before that it means "we don't know yet". Conflating
+    /// the two is what made monthly income read $0 on every cold launch.
+    @Published private(set) var hasResolvedSession: Bool = false
 
     /// Human-readable name from the Apple credential, if we captured one
     /// on first sign-in. Cached in UserDefaults because Apple only
@@ -75,6 +109,11 @@ final class AuthService: NSObject, ObservableObject {
     /// Called on init — loads any existing Supabase session so the
     /// user stays signed in across launches.
     func bootstrap() async {
+        // Resolve exactly once, on every exit path: success, no session,
+        // or thrown error. Until this flips, income treats a nil owner as
+        // "unknown" rather than "signed out".
+        defer { hasResolvedSession = true }
+
         #if canImport(Supabase)
         do {
             let session = try await SupabaseConfig.client.auth.session
@@ -88,6 +127,7 @@ final class AuthService: NSObject, ObservableObject {
         // Without the Supabase package, behave as a single-user local app.
         isSignedIn = true
         currentUserID = DeviceIdentity.localUserID
+        SessionOwnerCache.remember(DeviceIdentity.localUserID)
         #endif
     }
 
@@ -126,6 +166,8 @@ final class AuthService: NSObject, ObservableObject {
             ?? DeviceIdentity.localUserID
         self.currentUserID = devID
         self.isSignedIn = true
+        self.hasResolvedSession = true
+        SessionOwnerCache.remember(devID)
         self.displayName = "Dev Tester"
         UserDefaults.standard.set("Dev Tester", forKey: displayNameKey)
         self.lastError = nil
@@ -198,6 +240,8 @@ final class AuthService: NSObject, ObservableObject {
         // signed-in state so the rest of the app can still be exercised.
         isSignedIn = true
         currentUserID = DeviceIdentity.localUserID
+        hasResolvedSession = true
+        SessionOwnerCache.remember(DeviceIdentity.localUserID)
         if let display = displayName?.trimmingCharacters(in: .whitespacesAndNewlines),
            !display.isEmpty {
             UserDefaults.standard.set(display, forKey: displayNameKey)
@@ -237,6 +281,8 @@ final class AuthService: NSObject, ObservableObject {
         #else
         isSignedIn = true
         currentUserID = DeviceIdentity.localUserID
+        hasResolvedSession = true
+        SessionOwnerCache.remember(DeviceIdentity.localUserID)
         lastError = nil
         return true
         #endif
@@ -306,6 +352,10 @@ final class AuthService: NSObject, ObservableObject {
         isSignedIn = false
         currentUserID = nil
         currentUserEmail = nil
+        hasResolvedSession = true
+        // Signed out is a *known* state — drop the restore-window hint so the
+        // previous owner's income can never be read back.
+        SessionOwnerCache.clear()
     }
 
     // MARK: - Delete account (App Store Guideline 5.1.1(v))
@@ -358,6 +408,8 @@ final class AuthService: NSObject, ObservableObject {
         currentUserID = nil
         currentUserEmail = nil
         lastError = nil
+        hasResolvedSession = true
+        SessionOwnerCache.clear()
         return true
     }
 
@@ -427,6 +479,8 @@ final class AuthService: NSObject, ObservableObject {
         let deviceID = UUID(uuidString: cred.user) ?? DeviceIdentity.localUserID
         isSignedIn = true
         currentUserID = deviceID
+        hasResolvedSession = true
+        SessionOwnerCache.remember(deviceID)
         if let name = nameTriplet {
             UserDefaults.standard.set(name.combined, forKey: displayNameKey)
             displayName = name.combined
@@ -439,6 +493,8 @@ final class AuthService: NSObject, ObservableObject {
     private func applySession(userID: UUID, email: String? = nil) {
         self.currentUserID = userID
         self.isSignedIn = true
+        self.hasResolvedSession = true
+        SessionOwnerCache.remember(userID)
         if let email, !email.isEmpty {
             self.currentUserEmail = email.lowercased()
         }

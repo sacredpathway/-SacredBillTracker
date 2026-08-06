@@ -43,9 +43,9 @@ enum BillTemplates {
         BillTemplate(id: "insurance",   name: "Insurance",     category: .insurance,     recurrence: .monthly, type: .household, autoPaySuggested: true,  systemImage: "shield.fill"),
         BillTemplate(id: "subscription",name: "Subscription",  category: .subscriptions, recurrence: .monthly, type: .household, autoPaySuggested: true,  systemImage: "repeat.circle.fill"),
 
-        // Business / owner-operator
-        BillTemplate(id: "trucknote",   name: "Truck Note",    category: .transportation, recurrence: .monthly, type: .business,  autoPaySuggested: false, systemImage: "truck.box.fill"),
-        BillTemplate(id: "fuelcard",    name: "Fuel Card",     category: .transportation, recurrence: .weekly,  type: .business,  autoPaySuggested: false, systemImage: "fuelpump.fill"),
+        // Business
+        BillTemplate(id: "autoloan",    name: "Auto Loan",     category: .transportation, recurrence: .monthly, type: .business,  autoPaySuggested: false, systemImage: "car.fill"),
+        BillTemplate(id: "fuel",        name: "Fuel",          category: .transportation, recurrence: .weekly,  type: .business,  autoPaySuggested: false, systemImage: "fuelpump.fill"),
         BillTemplate(id: "software",    name: "Software",      category: .software,       recurrence: .monthly, type: .business,  autoPaySuggested: true,  systemImage: "laptopcomputer"),
         BillTemplate(id: "officerent",  name: "Office Rent",   category: .rentBusiness,   recurrence: .monthly, type: .business,  autoPaySuggested: false, systemImage: "building.2.fill"),
     ]

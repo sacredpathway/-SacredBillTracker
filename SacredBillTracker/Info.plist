@@ -37,11 +37,43 @@
 	<key>AppsFlyerDevKey</key>
 	<string>$(APPSFLYER_DEV_KEY)</string>
 
-	<!-- NSUserTrackingUsageDescription intentionally OMITTED for this release.
-	     The AppsFlyer SDK is present but dormant (placeholder Dev Key), so the
-	     app never requests App Tracking Transparency. Omitting this key keeps the
-	     binary consistent with the non-tracking App Privacy label. Re-add this key
-	     only when a real AppsFlyer Dev Key is set and tracking is declared. -->
+	<!-- Send privacy-preserving SKAdNetwork and AdAttributionKit postback
+	     copies to AppsFlyer. Apple reads these endpoints from the app bundle;
+	     no runtime code or ATT authorization is required. -->
+	<key>NSAdvertisingAttributionReportEndpoint</key>
+	<string>https://appsflyer-skadnetwork.com/</string>
+	<key>AttributionCopyEndpoint</key>
+	<string>https://appsflyer-skadnetwork.com/</string>
+
+	<!-- TikTok Business SDK credentials, injected from the git-ignored
+	     Secrets.xcconfig (build settings TIKTOK_ACCESS_TOKEN / TIKTOK_APP_ID)
+	     and read at runtime via the bundle info dictionary. When a build setting
+	     is undefined, $(VAR) substitutes to an empty string and the app refuses
+	     to initialize the TikTok SDK (safe dormant no-op).
+	       • TikTokAccessToken — SECRET. Never commit a real value.
+	       • TikTokAppID       — the TikTok App ID from Events Manager (iOS data
+	                             source 6762890363). The Apple App Store ID is a
+	                             public constant inside TikTokEventsManager. -->
+	<key>TikTokAccessToken</key>
+	<string>$(TIKTOK_ACCESS_TOKEN)</string>
+	<key>TikTokAppID</key>
+	<string>$(TIKTOK_APP_ID)</string>
+
+	<!-- App Tracking Transparency prompt copy. REQUIRED now that the app
+	     requests ATT (IDFA) for TikTok attribution.
+	     ⚠️ CONSISTENCY RULE: this key, PrivacyInfo.xcprivacy (NSPrivacyTracking)
+	     and the App Store Privacy Label must all agree at submission time.
+	     Both SDKs remain dormant until real credentials are supplied, but the
+	     declared posture is now "tracking". Do not ship a build that declares
+	     tracking while the App Store label still says otherwise. -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Sacred Bill Tracker uses your device identifier to measure how well our ads perform. Declining will not limit any feature of the app.</string>
+
+	<!-- Xcode merges AppsFlyer's legitimate NSPrivacyTrackingDomains into the
+	     generated application Info.plist. Apple requires this matching flag
+	     whenever that generated domain array is non-empty. -->
+	<key>NSPrivacyTracking</key>
+	<true/>
 
 		<!-- SKAdNetwork ad-network IDs from AppsFlyer's published partner list.
 		     Apple sends install postbacks only to the networks listed here.

@@ -166,10 +166,26 @@ struct WeeklyIncome: Identifiable, Codable, Hashable {
 
     // MARK: - Derived
 
-    /// The "anchor" date used when bucketing into a month — uses
-    /// `weekStart` so a week that straddles two months is reported
-    /// under the month it began.
-    var bucketDate: Date { weekStart }
+    /// The date this entry's income is attributed to when bucketing into
+    /// a week / month / year.
+    ///
+    /// Every entry created since the single-Date Add Income flow, and every
+    /// Plaid import, stores `weekStart == weekEnd`, so this is simply that
+    /// day. Only *legacy* week-range rows (Mon→Sun) differ, and those are
+    /// attributed to `weekEnd` — the settlement date the week pays out on.
+    ///
+    /// This is what fixes the "This Month income = $0" bug: a legacy week
+    /// like Mon Jun 29 → Sun Jul 5 previously bucketed under `weekStart`
+    /// (June), so it fell outside July's range and disappeared from the
+    /// current month until the first Monday landed inside that month.
+    /// Attributing by `weekEnd` puts it in exactly one month — July —
+    /// so months never double-count and never drop a straddling week.
+    ///
+    /// `max` guards against any corrupt row where `weekEnd < weekStart`.
+    var incomeDate: Date { max(weekStart, weekEnd) }
+
+    /// The "anchor" date used when bucketing into a month.
+    var bucketDate: Date { incomeDate }
 
     /// Single-date convenience — the Add Income flow now stores one
     /// date per entry. The model keeps a week range under the hood so

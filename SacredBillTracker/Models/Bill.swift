@@ -93,8 +93,9 @@ struct Bill: Identifiable, Codable, Hashable {
     var autoPay: Bool
     var notes: String
 
-    /// User-set status. Computed `effectiveStatus` treats auto-pay bills as
-    /// paid and promotes uncovered unpaid bills to `overdue` once the due
+    /// User-set status. Computed `effectiveStatus` reads an auto-pay bill as
+    /// paid only once its due date has passed (the draft is assumed to have
+    /// run), and promotes an uncovered unpaid bill to `overdue` once its due
     /// date has passed.
     var status: PaymentStatus
 
@@ -306,17 +307,33 @@ struct Bill: Identifiable, Codable, Hashable {
 
     // MARK: - Derived
 
-    /// Treat auto-pay as covered for the current due cycle, otherwise promote
-    /// an unpaid bill whose due date has passed to overdue.
-    var effectiveStatus: PaymentStatus {
-        if isPaid { return .paid }
+    /// True once the calendar day of the due date has passed (start-of-day
+    /// comparison, so the due day itself does NOT count as passed yet).
+    var hasDueDatePassed: Bool {
         let cal = Calendar.current
         return cal.startOfDay(for: dueDate) < cal.startOfDay(for: Date())
-            ? .overdue : .unpaid
+    }
+
+    /// Reflects the bill's paid/unpaid state, promoting an unpaid bill to
+    /// `overdue` once its due date has passed. Auto-pay does NOT affect this:
+    /// a bill is paid only when its `status` is `.paid` (see `isPaid`), so an
+    /// autopay bill whose draft never confirmed still surfaces as overdue.
+    var effectiveStatus: PaymentStatus {
+        if isPaid { return .paid }
+        return hasDueDatePassed ? .overdue : .unpaid
     }
 
     var isAutoPaid: Bool { autoPay }
-    var isPaid: Bool     { status == .paid || isAutoPaid }
+    /// Whether this bill's amount is settled for the current cycle.
+    /// True ONLY when the bill's `status` is `.paid`. Auto-pay is a
+    /// scheduling / reminder-suppression flag — NOT proof the draft cleared —
+    /// so it never marks a bill paid on its own. This keeps an autopay bill
+    /// counting toward what's owed until payment is actually confirmed, and
+    /// lets a failed autopay draft surface as `overdue` instead of hiding as
+    /// paid (the "autopay can never show overdue" money bug).
+    var isPaid: Bool {
+        status == .paid
+    }
     var isOverdue: Bool  { effectiveStatus == .overdue }
     var isDueToday: Bool { Calendar.current.isDateInToday(dueDate) }
 
