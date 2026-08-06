@@ -2727,7 +2727,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.16;
+				MARKETING_VERSION = 1.0.17;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2765,7 +2765,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.16;
+				MARKETING_VERSION = 1.0.17;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2895,7 +2895,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.16;
+				MARKETING_VERSION = 1.0.17;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2923,7 +2923,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.16;
+				MARKETING_VERSION = 1.0.17;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
