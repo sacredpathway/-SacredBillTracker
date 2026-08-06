@@ -204,13 +204,13 @@ struct SacredBillTrackerApp: App {
                         _ = await notifications.requestAuthorization()
                     }
                 }
-                .onChange(of: scenePhase) { _, newPhase in
+                .onChange(of: scenePhase, initial: true) { _, newPhase in
                     // Refresh the gate every time the app returns to the
                     // foreground.
                     if newPhase == .active {
                         Task { await versionGate.refresh() }
 
-                        // AppsFlyer — request ATT once, then start the SDK once.
+                        // AppsFlyer — resolve ATT, then start the active session.
                         // Guarded so it's a no-op until the package is linked.
                         #if canImport(AppsFlyerLib)
                         AppsFlyerManager.shared.requestATTThenStart()
@@ -353,7 +353,6 @@ import UIKit
 final class AppsFlyerManager: NSObject {
 
     static let shared = AppsFlyerManager()
-    private var didStart = false
     /// True only when a real (non-placeholder) Dev Key was found and applied.
     private var isConfigured = false
     private override init() { super.init() }
@@ -428,13 +427,18 @@ final class AppsFlyerManager: NSObject {
     }
 
     private func start() {
-        guard isConfigured, !didStart else {
-            debugLog("SDK start skipped (already started or not configured)")
+        guard isConfigured else {
+            debugLog("SDK start skipped (not configured)")
             return
         }
-        didStart = true
+        // AppsFlyer expects start on each active-session transition. SDK
+        // configuration remains one-time in App.init.
         debugLog("SDK start requested")
         AppsFlyerLib.shared().start()
+        Task {
+            _ = await PurchaseAttributionService.shared.recoverUnfinishedTransactions()
+            _ = await PurchaseAttributionService.shared.retryPendingPurchases()
+        }
     }
 
     // MARK: - In-app events (additive)
@@ -469,26 +473,26 @@ final class AppsFlyerManager: NSObject {
         logEvent("income_created")
     }
 
-    /// Fired when a subscription purchase succeeds (subscription_started).
-    func logSubscriptionStarted(productID: String? = nil,
-                                revenue: NSNumber? = nil,
-                                currency: String? = nil) {
-        var values: [String: Any] = [:]
-        if let productID { values["af_content_id"] = productID }
-        if let revenue { values["af_revenue"] = revenue }
-        if let currency { values["af_currency"] = currency }
-        logEvent("af_subscribe", values: values.isEmpty ? nil : values)
-    }
-
-    /// Fired when StoreKit confirms a paid subscription purchase.
-    func logPurchase(productID: String? = nil,
-                     revenue: NSNumber? = nil,
-                     currency: String? = nil) {
-        var values: [String: Any] = [:]
-        if let productID { values["af_content_id"] = productID }
-        if let revenue { values["af_revenue"] = revenue }
-        if let currency { values["af_currency"] = currency }
-        logEvent("af_purchase", values: values.isEmpty ? nil : values)
+    /// Purchase events must use this acknowledged path through
+    /// PurchaseAttributionService. No StoreKit manager emits directly.
+    func logEventAcknowledged(_ name: String, values: [String: Any]) async throws {
+        guard isConfigured else {
+            throw PurchaseAttributionSenderError.appsFlyerNotConfigured
+        }
+        debugLog("Acknowledged event requested: \(name)")
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            AppsFlyerLib.shared().logEvent(
+                name: name,
+                values: values,
+                completionHandler: { _, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: ())
+                    }
+                }
+            )
+        }
     }
 }
 

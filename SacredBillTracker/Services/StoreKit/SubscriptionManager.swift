@@ -196,7 +196,17 @@ final class SubscriptionManager: ObservableObject {
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
-                await transaction.finish()
+                let attributionPreparation = await preparePurchaseAttribution(
+                    transaction: transaction,
+                    source: "legacy_paywall"
+                )
+                if attributionPreparation.permitsStoreKitFinish {
+                    await transaction.finish()
+                }
+                schedulePurchaseAttributionDelivery(
+                    transactionID: String(transaction.id),
+                    preparation: attributionPreparation
+                )
                 await refreshEntitlements()
                 // AutoTrack: verify server-side immediately so the backend
                 // entitlement (authoritative) is seeded right after purchase.
@@ -205,20 +215,6 @@ final class SubscriptionManager: ObservableObject {
                     await refreshAutoTrackEntitlementFromBackend()
                 }
                 lastPurchaseSucceeded = true
-                // Attribution: subscription_started (no-op while AppsFlyer dormant).
-                #if canImport(AppsFlyerLib)
-                attributionDebugLog("Verified purchase success path reached; requesting af_subscribe and af_purchase")
-                AppsFlyerManager.shared.logSubscriptionStarted(
-                    productID: product.id,
-                    revenue: NSDecimalNumber(decimal: product.price),
-                    currency: product.priceFormatStyle.currencyCode
-                )
-                AppsFlyerManager.shared.logPurchase(
-                    productID: product.id,
-                    revenue: NSDecimalNumber(decimal: product.price),
-                    currency: product.priceFormatStyle.currencyCode
-                )
-                #endif
                 return isPro
 
             case .userCancelled:
@@ -366,10 +362,64 @@ final class SubscriptionManager: ObservableObject {
     private func handle(transactionResult: VerificationResult<StoreKit.Transaction>) async {
         do {
             let transaction = try checkVerified(transactionResult)
-            await transaction.finish()
+            guard ProductID.all.contains(transaction.productID) else { return }
+            let attributionPreparation = await preparePurchaseAttribution(
+                transaction: transaction,
+                source: "transaction_listener"
+            )
+            if attributionPreparation.permitsStoreKitFinish {
+                await transaction.finish()
+            }
+            schedulePurchaseAttributionDelivery(
+                transactionID: String(transaction.id),
+                preparation: attributionPreparation
+            )
             await refreshEntitlements()
         } catch {
             // Un-verifiable transaction — ignore; entitlement won't be granted.
+        }
+    }
+
+    private func preparePurchaseAttribution(
+        transaction: StoreKit.Transaction,
+        source: String
+    ) async -> PurchaseAttributionPreparationOutcome {
+        let outcome = await PurchaseAttributionService.shared.prepareVerifiedSubscriptionPurchase(
+            transaction: transaction,
+            tier: attributionTier(for: transaction.productID),
+            source: source
+        )
+        switch outcome {
+        case .ineligible(let reason), .deferred(let reason):
+            attributionDebugLog("Attribution preparation skipped for \(transaction.id): \(reason)")
+        case .prepared, .alreadyRecorded:
+            break
+        }
+        return outcome
+    }
+
+    private func schedulePurchaseAttributionDelivery(
+        transactionID: String,
+        preparation: PurchaseAttributionPreparationOutcome
+    ) {
+        guard preparation == .prepared else { return }
+        Task { [weak self] in
+            let outcome = await PurchaseAttributionService.shared
+                .deliverPreparedPurchase(transactionID: transactionID)
+            if case .deferred(let reason) = outcome {
+                self?.attributionDebugLog("Attribution delivery deferred for \(transactionID): \(reason)")
+            }
+        }
+    }
+
+    private func attributionTier(for productID: String) -> String {
+        let planTier = PlanTier.from(productID: productID)
+        if planTier != .free { return planTier.rawValue }
+        switch productID {
+        case ProductID.proMonthly, ProductID.proYearly: return "pro"
+        case ProductID.focusPlusMonthly: return "focus_plus"
+        case ProductID.autoTrackMonthly, ProductID.autoTrackYearly: return "autotrack"
+        default: return "subscription"
         }
     }
 

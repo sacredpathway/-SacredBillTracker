@@ -126,7 +126,18 @@ final class TierEntitlementManager: ObservableObject {
                 if case .verified(let txn) = verification {
                     let purchased = PlanTier.from(productID: txn.productID)
                     let previous = activeTier
-                    await txn.finish()
+                    let attributionPreparation = await preparePurchaseAttribution(
+                        transaction: txn,
+                        tier: purchased,
+                        source: "three_tier_paywall"
+                    )
+                    if attributionPreparation.permitsStoreKitFinish {
+                        await txn.finish()
+                    }
+                    schedulePurchaseAttributionDelivery(
+                        transactionID: String(txn.id),
+                        preparation: attributionPreparation
+                    )
                     await refreshFromStoreKit()
                     await syncPurchaseToBackend(txn)
                     await AnalyticsService.shared.log(
@@ -202,8 +213,58 @@ final class TierEntitlementManager: ObservableObject {
         listener = Task.detached { [weak self] in
             for await update in Transaction.updates {
                 guard case .verified(let txn) = update else { continue }
-                await txn.finish()
-                await self?.refreshFromStoreKit()
+                guard ProductID.tierPlans.contains(txn.productID), let self else { continue }
+                let attributionPreparation = await self.preparePurchaseAttribution(
+                    transaction: txn,
+                    tier: PlanTier.from(productID: txn.productID),
+                    source: "transaction_listener"
+                )
+                if attributionPreparation.permitsStoreKitFinish {
+                    await txn.finish()
+                }
+                await self.schedulePurchaseAttributionDelivery(
+                    transactionID: String(txn.id),
+                    preparation: attributionPreparation
+                )
+                await self.refreshFromStoreKit()
+            }
+        }
+    }
+
+    private func preparePurchaseAttribution(
+        transaction: StoreKit.Transaction,
+        tier: PlanTier,
+        source: String
+    ) async -> PurchaseAttributionPreparationOutcome {
+        let outcome = await PurchaseAttributionService.shared.prepareVerifiedSubscriptionPurchase(
+            transaction: transaction,
+            tier: tier.rawValue,
+            source: source
+        )
+        if case .ineligible(let reason) = outcome {
+            #if DEBUG
+            print("[AppsFlyer][Tier] Attribution preparation skipped for \(transaction.id): \(reason)")
+            #endif
+        } else if case .deferred(let reason) = outcome {
+            #if DEBUG
+            print("[AppsFlyer][Tier] Attribution preparation deferred for \(transaction.id): \(reason)")
+            #endif
+        }
+        return outcome
+    }
+
+    private func schedulePurchaseAttributionDelivery(
+        transactionID: String,
+        preparation: PurchaseAttributionPreparationOutcome
+    ) {
+        guard preparation == .prepared else { return }
+        Task {
+            let outcome = await PurchaseAttributionService.shared
+                .deliverPreparedPurchase(transactionID: transactionID)
+            if case .deferred(let reason) = outcome {
+                #if DEBUG
+                print("[AppsFlyer][Tier] Attribution delivery deferred for \(transactionID): \(reason)")
+                #endif
             }
         }
     }
