@@ -94,7 +94,7 @@ struct QuickAddView: View {
                         AddEditBillView(mode: .add)
                     } label: {
                         Label("Start from scratch", systemImage: "plus")
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                     }
                 }
             }

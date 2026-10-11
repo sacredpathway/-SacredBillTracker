@@ -84,6 +84,8 @@
 	     in Info.plist and with the App Store Privacy Label. -->
 	<key>NSPrivacyTracking</key>
 	<true/>
+	<!-- AppsFlyer tracking domains, matching the privacy manifest embedded in
+	     AppsFlyerLib 6.18.1. The SDK is started only after the ATT decision. -->
 	<key>NSPrivacyTrackingDomains</key>
 	<array>
 		<string>att.attr.whappsflyer.com</string>

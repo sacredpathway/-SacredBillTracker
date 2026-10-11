@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
 
     @EnvironmentObject private var store: BillStore
+    @EnvironmentObject private var learningRouter: LearningCenterRouter
 
     // v1.1 (Milestone 1) — one-time first-run onboarding. This lives on the
     // signed-in root, so it only ever presents to an authenticated user, once
@@ -20,24 +21,30 @@ struct ContentView: View {
     @State private var showQuickAddFromOnboarding = false
 
     var body: some View {
-        TabView {
+        TabView(selection: $learningRouter.selectedTab) {
             DashboardView()
                 .tabItem { Label("Dashboard", systemImage: "square.grid.2x2.fill") }
+                .tag(SacredBillTrackerTab.dashboard)
 
             BillsView()
                 .tabItem { Label("Bills", systemImage: "list.bullet.rectangle.fill") }
+                .tag(SacredBillTrackerTab.bills)
 
             BudgetDashboardView()
                 .tabItem { Label("Budget", systemImage: "chart.bar.fill") }
+                .tag(SacredBillTrackerTab.budget)
 
             CalendarView()
                 .tabItem { Label("Calendar", systemImage: "calendar") }
+                .tag(SacredBillTrackerTab.calendar)
 
             ReportsView()
                 .tabItem { Label("Reports", systemImage: "chart.pie.fill") }
+                .tag(SacredBillTrackerTab.reports)
 
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+                .tag(SacredBillTrackerTab.settings)
         }
         // First-run onboarding carousel — shown once per install.
         .fullScreenCover(isPresented: $showOnboarding, onDismiss: { onboardingSeen = true }) {
@@ -134,7 +141,7 @@ struct OnboardingCarouselView: View {
                             Spacer()
                             Image(systemName: page.systemImage)
                                 .font(.system(size: 66, weight: .semibold))
-                                .foregroundStyle(Color.appAccent)
+                                .foregroundStyle(Color.appAccentText)
                                 .accessibilityHidden(true)
                             Text(page.title)
                                 .font(.title.weight(.bold))
@@ -207,7 +214,7 @@ struct FirstBillCelebrationView: View {
                     .scaleEffect(pop ? 1 : 0.6)
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 72, weight: .bold))
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                     .scaleEffect(pop ? 1 : 0.5)
                     .accessibilityHidden(true)
             }
@@ -256,4 +263,5 @@ struct FirstBillCelebrationView: View {
         .environmentObject(NotificationManager.shared)
         .environmentObject(AuthService.shared)
         .environmentObject(SubscriptionManager())
+        .environmentObject(LearningCenterRouter())
 }

@@ -22,7 +22,7 @@ struct PrioritySection: View {
             HStack(spacing: 8) {
                 Image(systemName: "flag.fill")
                     .font(.subheadline)
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                 Text("Pay this first")
                     .font(.headline)
                 Spacer()
@@ -30,7 +30,7 @@ struct PrioritySection: View {
                     .font(.caption.bold())
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                     .background(Color.appAccent.opacity(0.15), in: Capsule())
             }
             .padding(.horizontal)

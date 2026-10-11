@@ -31,6 +31,32 @@ import AppTrackingTransparency
 // — that environment value is only available inside a SwiftUI View, so it
 // cannot live directly on the App-level body.
 
+enum RootStartupRoute: Equatable {
+    case loading
+    case signedOut
+    case mainApp
+    case forceUpdate(message: String, appStoreURL: URL)
+}
+
+enum RootStartupRouter {
+    static func route(
+        gateState: VersionGateService.GateState,
+        hasResolvedSession: Bool,
+        isSignedIn: Bool,
+        isEntitlementRefreshInFlight: Bool = false
+    ) -> RootStartupRoute {
+        switch gateState {
+        case .blocked(let message, let url):
+            return .forceUpdate(message: message, appStoreURL: url)
+        case .loading:
+            return .loading
+        case .allowed, .optionalUpdate:
+            guard hasResolvedSession else { return .loading }
+            return isSignedIn ? .mainApp : .signedOut
+        }
+    }
+}
+
 private struct RootScene: View {
 
     @EnvironmentObject private var auth: AuthService
@@ -53,27 +79,8 @@ private struct RootScene: View {
 
     var body: some View {
         Group {
-            switch versionGate.gateState {
-            case .blocked(let message, let url):
-                // HARD BLOCK — root view is replaced entirely. Cannot
-                // be dismissed; ContentView/AuthGateView never mount.
-                ForceUpdateView(message: message, appStoreURL: url)
-
-            case .loading, .allowed, .optionalUpdate:
-                Group {
-                    if !auth.isSignedIn {
-                        // Not signed in — show the auth chooser (email/
-                        // password sign-in, create account, or Sign in
-                        // with Apple).
-                        AuthGateView()
-                    } else {
-                        // Signed in (any tier) — go straight to the app.
-                        // Paywall is surfaced contextually by ProLockCard
-                        // / FreeTierLimits when the user attempts a Pro
-                        // feature.
-                        ContentView()
-                    }
-                }
+            routedContent
+        }
                 .sheet(isPresented: $showOptionalUpdateSheet) {
                     if case .optionalUpdate(let latestBuild) = versionGate.gateState,
                        let cfg = versionGate.lastConfig,
@@ -92,8 +99,6 @@ private struct RootScene: View {
                         showOptionalUpdateSheet = false
                     }
                 }
-            }
-        }
         .onChange(of: review.pendingReviewRequest) { _, newValue in
             guard newValue != nil else { return }
             // Apple's system sheet — never a custom replacement.
@@ -105,6 +110,90 @@ private struct RootScene: View {
         .preferredColorScheme(
             AppearancePreference.from(rawValue: appearanceRaw).colorScheme
         )
+    }
+
+    @ViewBuilder
+    private var routedContent: some View {
+        #if DEBUG
+        if HelpCenterUITestRoute.shouldOpenHelpCenter {
+            NavigationStack {
+                HelpCenterView()
+            }
+        } else {
+            startupContent
+        }
+        #else
+        startupContent
+        #endif
+    }
+
+    @ViewBuilder
+    private var startupContent: some View {
+            switch RootStartupRouter.route(
+                gateState: versionGate.gateState,
+                hasResolvedSession: auth.hasResolvedSession,
+                isSignedIn: auth.isSignedIn
+            ) {
+            case .forceUpdate(let message, let url):
+                // HARD BLOCK — root view is replaced entirely. Cannot
+                // be dismissed; ContentView/AuthGateView never mount.
+                ForceUpdateView(message: message, appStoreURL: url)
+
+            case .loading:
+                StartupLoadingView()
+
+            case .signedOut:
+                // Not signed in — show the auth chooser only after the
+                // session restore has resolved. Before that, nil means
+                // "unknown", not "new user".
+                AuthGateView()
+
+            case .mainApp:
+                // Signed in (any tier) — go straight to the app. Paywall is
+                // surfaced contextually by ProLockCard / FreeTierLimits when
+                // the user attempts a Pro feature.
+                ContentView()
+            }
+    }
+}
+
+#if DEBUG
+enum HelpCenterUITestRoute {
+    static let launchArgument = "SBT_UI_TEST_OPEN_HELP_CENTER"
+
+    static var shouldOpenHelpCenter: Bool {
+        ProcessInfo.processInfo.arguments.contains(launchArgument)
+    }
+}
+#endif
+
+private struct StartupLoadingView: View {
+    var body: some View {
+        ZStack {
+            Color.appSacredBlack.ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                BrandHeaderView(compact: true)
+                    .frame(maxWidth: 220)
+
+                ProgressView()
+                    .tint(Color.appAccentText)
+                    .controlSize(.large)
+
+                VStack(spacing: 8) {
+                    Text("Sacred Bill Tracker")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(.white)
+
+                    Text("Restoring your account...")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.78))
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .padding(32)
+        }
+        .preferredColorScheme(.dark)
     }
 }
 
@@ -137,6 +226,7 @@ struct SacredBillTrackerApp: App {
     @StateObject private var tiers = TierEntitlementManager()
     @StateObject private var reviewPrompt = ReviewPromptService.shared
     @StateObject private var versionGate = VersionGateService.shared
+    @StateObject private var learningRouter = LearningCenterRouter()
     /// v1.0.9.x — Sacred Focus productivity system stores.
     @StateObject private var noteStore = NoteStore()
     @StateObject private var scheduleStore = ScheduleStore()
@@ -156,11 +246,16 @@ struct SacredBillTrackerApp: App {
         // (nav bars, tab bar, List/Form backgrounds) once at launch so
         // every screen adopts the green canvas + gold accents.
         ThemeAppearance.apply()
+        #if SBT_STAGING_ACCEPTANCE
+        _ = SBTStagingRoute.required
+        #endif
 
         // AppsFlyer — set keys only (no network call yet). Inert until the
         // AppsFlyerFramework SPM package is linked.
         #if canImport(AppsFlyerLib)
-        AppsFlyerManager.shared.configure()
+        #if !SBT_STAGING_ACCEPTANCE
+                        AppsFlyerManager.shared.configure()
+                        #endif
         #endif
 
         // TikTok — initialize the Business SDK. Install/launch events are sent
@@ -168,13 +263,18 @@ struct SacredBillTrackerApp: App {
         // Inert until the TikTokBusinessSDK SPM package is linked AND real
         // credentials exist in the git-ignored Secrets.xcconfig.
         #if canImport(TikTokBusinessSDK)
-        TikTokEventsManager.shared.configureAndInitialize()
+        #if !SBT_STAGING_ACCEPTANCE
+                        TikTokEventsManager.shared.configureAndInitialize()
+                        #endif
         #endif
     }
 
     var body: some Scene {
         WindowGroup {
             RootScene()
+                #if SBT_STAGING_ACCEPTANCE
+                .overlay(alignment: .top) { Text("STAGING — TEST DATA ONLY").font(.caption.bold()).foregroundStyle(.white).padding(4).background(.red).allowsHitTesting(false) }
+                #endif
                 .environmentObject(store)
                 .environmentObject(incomeStore)
                 .environmentObject(profileStore)
@@ -185,6 +285,7 @@ struct SacredBillTrackerApp: App {
                 .environmentObject(reviewPrompt)
                 .task { await tiers.start() }
                 .environmentObject(versionGate)
+                .environmentObject(learningRouter)
                 .environmentObject(noteStore)
                 .environmentObject(scheduleStore)
                 .environmentObject(todoStore)
@@ -203,32 +304,38 @@ struct SacredBillTrackerApp: App {
 
                     // Once-per-cold-launch counter for the in-app review gate.
                     reviewPrompt.recordAppLaunch()
-                    // Pull a fresh quote from Quotable / ZenQuotes in the
-                    // background. The cached + day-of-year fallback already
-                    // shows on screen by now, so this just upgrades it.
+                    // Refresh the local financial lesson; no external request.
                     QuoteService.shared.refreshInBackground()
                     // Ask for notification permission on first launch only.
                     if notifications.authorizationStatus == .notDetermined {
                         _ = await notifications.requestAuthorization()
                     }
                 }
-                .onChange(of: scenePhase, initial: true) { _, newPhase in
+                .onChange(of: scenePhase) { _, newPhase in
                     // Refresh the gate every time the app returns to the
                     // foreground.
                     if newPhase == .active {
-                        Task { await versionGate.refresh() }
+                        Task {
+                            await versionGate.refresh()
+                            await tiers.refreshFromStoreKit()
+                            await subscriptions.refreshEntitlements()
+                        }
 
-                        // AppsFlyer — resolve ATT, then start the active session.
+                        // AppsFlyer — request ATT once, then start the SDK once.
                         // Guarded so it's a no-op until the package is linked.
                         #if canImport(AppsFlyerLib)
+                        #if !SBT_STAGING_ACCEPTANCE
                         AppsFlyerManager.shared.requestATTThenStart()
+                        #endif
                         #endif
 
                         // TikTok — the SDK never prompts for ATT itself, so we
                         // request it here, once, only after the UI is active.
                         // No-op unless NSUserTrackingUsageDescription exists.
                         #if canImport(TikTokBusinessSDK)
+                        #if !SBT_STAGING_ACCEPTANCE
                         TikTokEventsManager.shared.requestATTOnce()
+                        #endif
                         #endif
                     }
                 }
@@ -301,6 +408,7 @@ struct SacredBillTrackerApp: App {
         // previous account, then re-resolve for THIS user from local StoreKit
         // entitlements + the backend `current_subscription_tier` RPC. Without
         // this, the paywall could show the prior account's tier/"CURRENT".
+        subscriptions.clearForSignedOutUser()
         tiers.clearForSignedOutUser()
         await tiers.refreshFromStoreKit()
         await tiers.refreshFromBackend()
@@ -378,6 +486,7 @@ import UIKit
 final class AppsFlyerManager: NSObject {
 
     static let shared = AppsFlyerManager()
+    private var didStart = false
     /// True only when a real (non-placeholder) Dev Key was found and applied.
     private var isConfigured = false
     private override init() { super.init() }
@@ -452,18 +561,13 @@ final class AppsFlyerManager: NSObject {
     }
 
     private func start() {
-        guard isConfigured else {
-            debugLog("SDK start skipped (not configured)")
+        guard isConfigured, !didStart else {
+            debugLog("SDK start skipped (already started or not configured)")
             return
         }
-        // AppsFlyer expects start on each active-session transition. SDK
-        // configuration remains one-time in App.init.
+        didStart = true
         debugLog("SDK start requested")
         AppsFlyerLib.shared().start()
-        Task {
-            _ = await PurchaseAttributionService.shared.recoverUnfinishedTransactions()
-            _ = await PurchaseAttributionService.shared.retryPendingPurchases()
-        }
     }
 
     // MARK: - In-app events (additive)
@@ -500,7 +604,7 @@ final class AppsFlyerManager: NSObject {
 
     /// Purchase events must use this acknowledged path through
     /// PurchaseAttributionService. No StoreKit manager emits directly.
-    func logEventAcknowledged(_ name: String, values: [String: Any]) async throws {
+    func logEventAcknowledged(_ name: String, values: [String: String]) async throws {
         guard isConfigured else {
             throw PurchaseAttributionSenderError.appsFlyerNotConfigured
         }

@@ -44,6 +44,8 @@
 	<string>https://appsflyer-skadnetwork.com/</string>
 	<key>AttributionCopyEndpoint</key>
 	<string>https://appsflyer-skadnetwork.com/</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Sacred Bill Tracker uses the camera only when you choose to photograph a receipt for Receipt Jar.</string>
 
 	<!-- TikTok Business SDK credentials, injected from the git-ignored
 	     Secrets.xcconfig (build settings TIKTOK_ACCESS_TOKEN / TIKTOK_APP_ID)
@@ -68,12 +70,6 @@
 	     tracking while the App Store label still says otherwise. -->
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Sacred Bill Tracker uses your device identifier to measure how well our ads perform. Declining will not limit any feature of the app.</string>
-
-	<!-- Xcode merges AppsFlyer's legitimate NSPrivacyTrackingDomains into the
-	     generated application Info.plist. Apple requires this matching flag
-	     whenever that generated domain array is non-empty. -->
-	<key>NSPrivacyTracking</key>
-	<true/>
 
 		<!-- SKAdNetwork ad-network IDs from AppsFlyer's published partner list.
 		     Apple sends install postbacks only to the networks listed here.

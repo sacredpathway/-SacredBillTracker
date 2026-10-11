@@ -71,7 +71,7 @@ struct ThreeTierPaywallView: View {
         VStack(spacing: 6) {
             Image(systemName: "crown.fill")
                 .font(.system(size: 34))
-                .foregroundStyle(Color.appAccent)
+                .foregroundStyle(Color.appAccentText)
             Text("Unlock Sacred Bill Tracker")
                 .font(.title2.bold())
             Text("Your complete financial command center.")

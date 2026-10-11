@@ -56,7 +56,7 @@ struct PremiumZeroStateView: View {
             VStack(spacing: 12) {
                 Image(systemName: "chart.pie.fill")
                     .font(.system(size: 44, weight: .semibold))
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                     .accessibilityHidden(true)
                 Text("Start with one bill")
                     .font(.title3.weight(.bold))
@@ -72,7 +72,7 @@ struct PremiumZeroStateView: View {
                     HStack(spacing: 12) {
                         Image(systemName: benefit.icon)
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                             .frame(width: 24)
                             .accessibilityHidden(true)
                         Text(benefit.text)

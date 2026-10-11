@@ -85,7 +85,7 @@ struct CreateAccountView: View {
                     if let err = displayedError {
                         Text(err)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.appDangerText)
                     } else if !password.isEmpty && password.count < 8 {
                         Text("Password must be at least 8 characters.")
                             .font(.footnote)
@@ -134,7 +134,7 @@ struct CreateAccountView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
             }
         }
         .toolbarBackground(Color.appSacredBlack, for: .navigationBar)

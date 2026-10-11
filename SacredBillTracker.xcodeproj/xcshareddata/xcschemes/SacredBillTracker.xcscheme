@@ -38,6 +38,16 @@
                ReferencedContainer = "container:SacredBillTracker.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "535CBBF56D389B3EC598BF5C"
+               BuildableName = "SacredBillTrackerUITests.xctest"
+               BlueprintName = "SacredBillTrackerUITests"
+               ReferencedContainer = "container:SacredBillTracker.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

@@ -35,7 +35,7 @@ struct CashFlowCard: View {
             HStack(spacing: 8) {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.headline)
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                 Text("Cash flow")
                     .font(.headline)
                 Spacer()
@@ -65,7 +65,7 @@ struct CashFlowCard: View {
                 HStack(spacing: 6) {
                     Text("\(Int(progress * 100))% covered")
                         .font(.caption.monospacedDigit())
-                        .foregroundStyle(Color.appAccent)
+                        .foregroundStyle(Color.appAccentText)
                     Text("•")
                         .foregroundStyle(.secondary)
                     Text("\(flow.unpaidCount) unpaid")

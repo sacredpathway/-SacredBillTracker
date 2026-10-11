@@ -1,7 +1,23 @@
 {
   "identifier": "A1B2C3D4-1111-2222-3333-444455556666",
   "nonRenewingSubscriptions": [],
-  "products": [],
+  "products": [
+    {
+      "displayPrice": "49.99",
+      "familyShareable": false,
+      "internalID": "40010001",
+      "localizations": [
+        {
+          "description": "One-time Receipt Jar access for receipt photos, PDFs, OCR review, search, and bill links.",
+          "displayName": "Receipt Jar",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.sacredbilltracker.app.receiptjar.lifetime",
+      "referenceName": "Receipt Jar Lifetime",
+      "type": "NonConsumable"
+    }
+  ],
   "settings": {
     "_applicationInternalID": "0",
     "_developerTeamID": "DCCSGYD5A4",
@@ -142,7 +158,7 @@
           "introductoryOffer": null,
           "localizations": [
             {
-              "description": "Unlock daily planning, focus quotes, to-do lists, and Schedule Buddy.",
+              "description": "Unlock daily planning, financial education, to-do lists, and Schedule Buddy.",
               "displayName": "Sacred Focus+",
               "locale": "en_US"
             }

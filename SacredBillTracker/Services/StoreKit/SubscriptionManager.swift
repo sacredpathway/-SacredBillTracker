@@ -12,6 +12,7 @@
 //
 
 import Foundation
+import Combine
 import StoreKit
 import SwiftUI
 import UIKit
@@ -69,6 +70,10 @@ final class SubscriptionManager: ObservableObject {
     /// derived from StoreKit entitlements in `refreshEntitlements()`.
     @Published private(set) var rawPlanTier: PlanTier = .free
 
+    /// Receipt Jar one-time non-consumable entitlement, separate from
+    /// subscription tiers and restored through StoreKit.
+    @Published private(set) var hasReceiptJar: Bool = false
+
     #if DEBUG
     /// QA ONLY — simulate a 3-tier plan for gate testing when local StoreKit
     /// Testing isn't engaging in the simulator. Compiled out of Release builds
@@ -90,7 +95,7 @@ final class SubscriptionManager: ObservableObject {
     /// Effective tier = max(new 3-tier plan, legacy Pro→Business, legacy
     /// AutoTrack→Unlimited). Single source of truth for feature gating.
     var effectiveTier: PlanTier {
-        var t = rawPlanTier
+        var t = max(rawPlanTier, SBTVerifiedEntitlementStore.shared.rewardTier, SBTVerifiedEntitlementStore.shared.accountTier)
         if currentTier.isPro { t = max(t, .business) }   // legacy Pro
         if hasAutoTrack      { t = max(t, .unlimited) }  // legacy AutoTrack
         #if DEBUG
@@ -123,13 +128,31 @@ final class SubscriptionManager: ObservableObject {
     var autoTrackMonthlyProduct: Product? { products[ProductID.autoTrackMonthly] }
     var autoTrackYearlyProduct:  Product? { products[ProductID.autoTrackYearly]  }
 
+    /// Receipt Jar one-time non-consumable product (loaded from StoreKit).
+    var receiptJarProduct: Product? {
+        ReceiptJarReleaseGate.isEnabled ? products[ProductID.receiptJarLifetime] : nil
+    }
+
     // MARK: - Private
 
     private var transactionListener: Task<Void, Never>?
 
     // MARK: - Init
 
-    init() {}
+    private var entitlementObservation: AnyCancellable?
+    private var accountObservation: AnyCancellable?
+    private var rewardObservation: AnyCancellable?
+    init() {
+        accountObservation = SBTVerifiedEntitlementStore.shared.$accountTier.sink { [weak self] tier in
+            guard let self else { return }
+            self.hasAutoTrack = tier >= .unlimited || !self.purchasedProductIDs.isDisjoint(with: ProductID.autoTrack) || self.rawPlanTier >= .unlimited
+            self.objectWillChange.send()
+        }
+        rewardObservation = SBTVerifiedEntitlementStore.shared.$rewardTier.sink { [weak self] _ in self?.objectWillChange.send() }
+        entitlementObservation = SBTVerifiedEntitlementStore.shared.$productIDs.sink { [weak self] ids in
+            self?.applyVerifiedProducts(ids)
+        }
+    }
 
     // Note: no `deinit` cancel — under Swift 6 strict concurrency, reading
     // a @MainActor-isolated stored property from a nonisolated `deinit` is
@@ -187,8 +210,14 @@ final class SubscriptionManager: ObservableObject {
             // For AutoTrack we bind the Apple transaction to the Supabase
             // user id via appAccountToken so server notifications
             // (renewals/cancels/refunds) attribute to the right account.
+            let authenticatedID = await AuthService.shared.verifiedPurchaseAccountID()
+            // An explicit caller token must refer to this live authenticated session.
+            if let requested = appAccountToken, requested != authenticatedID {
+                lastError = "Sign in to the purchasing Sacred Bill Tracker account and try again."
+                return false
+            }
             var options: Set<Product.PurchaseOption> = []
-            if let token = appAccountToken {
+            if let token = authenticatedID {
                 options.insert(.appAccountToken(token))
             }
             let result = try await product.purchase(options: options)
@@ -196,17 +225,7 @@ final class SubscriptionManager: ObservableObject {
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
-                let attributionPreparation = await preparePurchaseAttribution(
-                    transaction: transaction,
-                    source: "legacy_paywall"
-                )
-                if attributionPreparation.permitsStoreKitFinish {
-                    await transaction.finish()
-                }
-                schedulePurchaseAttributionDelivery(
-                    transactionID: String(transaction.id),
-                    preparation: attributionPreparation
-                )
+                await transaction.finish()
                 await refreshEntitlements()
                 // AutoTrack: verify server-side immediately so the backend
                 // entitlement (authoritative) is seeded right after purchase.
@@ -215,6 +234,11 @@ final class SubscriptionManager: ObservableObject {
                     await refreshAutoTrackEntitlementFromBackend()
                 }
                 lastPurchaseSucceeded = true
+                await recordPurchaseAttribution(
+                    transaction: transaction,
+                    product: product,
+                    source: "legacy_paywall"
+                )
 
                 // Attribution: TikTok — fired ONLY here, inside the verified
                 // transaction path (immediately after `checkVerified`). Never
@@ -250,7 +274,7 @@ final class SubscriptionManager: ObservableObject {
                 }
                 #endif
 
-                return isPro
+                return purchasedProductIDs.contains(product.id)
 
             case .userCancelled:
                 return false
@@ -280,8 +304,8 @@ final class SubscriptionManager: ObservableObject {
             // Reconcile AutoTrack against the server (authoritative) too, so
             // Restore re-grants AutoTrack from server-verified state.
             await refreshAutoTrackEntitlementFromBackend()
-            if !isPro && !hasAutoTrack && !hasFocusPlus {
-                lastError = "No active subscription was found on this Apple ID."
+            if purchasedProductIDs.isEmpty && SBTVerifiedEntitlementStore.shared.rewardTier == .free && SBTVerifiedEntitlementStore.shared.accountTier == .free {
+                lastError = SBTVerifiedEntitlementStore.shared.verificationMessage ?? "No active subscription was found on this Apple ID."
             }
         } catch {
             lastError = "Restore failed: \(error.localizedDescription)"
@@ -294,61 +318,26 @@ final class SubscriptionManager: ObservableObject {
     /// Yearly wins over Monthly if both somehow present.
     func refreshEntitlements() async {
         startTransactionListenerIfNeeded()
-        var activeIDs: Set<String> = []
-        var tier: SubscriptionTier = .free
-        var plan: PlanTier = .free
-        var focusPlus = false
-        var autoTrack = false
-
-        // Disambiguate: SwiftUI also ships a `Transaction` type (animations).
-        for await result in StoreKit.Transaction.currentEntitlements {
-            guard let transaction = try? checkVerified(result) else { continue }
-
-            // Skip revoked / expired transactions that might linger in the
-            // stream (StoreKit usually filters, but belt-and-suspenders).
-            if transaction.revocationDate != nil { continue }
-            if let expires = transaction.expirationDate, expires < Date() { continue }
-
-            activeIDs.insert(transaction.productID)
-
-            switch transaction.productID {
-            case ProductID.proYearly:
-                tier = .proYearly  // yearly wins
-            case ProductID.proMonthly:
-                if tier != .proYearly { tier = .proMonthly }
-            case ProductID.focusPlusMonthly:
-                // v1.0.9 — Focus+ is independent of Pro; do not flip
-                // currentTier here.
-                focusPlus = true
-            case ProductID.autoTrackMonthly, ProductID.autoTrackYearly:
-                // AutoTrack is independent of Pro; do not flip currentTier.
-                autoTrack = true
-            case ProductID.essentialMonthly, ProductID.businessMonthly, ProductID.unlimitedMonthly:
-                // 3-tier plans drive `rawPlanTier` (not the legacy currentTier).
-                let t = PlanTier.from(productID: transaction.productID)
-                if t.rank > plan.rank { plan = t }
-            default:
-                break
-            }
-        }
-
-        #if DEBUG
-        // Debug-only local QA override. Release builds do not bypass StoreKit.
-        if let email = AuthService.shared.currentUserEmail,
-           Self.focusPlusOwnerEmails.contains(email.lowercased()) {
-            focusPlus = true
-        }
-        #endif
-
-        self.purchasedProductIDs = activeIDs
-        self.currentTier = tier
-        self.hasFocusPlus = focusPlus
-        // Local (StoreKit) view of AutoTrack. The backend reconcile in
-        // refreshAutoTrackEntitlementFromBackend() is authoritative and may
-        // promote/demote this based on server-verified state.
-        self.hasAutoTrack = autoTrack
-        self.rawPlanTier = plan
+        await SBTVerifiedEntitlementStore.shared.refreshFromApple()
+        applyVerifiedProducts(SBTVerifiedEntitlementStore.shared.productIDs)
+        if purchasedProductIDs.isEmpty { lastError = SBTVerifiedEntitlementStore.shared.verificationMessage }
     }
+
+    private func applyVerifiedProducts(_ activeIDs: Set<String>) {
+        purchasedProductIDs = activeIDs
+        currentTier = activeIDs.contains(ProductID.proYearly) ? .proYearly :
+            activeIDs.contains(ProductID.proMonthly) ? .proMonthly : .free
+        rawPlanTier = activeIDs.map(PlanTier.from(productID:)).max() ?? .free
+        hasFocusPlus = activeIDs.contains(ProductID.focusPlusMonthly)
+        hasAutoTrack = !activeIDs.isDisjoint(with: ProductID.autoTrack) || rawPlanTier >= .unlimited || SBTVerifiedEntitlementStore.shared.accountTier >= .unlimited
+        hasReceiptJar = ReceiptJarReleaseGate.isEnabled && activeIDs.contains(ProductID.receiptJarLifetime)
+    }
+
+    #if DEBUG
+    func applyVerifiedProductsForTesting(_ activeIDs: Set<String>) {
+        applyVerifiedProducts(activeIDs)
+    }
+    #endif
 
     /// Allow external callers (e.g. auth state changes) to re-evaluate
     /// the owner override without waiting for the next StoreKit
@@ -372,6 +361,7 @@ final class SubscriptionManager: ObservableObject {
         purchasedProductIDs = []
         hasFocusPlus = false
         hasAutoTrack = false
+        hasReceiptJar = false
         lastPurchaseSucceeded = false
         lastError = nil
     }
@@ -397,53 +387,38 @@ final class SubscriptionManager: ObservableObject {
     private func handle(transactionResult: VerificationResult<StoreKit.Transaction>) async {
         do {
             let transaction = try checkVerified(transactionResult)
-            guard ProductID.all.contains(transaction.productID) else { return }
-            let attributionPreparation = await preparePurchaseAttribution(
+            SBTVerifiedEntitlementStore.shared.invalidateVerifiedStoreKitTransaction(transaction)
+            await transaction.finish()
+            await refreshEntitlements()
+            guard let product = await productForAttribution(id: transaction.productID) else { return }
+            await recordPurchaseAttribution(
                 transaction: transaction,
+                product: product,
                 source: "transaction_listener"
             )
-            if attributionPreparation.permitsStoreKitFinish {
-                await transaction.finish()
-            }
-            schedulePurchaseAttributionDelivery(
-                transactionID: String(transaction.id),
-                preparation: attributionPreparation
-            )
-            await refreshEntitlements()
         } catch {
             // Un-verifiable transaction — ignore; entitlement won't be granted.
         }
     }
 
-    private func preparePurchaseAttribution(
-        transaction: StoreKit.Transaction,
-        source: String
-    ) async -> PurchaseAttributionPreparationOutcome {
-        let outcome = await PurchaseAttributionService.shared.prepareVerifiedSubscriptionPurchase(
-            transaction: transaction,
-            tier: attributionTier(for: transaction.productID),
-            source: source
-        )
-        switch outcome {
-        case .ineligible(let reason), .deferred(let reason):
-            attributionDebugLog("Attribution preparation skipped for \(transaction.id): \(reason)")
-        case .prepared, .alreadyRecorded:
-            break
-        }
-        return outcome
+    private func productForAttribution(id: String) async -> Product? {
+        if let loaded = products[id] { return loaded }
+        return try? await Product.products(for: [id]).first
     }
 
-    private func schedulePurchaseAttributionDelivery(
-        transactionID: String,
-        preparation: PurchaseAttributionPreparationOutcome
-    ) {
-        guard preparation == .prepared else { return }
-        Task { [weak self] in
-            let outcome = await PurchaseAttributionService.shared
-                .deliverPreparedPurchase(transactionID: transactionID)
-            if case .deferred(let reason) = outcome {
-                self?.attributionDebugLog("Attribution delivery deferred for \(transactionID): \(reason)")
-            }
+    private func recordPurchaseAttribution(
+        transaction: StoreKit.Transaction,
+        product: Product,
+        source: String
+    ) async {
+        let outcome = await PurchaseAttributionService.shared.recordVerifiedSubscriptionPurchase(
+            transaction: transaction,
+            product: product,
+            tier: attributionTier(for: product.id),
+            source: source
+        )
+        if case .deferred(let reason) = outcome {
+            attributionDebugLog("Attribution deferred for \(transaction.id): \(reason)")
         }
     }
 
@@ -454,6 +429,7 @@ final class SubscriptionManager: ObservableObject {
         case ProductID.proMonthly, ProductID.proYearly: return "pro"
         case ProductID.focusPlusMonthly: return "focus_plus"
         case ProductID.autoTrackMonthly, ProductID.autoTrackYearly: return "autotrack"
+        case ProductID.receiptJarLifetime: return "receipt_jar"
         default: return "subscription"
         }
     }
@@ -502,6 +478,8 @@ final class SubscriptionManager: ObservableObject {
     /// function re-fetches the truth from Apple using the original
     /// transaction id — no signed blob or secret is sent from the client.
     func verifyAutoTrackOnBackend(_ transaction: StoreKit.Transaction) async {
+        guard transaction.environment == .production,
+              transaction.appAccountToken == (await AuthService.shared.verifiedPurchaseAccountID()) else { return }
         #if canImport(Supabase)
         struct Body: Encodable {
             let platform: String
@@ -528,34 +506,11 @@ final class SubscriptionManager: ObservableObject {
         #endif
     }
 
-    /// Reconcile AutoTrack entitlement against the server RPC
-    /// `autotrack_entitlement()` (reflects store webhook updates + cross-device).
-    ///
-    /// IMPORTANT: this only ever PROMOTES to unlocked — it never demotes a valid
-    /// local StoreKit entitlement. `refreshEntitlements()` (Apple's
-    /// `Transaction.currentEntitlements`) is the authoritative local signal and
-    /// already removes expired/revoked transactions, so locking on lapse is
-    /// handled there. Letting the backend force `false` here would wrongly lock
-    /// a user in the window right after purchase (before the receipt is recorded
-    /// server-side) and breaks local StoreKit-config testing entirely.
+    /// Reconcile through the same verified snapshot, never a promote-only RPC.
     func refreshAutoTrackEntitlementFromBackend() async {
-        #if canImport(Supabase)
-        struct Entitlement: Decodable { let entitled: Bool? }
-        do {
-            let result: Entitlement = try await SupabaseConfig.client
-                .rpc("autotrack_entitlement")
-                .execute()
-                .value
-            if result.entitled == true {
-                self.hasAutoTrack = true
-            }
-        } catch {
-            #if DEBUG
-            print("[AutoTrack] autotrack_entitlement failed: \(error)")
-            #endif
-        }
-        #endif
+        await refreshEntitlements()
     }
+
 }
 
 // MARK: - Price formatting helpers

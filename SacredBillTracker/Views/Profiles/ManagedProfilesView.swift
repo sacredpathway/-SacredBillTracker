@@ -154,7 +154,7 @@ struct ManagedProfilesView: View {
                             Spacer()
                             if profiles.selection == .allProfiles {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(Color.appAccent)
+                                    .foregroundStyle(Color.appAccentText)
                             }
                         }
                     }
@@ -186,7 +186,7 @@ struct ManagedProfilesView: View {
                     Section {
                         Text(message)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.appDangerText)
                     }
                 }
             }
@@ -247,7 +247,7 @@ struct ManagedProfilesView: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Capsule().fill(Color.appAccent.opacity(0.14)))
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                     }
                 }
                 Text(profile.kind.title)
@@ -257,7 +257,7 @@ struct ManagedProfilesView: View {
             Spacer()
             if profiles.selectedProfile?.id == profile.id {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
             } else {
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))

@@ -21,7 +21,38 @@ struct MonthlyBillTotals: Hashable {
     let unpaidCount: Int
 }
 
+struct UpcomingBillTotals: Hashable {
+    let dueNext7Days: Decimal
+    let dueNext30Days: Decimal
+}
+
 enum BillTotalsCalculator {
+    /// Unpaid obligations due from today through the requested day boundary.
+    /// Start-of-day comparisons make the result independent of the time saved
+    /// on a bill and deliberately exclude both overdue and soft-deleted bills.
+    static func upcomingTotals(
+        from bills: [Bill],
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> UpcomingBillTotals {
+        let today = calendar.startOfDay(for: now)
+
+        func total(through days: Int) -> Decimal {
+            guard let boundary = calendar.date(byAdding: .day, value: days, to: today) else { return 0 }
+            return bills
+                .filter {
+                    let due = calendar.startOfDay(for: $0.dueDate)
+                    return $0.deletedAt == nil && !$0.isPaid && due >= today && due <= boundary
+                }
+                .reduce(Decimal(0)) { $0 + $1.amount }
+        }
+
+        return UpcomingBillTotals(
+            dueNext7Days: total(through: 7),
+            dueNext30Days: total(through: 30)
+        )
+    }
+
     static func bills(
         from bills: [Bill],
         in month: Date = Date(),
@@ -71,6 +102,16 @@ enum BillTotalsCalculator {
             paidCount: monthBills.filter(\.isPaid).count,
             unpaidCount: monthBills.filter { !$0.isPaid }.count
         )
+    }
+}
+
+enum BillPaymentTransition {
+    static func markingPaid(_ bill: Bill, at date: Date = Date()) -> Bill {
+        var updated = bill
+        updated.status = .paid
+        updated.lastPaidDate = date
+        updated.applyPayoffPaymentIfNeeded(kind: updated.isAutoPaid ? .autoPay : .manual, now: date)
+        return updated
     }
 }
 
@@ -458,10 +499,7 @@ final class BillStore: ObservableObject {
     }
 
     func markPaid(_ bill: Bill) {
-        var updated = bill
-        updated.status = .paid
-        updated.lastPaidDate = Date()
-        updated.applyPayoffPaymentIfNeeded(kind: updated.isAutoPaid ? .autoPay : .manual)
+        let updated = BillPaymentTransition.markingPaid(bill)
         update(updated)
 
         // Marking a bill paid is a clean positive moment — bill done,
@@ -532,6 +570,10 @@ final class BillStore: ObservableObject {
     var upcoming: [Bill] {
         let today = Calendar.current.startOfDay(for: Date())
         return filteredBills.filter { !$0.isPaid && $0.dueDate >= today }
+    }
+
+    func upcomingTotals(now: Date = Date()) -> UpcomingBillTotals {
+        BillTotalsCalculator.upcomingTotals(from: filteredBills, now: now)
     }
 
     // MARK: - Totals

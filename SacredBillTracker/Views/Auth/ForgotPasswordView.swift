@@ -121,7 +121,7 @@ struct ForgotPasswordView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
             }
         }
         .toolbarBackground(Color.appSacredBlack, for: .navigationBar)

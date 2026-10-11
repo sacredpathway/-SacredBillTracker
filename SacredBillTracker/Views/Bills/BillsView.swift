@@ -24,6 +24,7 @@ struct BillsView: View {
     /// → `BillDetailView` → "Edit" two-screen flow that the user
     /// perceived as "stacking new pages".
     @State private var billToEdit: Bill?
+    @State private var showPDFPreview = false
 
     // v1.6 — Sacred leaf scroll background tracking.
     @State private var sbtLeafScrollOffset: CGFloat = 0
@@ -131,6 +132,9 @@ struct BillsView: View {
             .sheet(isPresented: $showAdd) {
                 QuickAddView()
             }
+            .sheet(isPresented: $showPDFPreview) {
+                BillPDFPreviewView(bills: visibleBills)
+            }
             .paywallSheet(isPresented: $showPaywall,
                           reason: "Free is capped at \(FreeTierLimits.maxBills) bills. Pro makes it unlimited.")
         }
@@ -142,33 +146,16 @@ struct BillsView: View {
         subs.canUnlimitedBills || store.allStoredBills.count < FreeTierLimits.maxBills
     }
 
-    /// Native iOS share button — pipes a plain-text summary of the
-    /// currently-visible bills through `UIActivityViewController` via
-    /// SwiftUI's `ShareLink`. Respects the active scope / search /
-    /// status filter so what the user sees is what gets shared.
-    ///
-    /// PRIVACY: the generator never reads `Bill.notes`. Local-only —
-    /// nothing is uploaded; the user picks the destination (Messages,
-    /// Mail, Notes, AirDrop, …) from the system share sheet.
+    /// Opens the professional PDF preview for exactly the currently visible
+    /// bills. The preview generates locally and the native share sheet keeps
+    /// the user in control of the destination.
     private var shareSummaryButton: some View {
-        ShareLink(
-            item: BillShareService.makeSummary(
-                bills: visibleBills,
-                income: BillShareService.IncomeAggregates(
-                    thisWeek:   incomeStore.thisWeekTotal,
-                    last30Days: incomeStore.last30DaysTotal,
-                    thisMonth:  incomeStore.thisMonthTotal,
-                    allTime:    incomeStore.allTimeTotal
-                )
-            ),
-            subject: Text("Sacred Bill Tracker Summary"),
-            message: Text("My current bill summary")
-        ) {
+        Button { showPDFPreview = true } label: {
             Image(systemName: "square.and.arrow.up")
                 .font(.title3)
         }
-        .accessibilityLabel("Share bill summary")
-        .accessibilityHint("Opens the iOS share sheet so you can send your bill summary to Messages, Mail, Notes, or AirDrop.")
+        .accessibilityLabel("Create PDF bill summary")
+        .accessibilityHint("Opens a preview before sharing or saving a professional PDF report.")
         .disabled(visibleBills.isEmpty)
     }
 

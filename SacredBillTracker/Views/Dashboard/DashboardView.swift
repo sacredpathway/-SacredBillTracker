@@ -24,6 +24,7 @@ struct DashboardView: View {
     /// so this replaces the legacy NavigationLink → BillDetailView →
     /// "Edit" button two-screen flow that was perceived as stacking.
     @State private var billToEdit: Bill?
+    @State private var billToView: Bill?
 
     /// v1.0.9.x — Health Score card → drill-in sheet.
     @State private var showHealthAttention: Bool = false
@@ -92,8 +93,10 @@ struct DashboardView: View {
                     ProfileSwitcherBar()
                         .padding(.horizontal)
 
-                    SacredDailyFocusCard(quote: quotes.quote)
-                        .padding(.horizontal)
+                    TimelineView(.periodic(from: .now, by: 60)) { timeline in
+                        SacredDailyFocusCard(quote: FinancialEducation.lesson(day: FinancialEducation.day(timeline.date), category: !store.overdue.isEmpty ? "Bills & Due Dates" : (!store.upcoming.isEmpty ? "Bills & Due Dates" : nil)))
+                            .padding(.horizontal)
+                    }
 
                     if store.bills.isEmpty {
                         // First-launch / zero-state (v1.1 Milestone 1): a
@@ -186,6 +189,12 @@ struct DashboardView: View {
                 AddEditBillView(mode: .edit(bill))
                     .environmentObject(store)
             }
+            .sheet(item: $billToView) { bill in
+                NavigationStack {
+                    BillDetailView(bill: bill)
+                        .environmentObject(store)
+                }
+            }
             .sheet(isPresented: $showHealthAttention) {
                 HealthAttentionListView(initialFilter: healthInitialFilter)
                     .environmentObject(store)
@@ -253,7 +262,7 @@ struct DashboardView: View {
                 } label: {
                     Label("Add", systemImage: "plus.circle.fill")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.appAccent)
+                        .foregroundStyle(Color.appAccentText)
                 }
                 .buttonStyle(.plain)
                 .padding(.trailing)
@@ -426,7 +435,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label("Combined Income", systemImage: "dollarsign.circle.fill")
                 .font(.caption.bold())
-                .foregroundStyle(Color.appAccent)
+                .foregroundStyle(Color.appAccentText)
             Text(currency.string(from: total as NSDecimalNumber) ?? "$0")
                 .font(.title.bold().monospacedDigit())
             Text("Business + Personal earnings together")
@@ -647,7 +656,7 @@ struct DashboardView: View {
             Spacer()
             Image(systemName: "dollarsign.circle.fill")
                 .font(.title)
-                .foregroundStyle(Color.appAccent)
+                .foregroundStyle(Color.appAccentText)
         }
         .padding()
         .background(Color.appCard, in: RoundedRectangle(cornerRadius: 16))
@@ -942,30 +951,59 @@ struct DashboardView: View {
 
     @ViewBuilder
     private var upcomingSection: some View {
-        let pool = store.upcoming
-        let list = Array(pool.prefix(8))
-        VStack(alignment: .leading, spacing: 8) {
-            sectionHeader("Due next")
-            if list.isEmpty {
-                EmptyStateView(
-                    systemImage: "checkmark.seal",
-                    title: "Stay ahead",
-                    message: "Nothing is queued up. Add your first recurring bill to keep the tree rooted."
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let thirtyDays = calendar.date(byAdding: .day, value: 30, to: today) ?? .distantFuture
+        let candidates = store.filteredBills.filter { bill in
+            let due = calendar.startOfDay(for: bill.dueDate)
+            return (!bill.isPaid && due < today) || (due >= today && due <= thirtyDays)
+        }
+        let list = Array(candidates.prefix(10))
+        let totals = store.upcomingTotals()
+        let future = candidates.filter { calendar.startOfDay(for: $0.dueDate) >= today }
+
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Upcoming Bills")
+
+            HStack(spacing: 10) {
+                UpcomingTotalCard(title: "Due Next 7 Days", amount: totals.dueNext7Days)
+                UpcomingTotalCard(title: "Due Next 30 Days", amount: totals.dueNext30Days)
+            }
+            .padding(.horizontal)
+
+            if candidates.isEmpty {
+                SmartBillsEmptyState(
+                    systemImage: "calendar.badge.checkmark",
+                    title: "No upcoming bills",
+                    message: "You’re clear for the next 30 days. New and recurring bills will appear here."
+                )
+                .padding(.horizontal)
+            } else if !future.isEmpty && future.allSatisfy({ $0.isPaid }) {
+                SmartBillsEmptyState(
+                    systemImage: "checkmark.seal.fill",
+                    title: "All upcoming bills paid",
+                    message: "Everything due in the next 30 days is covered."
                 )
                 .padding(.horizontal)
             } else {
-                VStack(spacing: 0) {
+                if totals.dueNext7Days == 0 {
+                    Label("No unpaid bills due within 7 days", systemImage: "checkmark.circle")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Theme.Color.secondaryText)
+                        .padding(.horizontal)
+                        .accessibilityLabel("No unpaid bills due within 7 days")
+                }
+
+                LazyVStack(spacing: 0) {
                     ForEach(list) { bill in
-                        Button {
-                            billToEdit = bill
-                        } label: {
-                            BillRowView(bill: bill, maxUnpaidAmount: store.maxUnpaidAmount)
-                                .padding(.horizontal)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
+                        SmartUpcomingBillRow(
+                            bill: bill,
+                            onPaid: { store.markPaid(bill) },
+                            onEdit: { billToEdit = bill },
+                            onDetails: { billToView = bill }
+                        )
                         if bill.id != list.last?.id {
-                            Divider().padding(.leading, 68)
+                            Divider().padding(.leading, 64)
                         }
                     }
                 }
@@ -1080,6 +1118,146 @@ struct DashboardView: View {
             .padding(.horizontal)
         }
         .buttonStyle(.plain)
+    }
+}
+
+private struct UpcomingTotalCard: View {
+    let title: String
+    let amount: Decimal
+
+    private static let formatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = .current
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.Color.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(Self.formatter.string(from: amount as NSDecimalNumber) ?? "$0.00")
+                .font(.system(.title3, design: .rounded).weight(.bold))
+                .foregroundStyle(Theme.Color.primaryText)
+                .minimumScaleFactor(0.72)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Theme.Color.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Theme.Color.hairline, lineWidth: 1)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct SmartBillsEmptyState: View {
+    let systemImage: String
+    let title: String
+    let message: String
+
+    var body: some View {
+        VStack(spacing: 9) {
+            Image(systemName: systemImage)
+                .font(.title2)
+                .foregroundStyle(Theme.Color.accentGoldText)
+            Text(title)
+                .font(.headline)
+            Text(message)
+                .font(.subheadline)
+                .foregroundStyle(Theme.Color.secondaryText)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Theme.Color.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct SmartUpcomingBillRow: View {
+    let bill: Bill
+    let onPaid: () -> Void
+    let onEdit: () -> Void
+    let onDetails: () -> Void
+
+    private var urgency: (label: String, detail: String, icon: String, color: Color) {
+        if bill.isPaid {
+            return ("Paid", "Paid", "checkmark.circle.fill", Theme.Color.success)
+        }
+        if bill.isOverdue {
+            let days = bill.daysOverdue
+            return ("Overdue", "\(days) day\(days == 1 ? "" : "s") overdue", "exclamationmark.triangle.fill", Theme.Color.dangerText)
+        }
+        if bill.isDueToday {
+            return ("Due today", "Due today", "calendar.badge.exclamationmark", Theme.Color.dangerText)
+        }
+        if bill.daysUntilDue <= 3 {
+            return ("Due soon", "Due in \(bill.daysUntilDue) days", "clock.badge.exclamationmark", Theme.Color.accentGoldText)
+        }
+        return ("Upcoming", "Due in \(bill.daysUntilDue) days", "calendar", Theme.Color.secondaryText)
+    }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 11) {
+            Image(systemName: bill.category.systemImage)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Theme.Color.accentGoldText)
+                .frame(width: 34, height: 34)
+                .background(Theme.Color.accentGold.opacity(0.12), in: Circle())
+                .accessibilityHidden(true)
+
+            Button(action: onDetails) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(bill.name)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(Theme.Color.primaryText)
+                            .lineLimit(2)
+                        Spacer(minLength: 8)
+                        Text(bill.formattedAmount)
+                            .font(.body.weight(.bold).monospacedDigit())
+                            .foregroundStyle(Theme.Color.primaryText)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                    }
+                    Text("\(bill.category.title) • \(bill.dueDate.mediumFormatted)")
+                        .font(.caption)
+                        .foregroundStyle(Theme.Color.secondaryText)
+                        .lineLimit(2)
+                    Label(urgency.detail, systemImage: urgency.icon)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(urgency.color)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Menu {
+                if !bill.isPaid {
+                    Button(action: onPaid) { Label("Mark as Paid", systemImage: "checkmark.circle") }
+                }
+                Button(action: onEdit) { Label("Edit Bill", systemImage: "pencil") }
+                Button(action: onDetails) { Label("View Details", systemImage: "doc.text.magnifyingglass") }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.title3)
+                    .foregroundStyle(Theme.Color.accentGoldText)
+                    .frame(minWidth: 44, minHeight: 44)
+            }
+            .accessibilityLabel("Actions for \(bill.name)")
+        }
+        .padding(.leading, 12)
+        .padding(.trailing, 5)
+        .padding(.vertical, 9)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("\(bill.name), \(bill.formattedAmount), \(bill.category.title), due \(bill.dueDate.mediumFormatted), \(urgency.detail)")
     }
 }
 

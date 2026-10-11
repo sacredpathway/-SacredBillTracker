@@ -60,7 +60,7 @@ struct SignInView: View {
                     if let error = auth.lastError {
                         Text(error)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.appDangerText)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
                     }

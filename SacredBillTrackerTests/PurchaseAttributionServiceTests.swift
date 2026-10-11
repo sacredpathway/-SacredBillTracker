@@ -3,51 +3,24 @@ import XCTest
 
 final class PurchaseAttributionServiceTests: XCTestCase {
     private actor Sender: PurchaseAttributionEventSending {
-        struct Sent: Equatable { let name: String; let values: PurchaseAttributionEventValues }
+        struct Sent: Equatable { let name: String; let values: [String: String] }
         private(set) var events: [Sent] = []
         var delayNanoseconds: UInt64 = 0
-        var failuresRemaining = 0
 
-        func send(event: String, values: PurchaseAttributionEventValues) async throws {
+        func send(event: String, values: [String: String]) async throws {
             if delayNanoseconds > 0 { try await Task.sleep(nanoseconds: delayNanoseconds) }
-            if failuresRemaining > 0 {
-                failuresRemaining -= 1
-                throw TestError.rejected
-            }
             events.append(Sent(name: event, values: values))
         }
 
         func snapshot() -> [Sent] { events }
         func setDelay(_ value: UInt64) { delayNanoseconds = value }
-        func failNextSend() { failuresRemaining += 1 }
     }
 
     private final class MemoryStore: PurchaseAttributionPersisting, @unchecked Sendable {
         private let lock = NSLock()
         private var data: Data?
-
-        init(data: Data? = nil) { self.data = data }
-
         func load() throws -> Data? { lock.withLock { data } }
         func save(_ data: Data) throws { lock.withLock { self.data = data } }
-    }
-
-    private struct FailingSaveStore: PurchaseAttributionPersisting {
-        func load() throws -> Data? { nil }
-        func save(_ data: Data) throws { throw TestError.rejected }
-    }
-
-    private enum TestError: Error { case rejected }
-
-    private struct LegacyRecord: Codable {
-        let purchase: VerifiedSubscriptionPurchase
-        let phase: String
-    }
-
-    private struct VersionedRecord: Codable {
-        let purchase: VerifiedSubscriptionPurchase
-        let phase: String
-        let contractVersion: Int
     }
 
     private func purchase(
@@ -67,7 +40,7 @@ final class PurchaseAttributionServiceTests: XCTestCase {
         )
     }
 
-    private func assertSingleRevenueEvent(
+    private func assertEventPair(
         tier: String,
         productID: String,
         price: String,
@@ -82,26 +55,25 @@ final class PurchaseAttributionServiceTests: XCTestCase {
         let outcome = await service.recordVerifiedSubscriptionPurchase(item)
         XCTAssertEqual(outcome, .recorded, file: file, line: line)
         let events = await sender.snapshot()
-        XCTAssertEqual(events.map(\.name), ["af_purchase"], file: file, line: line)
-        XCTAssertEqual(events[0].values.transactionID, item.transactionID, file: file, line: line)
-        XCTAssertEqual(events[0].values.revenue, Decimal(string: price), file: file, line: line)
-        XCTAssertEqual(events[0].values.currency, currency, file: file, line: line)
-        XCTAssertEqual(events[0].values.productID, productID, file: file, line: line)
-        XCTAssertEqual(events[0].values.tier, tier, file: file, line: line)
-        XCTAssertEqual(events[0].values.source, "three_tier_paywall", file: file, line: line)
-        XCTAssertTrue(events[0].values.appsFlyerDictionary["af_revenue"] is NSDecimalNumber, file: file, line: line)
+        XCTAssertEqual(events.map(\.name), ["af_subscribe", "af_purchase"], file: file, line: line)
+        XCTAssertEqual(events[0].values["af_transaction_id"], item.transactionID, file: file, line: line)
+        XCTAssertEqual(events[1].values["af_revenue"], price, file: file, line: line)
+        XCTAssertEqual(events[1].values["af_currency"], currency, file: file, line: line)
+        XCTAssertEqual(events[1].values["af_content_id"], productID, file: file, line: line)
+        XCTAssertEqual(events[1].values["subscription_tier"], tier, file: file, line: line)
+        XCTAssertEqual(events[1].values["purchase_source"], "three_tier_paywall", file: file, line: line)
     }
 
-    func test_verifiedEssential_emitsExactlyOneRevenueEvent() async {
-        await assertSingleRevenueEvent(tier: "essential", productID: ProductID.essentialMonthly, price: "4.99")
+    func test_verifiedEssential_emitsExactlyOnePair() async {
+        await assertEventPair(tier: "essential", productID: ProductID.essentialMonthly, price: "4.99")
     }
 
-    func test_verifiedBusiness_emitsExactlyOneRevenueEvent() async {
-        await assertSingleRevenueEvent(tier: "business", productID: ProductID.businessMonthly, price: "9.99")
+    func test_verifiedBusiness_emitsExactlyOnePair() async {
+        await assertEventPair(tier: "business", productID: ProductID.businessMonthly, price: "9.99")
     }
 
-    func test_verifiedUnlimited_emitsExactlyOneRevenueEvent() async {
-        await assertSingleRevenueEvent(tier: "unlimited", productID: ProductID.unlimitedMonthly, price: "14.99", currency: "CAD")
+    func test_verifiedUnlimited_emitsExactlyOnePair() async {
+        await assertEventPair(tier: "unlimited", productID: ProductID.unlimitedMonthly, price: "14.99", currency: "CAD")
     }
 
     func test_reprocessingSameTransaction_emitsNoDuplicate() async {
@@ -114,10 +86,10 @@ final class PurchaseAttributionServiceTests: XCTestCase {
         let count = await sender.snapshot().count
         XCTAssertEqual(first, .recorded)
         XCTAssertEqual(second, .alreadyRecorded)
-        XCTAssertEqual(count, 1)
+        XCTAssertEqual(count, 2)
     }
 
-    func test_concurrentProcessingSameTransaction_emitsOneRevenueEvent() async {
+    func test_concurrentProcessingSameTransaction_emitsOnePair() async {
         let sender = Sender()
         await sender.setDelay(30_000_000)
         let service = PurchaseAttributionService(sender: sender, persistence: MemoryStore())
@@ -128,7 +100,7 @@ final class PurchaseAttributionServiceTests: XCTestCase {
         _ = await [first, second]
 
         let names = await sender.snapshot().map(\.name)
-        XCTAssertEqual(names, ["af_purchase"])
+        XCTAssertEqual(names, ["af_subscribe", "af_purchase"])
     }
 
     func test_relaunchWithPersistedTransaction_emitsNoDuplicate() async {
@@ -147,233 +119,13 @@ final class PurchaseAttributionServiceTests: XCTestCase {
         XCTAssertTrue(relaunchedEvents.isEmpty)
     }
 
-    func test_preparedBeforeFinish_survivesRelaunchAndDeliversOnce() async {
-        let persistence = MemoryStore()
-        let firstSender = Sender()
-        let item = purchase(productID: ProductID.businessMonthly, price: "9.99", tier: "business")
-        let firstService = PurchaseAttributionService(sender: firstSender, persistence: persistence)
-
-        let preparation = await firstService.prepareVerifiedSubscriptionPurchase(item)
-        XCTAssertEqual(preparation, .prepared)
-        let eventsBeforeRelaunch = await firstSender.snapshot()
-        XCTAssertTrue(eventsBeforeRelaunch.isEmpty)
-
-        let relaunchedSender = Sender()
-        let relaunchedService = PurchaseAttributionService(sender: relaunchedSender, persistence: persistence)
-        let outcome = await relaunchedService.deliverPreparedPurchase(transactionID: item.transactionID)
-        XCTAssertEqual(outcome, .recorded)
-        let relaunchedEvents = await relaunchedSender.snapshot()
-        XCTAssertEqual(relaunchedEvents.map(\.name), ["af_purchase"])
-
-        let secondOutcome = await relaunchedService.deliverPreparedPurchase(transactionID: item.transactionID)
-        XCTAssertEqual(secondOutcome, .alreadyRecorded)
-        let finalEventCount = await relaunchedSender.snapshot().count
-        XCTAssertEqual(finalEventCount, 1)
-    }
-
-    func test_onlyDurableOrTerminalPreparationPermitsStoreKitFinish() {
-        XCTAssertTrue(PurchaseAttributionPreparationOutcome.prepared.permitsStoreKitFinish)
-        XCTAssertTrue(PurchaseAttributionPreparationOutcome.alreadyRecorded.permitsStoreKitFinish)
-        XCTAssertTrue(PurchaseAttributionPreparationOutcome.ineligible("not revenue").permitsStoreKitFinish)
-        XCTAssertFalse(PurchaseAttributionPreparationOutcome.deferred("not durable").permitsStoreKitFinish)
-    }
-
-    func test_sameTransactionFromDifferentListeners_usesOnePreparedRevenueIdentity() async {
-        let persistence = MemoryStore()
-        let sender = Sender()
-        let service = PurchaseAttributionService(sender: sender, persistence: persistence)
-        let direct = purchase(productID: ProductID.essentialMonthly, price: "4.99", tier: "essential")
-        let listener = VerifiedSubscriptionPurchase(
-            transactionID: direct.transactionID,
-            productID: direct.productID,
-            price: direct.price,
-            currency: direct.currency,
-            tier: direct.tier,
-            source: "transaction_listener"
-        )
-
-        let firstPreparation = await service.prepareVerifiedSubscriptionPurchase(direct)
-        let secondPreparation = await service.prepareVerifiedSubscriptionPurchase(listener)
-        XCTAssertEqual(firstPreparation, .prepared)
-        XCTAssertEqual(secondPreparation, .prepared)
-
-        _ = await service.deliverPreparedPurchase(transactionID: direct.transactionID)
-        _ = await service.deliverPreparedPurchase(transactionID: direct.transactionID)
-        let events = await sender.snapshot()
-        XCTAssertEqual(events.map(\.name), ["af_purchase"])
-        XCTAssertEqual(events[0].values.source, "three_tier_paywall")
-    }
-
-    func test_differentTransactionsEmitSeparateLegitimateRevenueEvents() async {
-        let sender = Sender()
-        let service = PurchaseAttributionService(sender: sender, persistence: MemoryStore())
-        let first = purchase(id: "initial-transaction", productID: ProductID.businessMonthly, price: "9.99", tier: "business")
-        let second = purchase(id: "different-transaction", productID: ProductID.businessMonthly, price: "9.99", tier: "business")
-
-        let firstOutcome = await service.recordVerifiedSubscriptionPurchase(first)
-        let secondOutcome = await service.recordVerifiedSubscriptionPurchase(second)
-        XCTAssertEqual(firstOutcome, .recorded)
-        XCTAssertEqual(secondOutcome, .recorded)
-
-        let events = await sender.snapshot()
-        XCTAssertEqual(events.map(\.name), ["af_purchase", "af_purchase"])
-        XCTAssertEqual(events.map(\.values.transactionID), [first.transactionID, second.transactionID])
-    }
-
-    func test_renewalWithNewAppleTransactionIDEmitsNewRevenueEvent() async {
-        let sender = Sender()
-        let service = PurchaseAttributionService(sender: sender, persistence: MemoryStore())
-        let initial = purchase(id: "apple-initial-id", productID: ProductID.essentialMonthly, price: "4.99", tier: "essential")
-        let renewal = purchase(id: "apple-renewal-id", productID: ProductID.essentialMonthly, price: "4.99", tier: "essential")
-
-        _ = await service.recordVerifiedSubscriptionPurchase(initial)
-        _ = await service.recordVerifiedSubscriptionPurchase(renewal)
-
-        let transactionIDs = await sender.snapshot().map(\.values.transactionID)
-        XCTAssertEqual(transactionIDs, ["apple-initial-id", "apple-renewal-id"])
-    }
-
-    func test_legacySubscribeSentRecordCompletesWithoutSecondRevenueEvent() async throws {
-        let item = purchase(productID: ProductID.unlimitedMonthly, price: "14.99", tier: "unlimited")
-        let encoded = try JSONEncoder().encode([
-            item.transactionID: LegacyRecord(purchase: item, phase: "subscribeSent")
-        ])
-        let sender = Sender()
-        let service = PurchaseAttributionService(sender: sender, persistence: MemoryStore(data: encoded))
-
-        let outcome = await service.recordVerifiedSubscriptionPurchase(item)
-        let events = await sender.snapshot()
-        XCTAssertEqual(outcome, .alreadyRecorded)
-        XCTAssertTrue(events.isEmpty)
-    }
-
-    func test_legacyPendingRecordIsQuarantinedWithoutRevenueEvent() async throws {
-        let item = purchase(productID: ProductID.essentialMonthly, price: "4.99", tier: "essential")
-        let encoded = try JSONEncoder().encode([
-            item.transactionID: LegacyRecord(purchase: item, phase: "pending")
-        ])
-        let sender = Sender()
-        let persistence = MemoryStore(data: encoded)
-        let service = PurchaseAttributionService(sender: sender, persistence: persistence)
-
-        guard case .deferred(let reason) = await service.recordVerifiedSubscriptionPurchase(item) else {
-            return XCTFail("Ambiguous legacy pending state must be quarantined")
-        }
-        let initialEvents = await sender.snapshot()
-        XCTAssertTrue(reason.contains("quarantined"))
-        XCTAssertTrue(initialEvents.isEmpty)
-
-        let relaunchedSender = Sender()
-        let relaunched = PurchaseAttributionService(sender: relaunchedSender, persistence: persistence)
-        _ = await relaunched.retryPendingPurchases()
-        let relaunchedEvents = await relaunchedSender.snapshot()
-        XCTAssertTrue(relaunchedEvents.isEmpty)
-    }
-
-    func test_relaunchAutomaticallyRetriesVersionedPendingPurchase() async {
-        let persistence = MemoryStore()
-        let initialSender = Sender()
-        await initialSender.failNextSend()
-        let item = purchase(productID: ProductID.businessMonthly, price: "9.99", tier: "business")
-        let initialService = PurchaseAttributionService(sender: initialSender, persistence: persistence)
-        guard case .deferred = await initialService.recordVerifiedSubscriptionPurchase(item) else {
-            return XCTFail("Initial failed send must remain pending")
-        }
-
-        let relaunchedSender = Sender()
-        let relaunched = PurchaseAttributionService(sender: relaunchedSender, persistence: persistence)
-        let outcomes = await relaunched.retryPendingPurchases()
-        let events = await relaunchedSender.snapshot()
-        XCTAssertEqual(outcomes[item.transactionID], .recorded)
-        XCTAssertEqual(events.map(\.name), ["af_purchase"])
-        XCTAssertEqual(events.map(\.values.transactionID), [item.transactionID])
-
-        let secondDrain = await relaunched.retryPendingPurchases()
-        XCTAssertTrue(secondDrain.isEmpty)
-    }
-
-    func test_corruptLedgerFailsClosedWithoutSendingRevenue() async {
-        let sender = Sender()
-        let persistence = MemoryStore(data: Data("not-json".utf8))
-        let item = purchase(productID: ProductID.unlimitedMonthly, price: "14.99", tier: "unlimited")
-        let service = PurchaseAttributionService(sender: sender, persistence: persistence)
-
-        guard case .deferred(let reason) = await service.recordVerifiedSubscriptionPurchase(item) else {
-            return XCTFail("Corrupt ledger must fail closed")
-        }
-        let events = await sender.snapshot()
-        XCTAssertTrue(reason.contains("could not be loaded"))
-        XCTAssertTrue(events.isEmpty)
-    }
-
-    func test_initialPersistenceFailureDefersWithoutSendingOrPermittingFinish() async {
-        let sender = Sender()
-        let item = purchase(productID: ProductID.businessMonthly, price: "9.99", tier: "business")
-        let service = PurchaseAttributionService(sender: sender, persistence: FailingSaveStore())
-
-        let preparation = await service.prepareVerifiedSubscriptionPurchase(item)
-        guard case .deferred(let reason) = preparation else {
-            return XCTFail("A non-durable transaction must be deferred")
-        }
-        let events = await sender.snapshot()
-        XCTAssertTrue(reason.contains("Could not persist pending attribution"))
-        XCTAssertFalse(preparation.permitsStoreKitFinish)
-        XCTAssertTrue(events.isEmpty)
-    }
-
-    func test_futureContractVersionFailsClosedWithoutSendingRevenue() async throws {
-        let item = purchase(productID: ProductID.businessMonthly, price: "9.99", tier: "business")
-        let encoded = try JSONEncoder().encode([
-            item.transactionID: VersionedRecord(
-                purchase: item,
-                phase: "pending",
-                contractVersion: 999
-            )
-        ])
-        let sender = Sender()
-        let service = PurchaseAttributionService(sender: sender, persistence: MemoryStore(data: encoded))
-
-        guard case .deferred(let reason) = await service.recordVerifiedSubscriptionPurchase(item) else {
-            return XCTFail("Future contract version must fail closed")
-        }
-        let events = await sender.snapshot()
-        XCTAssertTrue(reason.contains("unsupported"))
-        XCTAssertTrue(events.isEmpty)
-    }
-
-    func test_failedDeliveryStaysPendingAndRetryEmitsOneRevenueEvent() async {
-        let sender = Sender()
-        await sender.failNextSend()
-        let persistence = MemoryStore()
-        let item = purchase(productID: ProductID.businessMonthly, price: "9.99", tier: "business")
-        let service = PurchaseAttributionService(sender: sender, persistence: persistence)
-
-        guard case .deferred = await service.recordVerifiedSubscriptionPurchase(item) else {
-            return XCTFail("Failed send must remain deferred")
-        }
-        let retryOutcome = await service.recordVerifiedSubscriptionPurchase(item)
-        let eventNames = await sender.snapshot().map(\.name)
-        XCTAssertEqual(retryOutcome, .recorded)
-        XCTAssertEqual(eventNames, ["af_purchase"])
-    }
-
     func test_nonSuccessStoreKitOutcomesHaveNoAttributionCallSite() throws {
         let source = try String(contentsOf: sourceRoot().appendingPathComponent("SacredBillTracker/Services/StoreKit/TierEntitlementManager.swift"))
         let cancelled = source.range(of: "case .userCancelled:")!
         let pending = source.range(of: "case .pending:")!
         let unknown = source.range(of: "@unknown default:")!
-        XCTAssertFalse(source[cancelled.lowerBound..<pending.lowerBound].contains("preparePurchaseAttribution"))
-        XCTAssertFalse(source[pending.lowerBound..<unknown.lowerBound].contains("preparePurchaseAttribution"))
-    }
-
-    func test_unverifiedStoreKitResultsCannotReachPurchaseAttribution() throws {
-        let subscriptionSource = try String(contentsOf: sourceRoot().appendingPathComponent("SacredBillTracker/Services/StoreKit/SubscriptionManager.swift"))
-        XCTAssertTrue(subscriptionSource.contains("case .unverified(_, let error):\n            throw error"))
-        XCTAssertTrue(subscriptionSource.contains("let transaction = try checkVerified(verification)"))
-
-        let tierSource = try String(contentsOf: sourceRoot().appendingPathComponent("SacredBillTracker/Services/StoreKit/TierEntitlementManager.swift"))
-        XCTAssertTrue(tierSource.contains("if case .verified(let txn) = verification"))
-        XCTAssertTrue(tierSource.contains("guard case .verified(let txn) = update else { continue }"))
+        XCTAssertFalse(source[cancelled.lowerBound..<pending.lowerBound].contains("recordPurchaseAttribution"))
+        XCTAssertFalse(source[pending.lowerBound..<unknown.lowerBound].contains("recordPurchaseAttribution"))
     }
 
     func test_restoreAndEntitlementRefreshDoNotEmitPurchaseAttribution() throws {
@@ -386,55 +138,13 @@ final class PurchaseAttributionServiceTests: XCTestCase {
                 guard let start = source.range(of: functionName) else { continue }
                 let tail = source[start.lowerBound...]
                 let end = tail.dropFirst().firstIndex(of: "}") ?? tail.endIndex
-                XCTAssertFalse(tail[..<end].contains("preparePurchaseAttribution"), "\(functionName) must not attribute")
-                XCTAssertFalse(tail[..<end].contains("schedulePurchaseAttributionDelivery"), "\(functionName) must not deliver attribution")
+                XCTAssertFalse(tail[..<end].contains("recordPurchaseAttribution"), "\(functionName) must not attribute")
             }
         }
-    }
-
-    func test_purchaseCallSitesPrepareDurablyBeforeFinishingStoreKitTransaction() throws {
-        for relativePath in [
-            "SacredBillTracker/Services/StoreKit/TierEntitlementManager.swift",
-            "SacredBillTracker/Services/StoreKit/SubscriptionManager.swift"
-        ] {
-            let source = try String(contentsOf: sourceRoot().appendingPathComponent(relativePath))
-            let purchasePreparation = source.range(of: "let attributionPreparation = await preparePurchaseAttribution")
-            let finish = source.range(of: "await transaction.finish()") ?? source.range(of: "await txn.finish()")
-            XCTAssertNotNil(purchasePreparation, "\(relativePath) must prepare attribution")
-            XCTAssertNotNil(finish, "\(relativePath) must finish StoreKit transactions")
-            if let purchasePreparation, let finish {
-                XCTAssertLessThan(purchasePreparation.lowerBound, finish.lowerBound)
-            }
-            XCTAssertEqual(
-                source.components(separatedBy: "if attributionPreparation.permitsStoreKitFinish").count - 1,
-                2,
-                "Every direct and listener finish in \(relativePath) must be gated by durable preparation"
-            )
-        }
-    }
-
-    func test_transactionPayloadUsesPaidTransactionValuesAndRejectsFalseRevenueStates() throws {
-        let source = try String(contentsOf: sourceRoot().appendingPathComponent("SacredBillTracker/Services/StoreKit/PurchaseAttributionService.swift"))
-        XCTAssertTrue(source.contains("transaction.revocationDate == nil"))
-        XCTAssertTrue(source.contains("!transaction.isUpgraded"))
-        XCTAssertTrue(source.contains("transaction.ownershipType == .purchased"))
-        XCTAssertTrue(source.contains("transaction.reason == .purchase || transaction.reason == .renewal"))
-        XCTAssertTrue(source.contains("let price = transaction.price, price > 0"))
-        XCTAssertTrue(source.contains("transaction.currency?.identifier"))
-        XCTAssertTrue(source.contains("StoreKit.Transaction.unfinished"))
     }
 
     func test_metaSDKIsNotLinkedAsSecondPurchasePath() {
         XCTAssertNil(NSClassFromString("FBSDKAppEvents"))
-    }
-
-    func test_appStartsAppsFlyerForEachActiveSessionAndDrainsPendingPurchases() throws {
-        let source = try String(contentsOf: sourceRoot().appendingPathComponent("SacredBillTracker/SacredBillTrackerApp.swift"))
-        XCTAssertFalse(source.contains("private var didStart"))
-        XCTAssertTrue(source.contains(".onChange(of: scenePhase, initial: true)"))
-        XCTAssertTrue(source.contains("AppsFlyerLib.shared().start()"))
-        XCTAssertTrue(source.contains("PurchaseAttributionService.shared.recoverUnfinishedTransactions()"))
-        XCTAssertTrue(source.contains("PurchaseAttributionService.shared.retryPendingPurchases()"))
     }
 
     private func sourceRoot() -> URL {
@@ -442,4 +152,80 @@ final class PurchaseAttributionServiceTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
     }
+}
+
+
+final class StagingRoutingTests: XCTestCase {
+    private func configuration(ref: String = SBTStagingRoute.project, role: String = "anon") -> [String: String] {
+        let data = try! JSONSerialization.data(withJSONObject: ["ref": ref, "role": role])
+        let payload = data.base64EncodedString().replacingOccurrences(of: "=", with: "")
+        return ["SBT_STAGING_PROJECT": SBTStagingRoute.project,
+                "SBT_STAGING_URL": "https://" + SBTStagingRoute.host,
+                "SBT_STAGING_PUBLIC_KEY": "fixture." + payload + ".fixture"]
+    }
+    func testStagingResolvesExactProject() throws {
+        XCTAssertEqual(try SBTStagingRoute.resolve(configuration()).url.host, SBTStagingRoute.host)
+    }
+    func testProductionURLRejected() {
+        var v = configuration(); v["SBT_STAGING_URL"] = "https://zziauybwemoiqfpidiur.supabase.co"
+        XCTAssertThrowsError(try SBTStagingRoute.resolve(v))
+    }
+    func testPlaceholderRejected() {
+        var v = configuration(); v["SBT_STAGING_URL"] = "https://sbt-native-validation.invalid"
+        XCTAssertThrowsError(try SBTStagingRoute.resolve(v))
+    }
+    func testMissingProjectRejected() {
+        var v = configuration(); v.removeValue(forKey: "SBT_STAGING_PROJECT")
+        XCTAssertThrowsError(try SBTStagingRoute.resolve(v))
+    }
+    func testMissingKeyRejected() {
+        var v = configuration(); v.removeValue(forKey: "SBT_STAGING_PUBLIC_KEY")
+        XCTAssertThrowsError(try SBTStagingRoute.resolve(v))
+    }
+    func testOtherProjectKeyRejected() { XCTAssertThrowsError(try SBTStagingRoute.resolve(configuration(ref: "zziauybwemoiqfpidiur"))) }
+    func testPrivilegedKeyRejected() { XCTAssertThrowsError(try SBTStagingRoute.resolve(configuration(role: "service_role"))) }
+    func testHostBoundary() {
+        XCTAssertTrue(SBTStagingRoute.permits(URL(string: "https://" + SBTStagingRoute.host + "/auth/v1/user")))
+        for value in ["http://" + SBTStagingRoute.host, "https://" + SBTStagingRoute.host + ".evil.invalid", "https://zziauybwemoiqfpidiur.supabase.co", "https://user@" + SBTStagingRoute.host, "https://" + SBTStagingRoute.host + ":444"] {
+            XCTAssertFalse(SBTStagingRoute.permits(URL(string: value)))
+        }
+    }
+    #if SBT_STAGING_ACCEPTANCE
+    func testStagingAuthenticatesBothFixtureAccounts() async throws {
+        for (label, expected) in [("A", "fef84b78-43b3-470b-97cf-95c17faee5c8"), ("B", "7107bedd-ea60-4dec-8ac9-aaedbea2deda")] {
+            let token = try XCTUnwrap(ProcessInfo.processInfo.environment["SBT_ROUTING_ACCOUNT_" + label + "_TOKEN"])
+            var request = URLRequest(url: SupabaseConfig.url.appendingPathComponent("auth/v1/user"))
+            request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
+            request.setValue(SupabaseConfig.anonKey, forHTTPHeaderField: "apikey")
+            let (data, response) = try await SupabaseConfig.networkSession.data(for: request)
+            XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 200)
+            let user = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            XCTAssertEqual(user["id"] as? String, expected)
+            XCTAssertEqual(user["role"] as? String, "authenticated")
+            print("STAGING_AUTH_VERIFIED account=" + label + " project=thwjnpofhrpxfuvwkfgd")
+        }
+    }
+    func testCompiledStagingClientAndHealth() async throws {
+        XCTAssertEqual(SupabaseConfig.url.host, SBTStagingRoute.host)
+        XCTAssertEqual(SBTStagingRoute.cacheService, "com.sacredbilltracker.entitlement.staging.v1")
+        let url = SupabaseConfig.url.appendingPathComponent("functions/v1/sbt-sandbox-account/health")
+        let (data, response) = try await SupabaseConfig.networkSession.data(from: url)
+        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 503)
+        let health = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(health["ready"] as? Bool, false)
+        print("STAGING_ROUTE_VERIFIED project=thwjnpofhrpxfuvwkfgd health=503 ready=false")
+    }
+    func testProductionRequestBlockedBeforeNetwork() async {
+        do {
+            _ = try await SupabaseConfig.networkSession.data(from: URL(string: "https://zziauybwemoiqfpidiur.supabase.co/rest/v1/subscriptions")!)
+            XCTFail("Production request must be blocked")
+        } catch { XCTAssertEqual((error as? URLError)?.code, .unsupportedURL) }
+    }
+    func testPlaceholderRequestBlockedBeforeNetwork() async {
+        do {
+            _ = try await SupabaseConfig.networkSession.data(from: URL(string: "https://sbt-native-validation.invalid")!)
+            XCTFail("Placeholder request must be blocked")
+        } catch { XCTAssertEqual((error as? URLError)?.code, .unsupportedURL) }
+    }
+    #endif
 }

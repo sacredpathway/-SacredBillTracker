@@ -82,7 +82,7 @@ struct SubmitLoadView: View {
 
                     HStack {
                         Image(systemName: "arrow.down.circle.fill")
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.appDangerText)
                             .frame(width: 24)
                         TextField("Delivery Location", text: $delivery)
                             .textContentType(.fullStreetAddress)

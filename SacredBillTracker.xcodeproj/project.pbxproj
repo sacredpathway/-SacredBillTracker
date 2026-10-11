@@ -14,6 +14,7 @@
 		26F52DF4C4D787C965850FC7 /* BillRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20B21B9DB0B8F06E01D593C5 /* BillRowView.swift */; };
 		276DB5CE7BEF2738FE20D43D /* Bill.swift in Sources */ = {isa = PBXBuildFile; fileRef = B252CE25C6BFAAA19783989B /* Bill.swift */; };
 		27F24FBE8E5DF38E7D842A23 /* QuickAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C7549FABB88EBA3BA59F888 /* QuickAddView.swift */; };
+		28F8FB1756EBA05E51F7DF9F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD107D14EEB3B6B1CC25BB43 /* Foundation.framework */; };
 		3349ED36D62272BBCF445AE8 /* LocalBillRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C750C0F2CC1690F3324DDF /* LocalBillRepository.swift */; };
 		357D1BE8EA2B41116A5D2B80 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B4DDC439940F06B2F726E /* AppDelegate.swift */; };
 		462F20BB277878DC9C533959 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DDA57124A8B5C6972599799 /* CalendarView.swift */; };
@@ -30,6 +31,7 @@
 		8C39F5CD344F415BC9C3F384 /* BillRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD309CBCB575F112EC23B203 /* BillRepository.swift */; };
 		8EFE50C7A81D432D29372160 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE079A04FBE544C87B570E6F /* SettingsView.swift */; };
 		95219A33275E5DAC1C979124 /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5C1179848BC10A0F4DC45E /* PushNotificationManager.swift */; };
+		99E1A7AD76D22BF9F7CB2648 /* HelpCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B241056D523255F429B4FC7 /* HelpCenterView.swift */; };
 		9EA5E3C1C60C46B0B53BCB17 /* PushNotificationManager+Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFEB813F963556ADC7B0B592 /* PushNotificationManager+Remote.swift */; };
 		A9E0CBEE23CCAEE822163E82 /* BillDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1801AA917BD014DE39336181 /* BillDetailView.swift */; };
 		AAAA0001AAAA0001AAAA0001 /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB0001BBBB0001BBBB0001 /* SupabaseConfig.swift */; };
@@ -62,6 +64,7 @@
 		CFE9D72014C7366EEAC212E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9D049148AF854EB24C2B2E5 /* Assets.xcassets */; };
 		CPA1001CPA1001CPA1001 /* CPAReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPA0001CPA0001CPA0001 /* CPAReportGenerator.swift */; };
 		CPA1002CPA1002CPA1002 /* CPAReadyExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */; };
+		D3FE460088D621EA8B1915A6 /* HelpCenterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB97FB00A222E66BC8D2366A /* HelpCenterUITests.swift */; };
 		D933F686E796F409084E196B /* RecurrenceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE0EB48F476018D0BA8C1F0 /* RecurrenceType.swift */; };
 		DDDD1001DDDD1001DDDD1001 /* ProductIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0001DDDD0001DDDD0001 /* ProductIdentifiers.swift */; };
 		DDDD1002DDDD1002DDDD1002 /* Entitlements.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0002DDDD0002DDDD0002 /* Entitlements.swift */; };
@@ -98,10 +101,11 @@
 		MPRO1001MPRO1001MPRO1001 /* ManagedProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0001MPRO0001MPRO0001 /* ManagedProfile.swift */; };
 		MPRO1002MPRO1002MPRO1002 /* ManagedProfileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0002MPRO0002MPRO0002 /* ManagedProfileStore.swift */; };
 		MPRO1003MPRO1003MPRO1003 /* ManagedProfilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPRO0003MPRO0003MPRO0003 /* ManagedProfilesView.swift */; };
+		PATR1001PATR1001PATR1001 /* PurchaseAttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */; };
 		PDWN1001PDWN1001PDWN1001 /* PaydownPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */; };
 		PRCM1001PRCM1001PRCM1001 /* PremiumComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRCM0001PRCM0001PRCM0001 /* PremiumComponents.swift */; };
 		PRIV1001PRIV1001PRIV1001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */; };
-		PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1390001A1390001A1390001 /* PrivacyInfo.xcprivacy */; };
+		PRIV1002PRIV1002PRIV1002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = WGTPRIV1WGTPRIV1WGTPRIV1 /* PrivacyInfo.xcprivacy */; };
 		PRTN1001PRTN1001PRTN1001 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0001PRTN0001PRTN0001 /* Theme.swift */; };
 		PRTN1002PRTN1002PRTN1002 /* BillScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0002PRTN0002PRTN0002 /* BillScope.swift */; };
 		PRTN1003PRTN1003PRTN1003 /* PartnerInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRTN0003PRTN0003PRTN0003 /* PartnerInvite.swift */; };
@@ -112,6 +116,7 @@
 		PURL1001PURL1001PURL1001 /* PaymentURLValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */; };
 		QUOT1001QUOT1001QUOT1001 /* DailyQuotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */; };
 		QUTS1001QUTS1001QUTS1001 /* QuoteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */; };
+		RCPT1001RCPT1001RCPT1001 /* ReceiptJarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RCPT0001RCPT0001RCPT0001 /* ReceiptJarView.swift */; };
 		RFRL1001RFRL1001RFRL1001 /* ReferralService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */; };
 		RVWX1001RVWX1001RVWX1001 /* ReviewPromptService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */; };
 		SCHI1001SCHI1001SCHI1001 /* ScheduleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCHI0001SCHI0001SCHI0001 /* ScheduleItem.swift */; };
@@ -130,8 +135,9 @@
 		TSTBLD01TSTBLD01TSTBLD01 /* BillTotalsCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL01TSTFIL01TSTFIL01 /* BillTotalsCalculatorTests.swift */; };
 		TSTBLD02TSTBLD02TSTBLD02 /* IncomeMonthlyAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL02TSTFIL02TSTFIL02 /* IncomeMonthlyAttributionTests.swift */; };
 		TSTBLD03TSTBLD03TSTBLD03 /* IncomeOwnershipAuthLoadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL03TSTFIL03TSTFIL03 /* IncomeOwnershipAuthLoadingTests.swift */; };
-		PATR1001PATR1001PATR1001 /* PurchaseAttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */; };
 		TSTBLD04TSTBLD04TSTBLD04 /* PurchaseAttributionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */; };
+		TSTBLD05TSTBLD05TSTBLD05 /* ReceiptJarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL05TSTFIL05TSTFIL05 /* ReceiptJarTests.swift */; };
+		TSTBLD06TSTBLD06TSTBLD06 /* StartupRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSTFIL06TSTFIL06TSTFIL06 /* StartupRoutingTests.swift */; };
 		VGAT1001VGAT1001VGAT1001 /* AppVersionConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */; };
 		VGAT1002VGAT1002VGAT1002 /* VersionGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */; };
 		VGAT1003VGAT1003VGAT1003 /* ForceUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VGAT0003VGAT0003VGAT0003 /* ForceUpdateView.swift */; };
@@ -144,6 +150,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		9C9F79B11D9CF1A2A45A9718 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1781F676DEDF5767F3243DB0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 730950AD798A77AD508AA9E2;
+			remoteInfo = SacredBillTracker;
+		};
 		TSTPRX01TSTPRX01TSTPRX01 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1781F676DEDF5767F3243DB0 /* Project object */;
@@ -189,6 +202,7 @@
 		34928484F15201D290FB9C1C /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		376520D3B996FD93D29274AF /* BillType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillType.swift; sourceTree = "<group>"; };
 		3770D11D6E4AC732A53C284A /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
+		3B241056D523255F429B4FC7 /* HelpCenterView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HelpCenterView.swift; sourceTree = "<group>"; };
 		40C750C0F2CC1690F3324DDF /* LocalBillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalBillRepository.swift; sourceTree = "<group>"; };
 		418C8109C7CC5C32CCB90766 /* NotificationCategories.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationCategories.swift; sourceTree = "<group>"; };
 		47CBF228E0E41320254F06BD /* AddEditBillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditBillView.swift; sourceTree = "<group>"; };
@@ -204,6 +218,7 @@
 		8962CA11470A1C4878619F8F /* Color+Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
 		A035339CA64FB82C6F750F78 /* NotificationIntegrationHooks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationIntegrationHooks.swift; sourceTree = "<group>"; };
 		AAAA0010AAAA0010AAAA0010 /* LegacyDemoBills.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDemoBills.swift; sourceTree = "<group>"; };
+		AF6EF979A92AB76E1FFFA135 /* SacredBillTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SacredBillTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ANLY0001ANLY0001ANLY0001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		APRF0001APRF0001APRF0001 /* AppearancePreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearancePreference.swift; sourceTree = "<group>"; };
 		AUTH0001AUTH0001AUTH0001 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGateView.swift; sourceTree = "<group>"; };
@@ -212,6 +227,7 @@
 		AUTH0004AUTH0004AUTH0004 /* SubscriptionGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionGateView.swift; sourceTree = "<group>"; };
 		AUTH0005AUTH0005AUTH0005 /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		B252CE25C6BFAAA19783989B /* Bill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bill.swift; sourceTree = "<group>"; };
+		BB97FB00A222E66BC8D2366A /* HelpCenterUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HelpCenterUITests.swift; sourceTree = "<group>"; };
 		BBBB0001BBBB0001BBBB0001 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
 		BBBB0002BBBB0002BBBB0002 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		BBBB0003BBBB0003BBBB0003 /* CachingBillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachingBillRepository.swift; sourceTree = "<group>"; };
@@ -225,6 +241,7 @@
 		C9D049148AF854EB24C2B2E5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CATD0001CATD0001CATD0001 /* CategoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailView.swift; sourceTree = "<group>"; };
 		CBKV0001CBKV0001CBKV0001 /* CloudBackedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudBackedDefaults.swift; sourceTree = "<group>"; };
+		CD107D14EEB3B6B1CC25BB43 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		CD309CBCB575F112EC23B203 /* BillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillRepository.swift; sourceTree = "<group>"; };
 		CDDS0001CDDS0001CDDS0001 /* CategoryDetailDebugSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailDebugSeeder.swift; sourceTree = "<group>"; };
 		CFEB813F963556ADC7B0B592 /* PushNotificationManager+Remote.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "PushNotificationManager+Remote.swift"; sourceTree = "<group>"; };
@@ -705,10 +722,10 @@
 		MPRO0001MPRO0001MPRO0001 /* ManagedProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfile.swift; sourceTree = "<group>"; };
 		MPRO0002MPRO0002MPRO0002 /* ManagedProfileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfileStore.swift; sourceTree = "<group>"; };
 		MPRO0003MPRO0003MPRO0003 /* ManagedProfilesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedProfilesView.swift; sourceTree = "<group>"; };
+		PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionService.swift; sourceTree = "<group>"; };
 		PDWN0001PDWN0001PDWN0001 /* PaydownPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaydownPlanService.swift; sourceTree = "<group>"; };
 		PRCM0001PRCM0001PRCM0001 /* PremiumComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumComponents.swift; sourceTree = "<group>"; };
 		PRIV0001PRIV0001PRIV0001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		A1390001A1390001A1390001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		PRTN0001PRTN0001PRTN0001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		PRTN0002PRTN0002PRTN0002 /* BillScope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillScope.swift; sourceTree = "<group>"; };
 		PRTN0003PRTN0003PRTN0003 /* PartnerInvite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerInvite.swift; sourceTree = "<group>"; };
@@ -719,6 +736,7 @@
 		PURL0001PURL0001PURL0001 /* PaymentURLValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentURLValidator.swift; sourceTree = "<group>"; };
 		QUOT0001QUOT0001QUOT0001 /* DailyQuotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuotes.swift; sourceTree = "<group>"; };
 		QUTS0001QUTS0001QUTS0001 /* QuoteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteService.swift; sourceTree = "<group>"; };
+		RCPT0001RCPT0001RCPT0001 /* ReceiptJarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptJarView.swift; sourceTree = "<group>"; };
 		RFRL0001RFRL0001RFRL0001 /* ReferralService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferralService.swift; sourceTree = "<group>"; };
 		RVWX0001RVWX0001RVWX0001 /* ReviewPromptService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptService.swift; sourceTree = "<group>"; };
 		SCHI0001SCHI0001SCHI0001 /* ScheduleItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleItem.swift; sourceTree = "<group>"; };
@@ -737,8 +755,9 @@
 		TSTFIL01TSTFIL01TSTFIL01 /* BillTotalsCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillTotalsCalculatorTests.swift; sourceTree = "<group>"; };
 		TSTFIL02TSTFIL02TSTFIL02 /* IncomeMonthlyAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeMonthlyAttributionTests.swift; sourceTree = "<group>"; };
 		TSTFIL03TSTFIL03TSTFIL03 /* IncomeOwnershipAuthLoadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeOwnershipAuthLoadingTests.swift; sourceTree = "<group>"; };
-		PATR0001PATR0001PATR0001 /* PurchaseAttributionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionService.swift; sourceTree = "<group>"; };
 		TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttributionServiceTests.swift; sourceTree = "<group>"; };
+		TSTFIL05TSTFIL05TSTFIL05 /* ReceiptJarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptJarTests.swift; sourceTree = "<group>"; };
+		TSTFIL06TSTFIL06TSTFIL06 /* StartupRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupRoutingTests.swift; sourceTree = "<group>"; };
 		TSTXCT01TSTXCT01TSTXCT01 /* SacredBillTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SacredBillTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		VGAT0001VGAT0001VGAT0001 /* AppVersionConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionConfig.swift; sourceTree = "<group>"; };
 		VGAT0002VGAT0002VGAT0002 /* VersionGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionGateService.swift; sourceTree = "<group>"; };
@@ -750,9 +769,18 @@
 		WGTF0004WGTF0004WGTF0004 /* BillWidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillWidgetBridge.swift; sourceTree = "<group>"; };
 		WGTF0005WGTF0005WGTF0005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		WGTF0006WGTF0006WGTF0006 /* SacredBillTrackerWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SacredBillTrackerWidgets.entitlements; sourceTree = "<group>"; };
+		WGTPRIV1WGTPRIV1WGTPRIV1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		9B9652AA9692FA88AECEDEF8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				28F8FB1756EBA05E51F7DF9F /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FCB13D7EDBAAE7DD085AD9D3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -783,8 +811,10 @@
 			isa = PBXGroup;
 			children = (
 				DE079A04FBE544C87B570E6F /* SettingsView.swift */,
+				RCPT0001RCPT0001RCPT0001 /* ReceiptJarView.swift */,
 				ERWD0001ERWD0001ERWD0001 /* EarnRewardsView.swift */,
 				CPA0002CPA0002CPA0002 /* CPAReadyExportView.swift */,
+				3B241056D523255F429B4FC7 /* HelpCenterView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -812,6 +842,14 @@
 				HATT0001HATT0001HATT0001 /* HealthAttentionListView.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		4028EDDDEB5629A848CAB67B /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				CD107D14EEB3B6B1CC25BB43 /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 		48E6E710E46199A949C96CC5 /* Bills */ = {
@@ -958,11 +996,12 @@
 			isa = PBXGroup;
 			children = (
 				B486A56F7720E0D638FD26E7 /* SacredBillTracker */,
-				WGTGRP01WGTGRP01WGTGRP01 /* SacredBillTracker/SacredBillTrackerWidgets */,
+				WGTGRP01WGTGRP01WGTGRP01 /* SacredBillTrackerWidgets */,
 				TSTGRP01TSTGRP01TSTGRP01 /* SacredBillTrackerTests */,
 				D71BD8A0B6A6AA54EDBA6454 /* Products */,
 				C8E3EF4DBE49E56AD7B55F20 /* Frameworks */,
 				FD15934E2FE457070073BFCE /* Sacred B ill Tracker */,
+				F305318269A16D6BBAD85997 /* SacredBillTrackerUITests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -989,6 +1028,7 @@
 		C8E3EF4DBE49E56AD7B55F20 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4028EDDDEB5629A848CAB67B /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1011,6 +1051,7 @@
 				5141EFFF35ACD6C51F274E4D /* SacredBillTracker.app */,
 				WGTAPX01WGTAPX01WGTAPX01 /* SacredBillTrackerWidgets.appex */,
 				TSTXCT01TSTXCT01TSTXCT01 /* SacredBillTrackerTests.xctest */,
+				AF6EF979A92AB76E1FFFA135 /* SacredBillTrackerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1047,6 +1088,15 @@
 				0DDA57124A8B5C6972599799 /* CalendarView.swift */,
 			);
 			path = Calendar;
+			sourceTree = "<group>";
+		};
+		F305318269A16D6BBAD85997 /* SacredBillTrackerUITests */ = {
+			isa = PBXGroup;
+			children = (
+				BB97FB00A222E66BC8D2366A /* HelpCenterUITests.swift */,
+			);
+			name = SacredBillTrackerUITests;
+			path = SacredBillTrackerUITests;
 			sourceTree = "<group>";
 		};
 		FD1591432FE457070073BFCE /* Ad_v1_Assets */ = {
@@ -2271,6 +2321,8 @@
 				TSTFIL02TSTFIL02TSTFIL02 /* IncomeMonthlyAttributionTests.swift */,
 				TSTFIL03TSTFIL03TSTFIL03 /* IncomeOwnershipAuthLoadingTests.swift */,
 				TSTFIL04TSTFIL04TSTFIL04 /* PurchaseAttributionServiceTests.swift */,
+				TSTFIL05TSTFIL05TSTFIL05 /* ReceiptJarTests.swift */,
+				TSTFIL06TSTFIL06TSTFIL06 /* StartupRoutingTests.swift */,
 			);
 			path = SacredBillTrackerTests;
 			sourceTree = "<group>";
@@ -2283,15 +2335,15 @@
 			path = ForceUpdate;
 			sourceTree = "<group>";
 		};
-		WGTGRP01WGTGRP01WGTGRP01 /* SacredBillTracker/SacredBillTrackerWidgets */ = {
+		WGTGRP01WGTGRP01WGTGRP01 /* SacredBillTrackerWidgets */ = {
 			isa = PBXGroup;
 			children = (
+				WGTPRIV1WGTPRIV1WGTPRIV1 /* PrivacyInfo.xcprivacy */,
 				WGTF0001WGTF0001WGTF0001 /* SacredBillTrackerWidgetBundle.swift */,
 				WGTF0002WGTF0002WGTF0002 /* SacredBillTrackerWidget.swift */,
 				WGTF0003WGTF0003WGTF0003 /* WidgetSharedBillSnapshot.swift */,
 				WGTF0005WGTF0005WGTF0005 /* Info.plist */,
 				WGTF0006WGTF0006WGTF0006 /* SacredBillTrackerWidgets.entitlements */,
-				A1390001A1390001A1390001 /* PrivacyInfo.xcprivacy */,
 			);
 			path = SacredBillTracker/SacredBillTrackerWidgets;
 			sourceTree = "<group>";
@@ -2299,6 +2351,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		535CBBF56D389B3EC598BF5C /* SacredBillTrackerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F89D2770F1309059B3252DD9 /* Build configuration list for PBXNativeTarget "SacredBillTrackerUITests" */;
+			buildPhases = (
+				B2D867CF7D061A2DC1858E8F /* Sources */,
+				9B9652AA9692FA88AECEDEF8 /* Frameworks */,
+				80D0AFDD4815207A57AA75CE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				592B2908223E0D0F629A07CF /* PBXTargetDependency */,
+			);
+			name = SacredBillTrackerUITests;
+			productName = SacredBillTrackerUITests;
+			productReference = AF6EF979A92AB76E1FFFA135 /* SacredBillTrackerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		730950AD798A77AD508AA9E2 /* SacredBillTracker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8DC218CD826613AD2E353F27 /* Build configuration list for PBXNativeTarget "SacredBillTracker" */;
@@ -2416,6 +2486,7 @@
 				730950AD798A77AD508AA9E2 /* SacredBillTracker */,
 				WGTTGT01WGTTGT01WGTTGT01 /* SacredBillTrackerWidgets */,
 				TSTTGT01TSTTGT01TSTTGT01 /* SacredBillTrackerTests */,
+				535CBBF56D389B3EC598BF5C /* SacredBillTrackerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -2427,6 +2498,13 @@
 			files = (
 				CFE9D72014C7366EEAC212E6 /* Assets.xcassets in Resources */,
 				PRIV1001PRIV1001PRIV1001 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		80D0AFDD4815207A57AA75CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2505,6 +2583,7 @@
 				12255B7B972DFD75ACEBE607 /* ReportsView.swift in Sources */,
 				CATD1001CATD1001CATD1001 /* CategoryDetailView.swift in Sources */,
 				8EFE50C7A81D432D29372160 /* SettingsView.swift in Sources */,
+				RCPT1001RCPT1001RCPT1001 /* ReceiptJarView.swift in Sources */,
 				578746E5980F5F954D57B1F1 /* BillTemplate.swift in Sources */,
 				E79E495EB32A3A4DEDA9E64C /* CashFlowCard.swift in Sources */,
 				E4924F7A92B2B789B4C21777 /* PrioritySection.swift in Sources */,
@@ -2591,6 +2670,15 @@
 				SNAP0002SNAP0002SNAP0002 /* FinancialSnapshotView.swift in Sources */,
 				WGTB0103WGTB0103WGTB0103 /* WidgetSharedBillSnapshot.swift in Sources */,
 				WGTB0004WGTB0004WGTB0004 /* BillWidgetBridge.swift in Sources */,
+				99E1A7AD76D22BF9F7CB2648 /* HelpCenterView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2D867CF7D061A2DC1858E8F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3FE460088D621EA8B1915A6 /* HelpCenterUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2602,6 +2690,8 @@
 				TSTBLD02TSTBLD02TSTBLD02 /* IncomeMonthlyAttributionTests.swift in Sources */,
 				TSTBLD03TSTBLD03TSTBLD03 /* IncomeOwnershipAuthLoadingTests.swift in Sources */,
 				TSTBLD04TSTBLD04TSTBLD04 /* PurchaseAttributionServiceTests.swift in Sources */,
+				TSTBLD05TSTBLD05TSTBLD05 /* ReceiptJarTests.swift in Sources */,
+				TSTBLD06TSTBLD06TSTBLD06 /* StartupRoutingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2618,6 +2708,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		592B2908223E0D0F629A07CF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SacredBillTracker;
+			target = 730950AD798A77AD508AA9E2 /* SacredBillTracker */;
+			targetProxy = 9C9F79B11D9CF1A2A45A9718 /* PBXContainerItemProxy */;
+		};
 		TSTDEP01TSTDEP01TSTDEP01 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 730950AD798A77AD508AA9E2 /* SacredBillTracker */;
@@ -2631,6 +2727,28 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		55D9F2C569282EA2A1A1B358 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 61;
+				DEVELOPMENT_TEAM = DCCSGYD5A4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = SacredBillTracker;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		56EA2DDD7EA6B62E92CB9329 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = SECR0001SECR0001SECR0001 /* Secrets.xcconfig */;
@@ -2698,6 +2816,27 @@
 			};
 			name = Debug;
 		};
+		AFDA99CE0DC952CD8FC254B8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 61;
+				DEVELOPMENT_TEAM = DCCSGYD5A4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = SacredBillTracker;
+			};
+			name = Debug;
+		};
 		BAF6A2D9E2DF7BB8DC3B2BCF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = SECR0001SECR0001SECR0001 /* Secrets.xcconfig */;
@@ -2706,7 +2845,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 42;
+				CURRENT_PROJECT_VERSION = 61;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2727,7 +2866,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.17;
+				MARKETING_VERSION = 1.0.23;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2744,7 +2883,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 42;
+				CURRENT_PROJECT_VERSION = 61;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2765,7 +2904,7 @@
 					"$(SRCROOT)/SacredBillTracker/Views/Components",
 					"$(SRCROOT)/SacredBillTracker/Views/Bills",
 				);
-				MARKETING_VERSION = 1.0.17;
+				MARKETING_VERSION = 1.0.23;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2843,7 +2982,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 61;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -2863,7 +3002,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 61;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -2883,7 +3022,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 42;
+				CURRENT_PROJECT_VERSION = 61;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
@@ -2895,7 +3034,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.17;
+				MARKETING_VERSION = 1.0.23;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2911,7 +3050,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SacredBillTracker/SacredBillTrackerWidgets/SacredBillTrackerWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 42;
+				CURRENT_PROJECT_VERSION = 61;
 				DEVELOPMENT_TEAM = DCCSGYD5A4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SacredBillTracker/SacredBillTrackerWidgets/Info.plist;
@@ -2923,7 +3062,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.17;
+				MARKETING_VERSION = 1.0.23;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sacredbilltracker.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2950,6 +3089,15 @@
 			buildConfigurations = (
 				56EA2DDD7EA6B62E92CB9329 /* Debug */,
 				F8C11F1832EF84A327194F08 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F89D2770F1309059B3252DD9 /* Build configuration list for PBXNativeTarget "SacredBillTrackerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				55D9F2C569282EA2A1A1B358 /* Release */,
+				AFDA99CE0DC952CD8FC254B8 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

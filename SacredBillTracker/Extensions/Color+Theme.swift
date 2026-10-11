@@ -124,7 +124,7 @@ extension Color {
         case .dark:
             return UIColor(red: 0.902, green: 0.761, blue: 0.361, alpha: 1) // #E6C25C bright gold
         default:
-            return UIColor(red: 0.561, green: 0.431, blue: 0.063, alpha: 1) // #8F6E10 deep gold (was brown #754712)
+            return UIColor(red: 0.490, green: 0.373, blue: 0.047, alpha: 1) // #7D5F0C deep gold
         }
     })
 

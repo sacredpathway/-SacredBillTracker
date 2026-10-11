@@ -146,7 +146,7 @@ struct CPAReadyExportView: View {
                             .frame(width: 48, height: 48)
                         Image(systemName: "doc.text.magnifyingglass")
                             .font(.title2)
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                     }
                     VStack(alignment: .leading, spacing: 2) {
                         Text("CPA Ready Tax Package")
