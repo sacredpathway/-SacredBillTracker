@@ -28,6 +28,32 @@ import Supabase
 import Auth   // exposes OpenIDConnectCredentials, Provider, UserAttributes
 #endif
 
+// MARK: - Session owner cache
+
+/// Remembers the last signed-in owner ID **solely** so that the cold-launch
+/// window — after `AuthService.bootstrap()` starts but before the Supabase
+/// session comes back — can keep showing that user's locally cached income
+/// instead of collapsing every total to $0.
+///
+/// Cleared on sign-out and on account deletion, so a signed-out device never
+/// reveals the previous user's rows.
+enum SessionOwnerCache {
+
+    private static let key = "sacred.bill.tracker.auth.lastOwnerID.v1"
+
+    static var lastKnownOwnerID: UUID? {
+        UserDefaults.standard.string(forKey: key).flatMap(UUID.init(uuidString:))
+    }
+
+    static func remember(_ id: UUID) {
+        UserDefaults.standard.set(id.uuidString, forKey: key)
+    }
+
+    static func clear() {
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+}
+
 // MARK: - Public API
 
 @MainActor
@@ -38,6 +64,14 @@ final class AuthService: NSObject, ObservableObject {
 
     /// The Supabase-assigned user ID. `nil` while signed out.
     @Published private(set) var currentUserID: UUID?
+
+    /// `false` until the initial session restore (`bootstrap()`) finishes —
+    /// success, no session, or error alike.
+    ///
+    /// Consumers MUST NOT treat `currentUserID == nil` as "signed out" until
+    /// this is `true`. Before that it means "we don't know yet". Conflating
+    /// the two is what made monthly income read $0 on every cold launch.
+    @Published private(set) var hasResolvedSession: Bool = false
 
     /// Human-readable name from the Apple credential, if we captured one
     /// on first sign-in. Cached in UserDefaults because Apple only
@@ -75,19 +109,59 @@ final class AuthService: NSObject, ObservableObject {
     /// Called on init — loads any existing Supabase session so the
     /// user stays signed in across launches.
     func bootstrap() async {
+        // Resolve exactly once, on every exit path: success, no session,
+        // or thrown error. Until this flips, income treats a nil owner as
+        // "unknown" rather than "signed out".
+        defer { hasResolvedSession = true }
+
         #if canImport(Supabase)
         do {
             let session = try await SupabaseConfig.client.auth.session
             applySession(userID: session.user.id, email: session.user.email)
         } catch {
-            // Not signed in yet, or session expired — that's fine.
-            isSignedIn = false
-            currentUserID = nil
+            // Network failure does not sign out a previously authenticated
+            // cached SDK session. It supplies identity only, never entitlement
+            // freshness. Invalid/absent sessions and anonymous users stay denied.
+            if error is URLError, let cached = SupabaseConfig.client.auth.currentSession,
+               !cached.user.isAnonymous {
+                applySession(userID: cached.user.id, email: cached.user.email)
+            } else {
+                isSignedIn = false
+                currentUserID = nil
+            }
         }
         #else
         // Without the Supabase package, behave as a single-user local app.
         isSignedIn = true
         currentUserID = DeviceIdentity.localUserID
+        SessionOwnerCache.remember(DeviceIdentity.localUserID)
+        #endif
+    }
+
+    /// Durable account proof only. Never use the DEBUG bypass or device-local ID
+    /// to bind a store purchase. Existing local-only purchasing remains available.
+    func verifiedPurchaseAccountID() async -> UUID? {
+        #if canImport(Supabase)
+        guard let expected = currentUserID, isSignedIn,
+              let session = try? await SupabaseConfig.client.auth.session,
+              session.user.id == expected, currentUserID == expected, isSignedIn,
+              !session.user.isAnonymous else { return nil }
+        return session.user.id
+        #else
+        return nil
+        #endif
+    }
+
+    /// Cached authenticated SDK identity is sufficient to SELECT an existing
+    /// verified offline envelope. It is never sufficient to create one.
+    var offlineEntitlementAccountID: UUID? {
+        #if canImport(Supabase)
+        guard isSignedIn, let expected = currentUserID,
+              let session = SupabaseConfig.client.auth.currentSession,
+              session.user.id == expected, !session.user.isAnonymous else { return nil }
+        return expected
+        #else
+        return nil
         #endif
     }
 
@@ -126,6 +200,8 @@ final class AuthService: NSObject, ObservableObject {
             ?? DeviceIdentity.localUserID
         self.currentUserID = devID
         self.isSignedIn = true
+        self.hasResolvedSession = true
+        SessionOwnerCache.remember(devID)
         self.displayName = "Dev Tester"
         UserDefaults.standard.set("Dev Tester", forKey: displayNameKey)
         self.lastError = nil
@@ -198,6 +274,8 @@ final class AuthService: NSObject, ObservableObject {
         // signed-in state so the rest of the app can still be exercised.
         isSignedIn = true
         currentUserID = DeviceIdentity.localUserID
+        hasResolvedSession = true
+        SessionOwnerCache.remember(DeviceIdentity.localUserID)
         if let display = displayName?.trimmingCharacters(in: .whitespacesAndNewlines),
            !display.isEmpty {
             UserDefaults.standard.set(display, forKey: displayNameKey)
@@ -237,6 +315,8 @@ final class AuthService: NSObject, ObservableObject {
         #else
         isSignedIn = true
         currentUserID = DeviceIdentity.localUserID
+        hasResolvedSession = true
+        SessionOwnerCache.remember(DeviceIdentity.localUserID)
         lastError = nil
         return true
         #endif
@@ -296,6 +376,7 @@ final class AuthService: NSObject, ObservableObject {
     // MARK: - Sign out
 
     func signOut() async {
+        SBTVerifiedEntitlementStore.shared.signOut()
         #if canImport(Supabase)
         do {
             try await SupabaseConfig.client.auth.signOut()
@@ -306,6 +387,10 @@ final class AuthService: NSObject, ObservableObject {
         isSignedIn = false
         currentUserID = nil
         currentUserEmail = nil
+        hasResolvedSession = true
+        // Signed out is a *known* state — drop the restore-window hint so the
+        // previous owner's income can never be read back.
+        SessionOwnerCache.clear()
     }
 
     // MARK: - Delete account (App Store Guideline 5.1.1(v))
@@ -351,6 +436,7 @@ final class AuthService: NSObject, ObservableObject {
         }
         #endif
 
+        SBTVerifiedEntitlementStore.shared.signOut()
         // Wipe locally cached identity + display name.
         UserDefaults.standard.removeObject(forKey: displayNameKey)
         displayName = nil
@@ -358,6 +444,8 @@ final class AuthService: NSObject, ObservableObject {
         currentUserID = nil
         currentUserEmail = nil
         lastError = nil
+        hasResolvedSession = true
+        SessionOwnerCache.clear()
         return true
     }
 
@@ -427,6 +515,8 @@ final class AuthService: NSObject, ObservableObject {
         let deviceID = UUID(uuidString: cred.user) ?? DeviceIdentity.localUserID
         isSignedIn = true
         currentUserID = deviceID
+        hasResolvedSession = true
+        SessionOwnerCache.remember(deviceID)
         if let name = nameTriplet {
             UserDefaults.standard.set(name.combined, forKey: displayNameKey)
             displayName = name.combined
@@ -437,8 +527,11 @@ final class AuthService: NSObject, ObservableObject {
     }
 
     private func applySession(userID: UUID, email: String? = nil) {
+        SBTVerifiedEntitlementStore.shared.changeAccount(userID)
         self.currentUserID = userID
         self.isSignedIn = true
+        self.hasResolvedSession = true
+        SessionOwnerCache.remember(userID)
         if let email, !email.isEmpty {
             self.currentUserEmail = email.lowercased()
         }
@@ -490,4 +583,263 @@ private enum DeviceIdentity {
         UserDefaults.standard.set(fresh.uuidString, forKey: key)
         return fresh
     }()
+}
+
+// MARK: - Isolated account-service integration
+
+/// An authenticated server response may display sandbox state, never grant Release access.
+struct SBTAccountSnapshot: Decodable {
+    let account: UUID
+    let environment: String
+    let lifetime: SBTLifetimeSnapshot?
+    let subscriptions: [SBTSubscriptionSnapshot]?
+    let offers_enabled: Bool
+    let marketing: SBTMarketingSnapshot
+
+    func validate(owner: UUID) -> Bool {
+        account == owner && environment == "sandbox" && !offers_enabled &&
+        !marketing.production_sending_enabled && (lifetime?.isValidSandboxContract ?? true) &&
+        (subscriptions ?? []).allSatisfy { $0.isValidSandboxContract } &&
+        Set((subscriptions ?? []).map(\.original_transaction_id)).count == (subscriptions ?? []).count
+    }
+}
+/// Display/recovery data only. Never merged into Release feature gates or persisted offline.
+struct SBTSubscriptionSnapshot: Decodable {
+    let original_transaction_id: String
+    let product: String
+    let active: Bool
+    let revoked: Bool
+    let expires_at: String
+    let environment: String
+    var expiration: Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.date(from: expires_at) ?? ISO8601DateFormatter().date(from: expires_at)
+    }
+    var isValidSandboxContract: Bool {
+        environment == "sandbox" && PlanTier.from(productID: product) != .free &&
+        !original_transaction_id.isEmpty && original_transaction_id.count <= 64 &&
+        original_transaction_id.utf8.allSatisfy { $0 >= 48 && $0 <= 57 } &&
+        expiration != nil && !(active && revoked)
+    }
+    func tier(at now: Date) -> PlanTier {
+        guard isValidSandboxContract, active, !revoked, let expiry = expiration, expiry > now else { return .free }
+        return PlanTier.from(productID: product)
+    }
+}
+struct SBTLifetimeSnapshot: Decodable {
+    let entitlement_id: String
+    let environment: String
+    let scope: String
+    let platform: String
+    let product: String
+    let tier: String
+    let version: Int
+    var isValidSandboxContract: Bool {
+        entitlement_id == "lifetime_premium_v1" && environment == "sandbox" &&
+        scope == "staging-premium-only" && version == 1 && platform == "apple" &&
+        ["essential_monthly_499", "business_monthly_999", "unlimited_monthly_1499",
+         "com.sacredbilltracker.app.pro.monthly", "com.sacredbilltracker.app.pro.yearly"].contains(product) &&
+        tier != "free" && PlanTier.from(productID: product).rawValue == tier
+    }
+}
+struct SBTMarketingSnapshot: Decodable {
+    let state: String
+    let suppressed: Bool
+    let production_sending_enabled: Bool
+}
+
+enum SBTAccountConnection {
+    static let lifetimeWarning = "Lifetime Premium does not automatically cancel an existing App Store or Google Play subscription."
+    static let sandboxAuthIssuer = "https://thwjnpofhrpxfuvwkfgd.supabase.co/auth/v1"
+    static let sandboxAccountBase = "https://thwjnpofhrpxfuvwkfgd.supabase.co/functions/v1/sbt-sandbox-account"
+    static func approvedOrigin(_ raw: String) -> URL? {
+        guard raw == sandboxAccountBase else { return nil }
+        return URL(string: raw)
+    }
+    /// Outbound leak prevention only; the server still verifies JWT signature/claims.
+    static func permitsSandboxBearer(_ token: String, owner: UUID, now: Date = Date()) -> Bool {
+        let parts = token.split(separator: ".", omittingEmptySubsequences: false)
+        guard parts.count == 3, token.count <= 16384 else { return false }
+        var payload = String(parts[1]).replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        payload += String(repeating: "=", count: (4 - payload.count % 4) % 4)
+        guard let data = Data(base64Encoded: payload),
+              let claims = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              claims["iss"] as? String == sandboxAuthIssuer,
+              claims["aud"] as? String == "authenticated",
+              let subject = claims["sub"] as? String, UUID(uuidString: subject) == owner,
+              let expiry = claims["exp"] as? Double, expiry > now.timeIntervalSince1970 else { return false }
+        return true
+    }
+    static var configuredOrigin: URL? {
+        // No endpoint is guessed. Sandbox access is compiled out of Release.
+        #if DEBUG
+        return approvedOrigin(ProcessInfo.processInfo.environment["SBT_SANDBOX_ACCOUNT_URL"] ?? "")
+        #else
+        return nil
+        #endif
+    }
+}
+
+#if DEBUG && canImport(Supabase)
+/// Explicitly configured sandbox Auth; never reuses the app's production client/storage.
+@MainActor
+final class SBTSandboxSession: ObservableObject {
+    static let shared = SBTSandboxSession()
+    @Published private(set) var revision = 0
+    @Published private(set) var message = "Real sandbox authentication is deferred."
+    @Published private(set) var busy = false
+    private let client: SupabaseClient?
+    var isConfigured: Bool { client != nil }
+    init(environment: [String: String] = ProcessInfo.processInfo.environment) {
+        if SBTAccountConnection.approvedOrigin(environment["SBT_SANDBOX_ACCOUNT_URL"] ?? "") != nil,
+           let key = environment["SBT_SANDBOX_ANON_KEY"], !key.isEmpty {
+            client = SupabaseClient(supabaseURL: URL(string: "https://thwjnpofhrpxfuvwkfgd.supabase.co")!, supabaseKey: key,
+                options: .init(auth: .init(storageKey: "sbt.sandbox.thwjnpofhrpxfuvwkfgd.auth", autoRefreshToken: true)))
+        } else { client = nil }
+    }
+    func verifiedSession() async throws -> (owner: UUID, bearer: String) {
+        guard let client else { throw URLError(.userAuthenticationRequired) }
+        let expectedRevision = revision
+        let session = try await client.auth.session
+        guard revision == expectedRevision, !session.user.isAnonymous,
+              SBTAccountConnection.permitsSandboxBearer(session.accessToken, owner: session.user.id) else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        return (session.user.id, session.accessToken)
+    }
+    func signIn(email: String, password: String) async {
+        guard let client, !busy else { return }
+        busy = true
+        defer { busy = false }
+        revision += 1
+        do {
+            _ = try await client.auth.signIn(email: email, password: password)
+            _ = try await verifiedSession()
+            message = "Sandbox sign-in verified."
+        } catch { message = "Sandbox sign-in could not be verified." }
+        revision += 1
+    }
+    func refresh() async {
+        guard let client, !busy else { return }
+        busy = true
+        defer { busy = false }
+        do {
+            _ = try await client.auth.refreshSession()
+            _ = try await verifiedSession()
+            message = "Sandbox session refreshed."
+        } catch { message = "Sandbox refresh could not be verified." }
+        revision += 1
+    }
+    func signOut() async {
+        guard let client, !busy else { return }
+        busy = true
+        defer { busy = false }
+        revision += 1
+        var revoked = false
+        if let session = try? await verifiedSession(), let origin = SBTAccountConnection.configuredOrigin {
+            var request = URLRequest(url: origin.appendingPathComponent("logout"))
+            request.httpMethod = "POST"; request.httpBody = Data("{}".utf8); request.timeoutInterval = 15
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer " + session.bearer, forHTTPHeaderField: "Authorization")
+            let transport = URLSession(configuration: .ephemeral, delegate: SBTNoRedirect(), delegateQueue: nil)
+            defer { transport.invalidateAndCancel() }
+            if let (_, response) = try? await transport.data(for: request) { revoked = (response as? HTTPURLResponse)?.statusCode == 200 }
+        }
+        do {
+            try await client.auth.signOut(scope: .global)
+            message = revoked ? "Sandbox session signed out and revoked." : "Signed out locally. Sandbox revocation could not be confirmed."
+        } catch { message = "Signed out locally. Remote logout could not be confirmed." }
+        revision += 1
+    }
+}
+#endif
+
+private final class SBTNoRedirect: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+    func urlSession(_ session: URLSession, task: URLSessionTask,
+                    willPerformHTTPRedirection response: HTTPURLResponse,
+                    newRequest request: URLRequest,
+                    completionHandler: @escaping (URLRequest?) -> Void) {
+        completionHandler(nil) // Never forward an account bearer token to a redirect.
+    }
+}
+
+@MainActor
+final class SBTAccountIntegration: ObservableObject {
+    @Published private(set) var snapshot: SBTAccountSnapshot?
+    @Published private(set) var message = ""
+    @Published private(set) var busy = false
+    private var revision = 0
+    private let origin: URL? = SBTAccountConnection.configuredOrigin
+    var isConfigured: Bool { origin != nil }
+
+    func clear() {
+        revision += 1
+        snapshot = nil
+        message = ""
+        busy = false
+    }
+
+    func refresh() async { await perform(path: "account", body: [:]) }
+    static func appleVerificationPayload(originalTransactionID: String) -> [String: String] {
+        ["original_transaction_id": originalTransactionID, "platform": "apple"]
+    }
+
+    func verifySubscription(originalTransactionID: String) async {
+        await perform(path: "subscriptions/verify", body: Self.appleVerificationPayload(originalTransactionID: originalTransactionID))
+    }
+    func optIn(email: String, consent: Bool) async {
+        guard consent else { return }
+        await perform(path: "marketing/opt-in", body: ["email": email, "consent": true,
+            "source": "ios_settings", "version": "sbt-marketing-v1-draft"])
+    }
+    func optOut() async { await perform(path: "marketing/opt-out", body: [:]) }
+
+    private func perform(path: String, body: [String: Any]) async {
+        guard !busy else { return }
+        guard let origin else {
+            message = "Account benefit recovery is not available yet. You can still restore purchases through Apple."
+            return
+        }
+        let requestRevision = revision
+        busy = true
+        defer { if revision == requestRevision { busy = false } }
+        #if DEBUG && canImport(Supabase)
+        do {
+            let sessionRevision = SBTSandboxSession.shared.revision
+            let session = try await SBTSandboxSession.shared.verifiedSession()
+            let owner = session.owner
+            guard requestRevision == revision else { throw URLError(.userAuthenticationRequired) }
+            var request = URLRequest(url: origin.appendingPathComponent(path))
+            request.httpMethod = "POST"
+            request.timeoutInterval = 15
+            request.setValue("Bearer " + session.bearer, forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            let config = URLSessionConfiguration.ephemeral
+            config.httpCookieStorage = nil
+            config.urlCache = nil
+            let transport = URLSession(configuration: config, delegate: SBTNoRedirect(), delegateQueue: nil)
+            defer { transport.invalidateAndCancel() }
+            let (data, response) = try await transport.data(for: request)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200, data.count <= 65536,
+                  revision == requestRevision,
+                  sessionRevision == SBTSandboxSession.shared.revision,
+                  owner == (try await SBTSandboxSession.shared.verifiedSession()).owner,
+                  revision == requestRevision else { throw URLError(.badServerResponse) }
+            let value = try JSONDecoder().decode(SBTAccountSnapshot.self, from: data)
+            guard value.validate(owner: owner) else { throw URLError(.cannotParseResponse) }
+            snapshot = value
+            message = "Sandbox account checked. Production benefits and email sending remain off."
+            if path == "marketing/opt-in" { AnalyticsService.shared.track(.marketingOptIn, source: "settings") }
+            if path == "marketing/opt-out" { AnalyticsService.shared.track(.marketingOptOut, source: "settings") }
+        } catch {
+            guard revision == requestRevision else { return }
+            snapshot = nil
+            message = "Could not verify account preferences. No new access was granted. Try again when connected."
+        }
+        #else
+        message = "Account service unavailable."
+        #endif
+    }
 }

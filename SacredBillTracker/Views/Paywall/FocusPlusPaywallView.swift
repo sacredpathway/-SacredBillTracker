@@ -44,7 +44,7 @@ struct FocusPlusPaywallView: View {
                                 .font(.largeTitle.bold())
                                 .foregroundStyle(.primary)
                         }
-                        Text("Unlock daily planning, focus quotes, to-do lists, and Schedule Buddy.")
+                        Text("Unlock daily planning, financial education, to-do lists, and Schedule Buddy.")
                             .font(.callout)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -238,7 +238,7 @@ struct FocusPlusPaywallView: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 14) {
                 Link("Privacy Policy",
-                     destination: URL(string: "https://www.sacredpathway.org/sacred-bill-tracker-privacy")!)
+                     destination: URL(string: "https://www.sacredpathwayllc.com/sacred-bill-tracker/privacy-policy")!)
                 Link("Terms of Use",
                      destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
             }
@@ -280,11 +280,11 @@ struct FocusPlusFeature: Identifiable, Hashable {
         .init(id: "center",
               icon: "target",
               title: "Daily Focus Center",
-              subtitle: "One screen for what matters today — bills, tasks, and a short focus quote."),
+              subtitle: "One screen for what matters today — bills, tasks, and a short money lesson."),
         .init(id: "quotes",
-              icon: "quote.bubble.fill",
-              title: "Short focus quotes",
-              subtitle: "Calm, motivational quotes to start each day with intention."),
+              icon: "book.fill",
+              title: "Short financial education",
+              subtitle: "Calm, financial education lessons for everyday money concepts."),
         .init(id: "todo",
               icon: "checklist",
               title: "To-do list",
@@ -303,7 +303,7 @@ struct FocusPlusFeature: Identifiable, Hashable {
               subtitle: "See your streaks and completed tasks at a glance."),
         .init(id: "favorites",
               icon: "star.fill",
-              title: "Saved favorite quotes",
+              title: "Saved financial lessons",
               subtitle: "Bookmark the lines that hit and revisit them anytime.")
     ]
 }

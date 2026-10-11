@@ -28,8 +28,8 @@ final class CloudBackedDefaults {
     private let defaults: UserDefaults
     private let cloud: NSUbiquitousKeyValueStore
 
-    private init(defaults: UserDefaults = .standard,
-                 cloud: NSUbiquitousKeyValueStore = .default) {
+    init(defaults: UserDefaults = .standard,
+         cloud: NSUbiquitousKeyValueStore = .default) {
         self.defaults = defaults
         self.cloud = cloud
         // Pull whatever the cloud already has on launch (covers reinstall).

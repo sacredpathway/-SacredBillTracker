@@ -891,7 +891,7 @@ struct BudgetDashboardView: View {
                     actionRow.padding(.horizontal)
 
                     if let err = store.errorText {
-                        Text(err).font(.footnote).foregroundStyle(.red).padding(.horizontal)
+                        Text(err).font(.footnote).foregroundStyle(Color.appDangerText).padding(.horizontal)
                     }
 
                     forecastSection.padding(.horizontal)
@@ -1015,7 +1015,7 @@ struct BudgetDashboardView: View {
             }
             .buttonStyle(.plain)
             .background(Color.appCard, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .foregroundStyle(Color.appAccent)
+            .foregroundStyle(Color.appAccentText)
             .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.appAccent.opacity(0.4), lineWidth: 1))
         }
     }
@@ -1059,7 +1059,7 @@ struct BudgetDashboardView: View {
                     Image(systemName: "calendar.badge.exclamationmark")
                     Text("\(money(store.overdueUnpaid)) in bills are past due.")
                     Spacer(minLength: 0)
-                }.font(.caption.weight(.medium)).foregroundStyle(.red)
+                }.font(.caption.weight(.medium)).foregroundStyle(Color.appDangerText)
             }
         }
         .padding(14)
@@ -1118,7 +1118,7 @@ struct BudgetDashboardView: View {
             Text("Top actions to improve").font(.caption.weight(.bold)).foregroundStyle(.secondary)
             ForEach(store.topActions()) { a in
                 HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: a.icon).foregroundStyle(Color.appAccent).frame(width: 20)
+                    Image(systemName: a.icon).foregroundStyle(Color.appAccentText).frame(width: 20)
                     Text(a.text).font(.caption)
                     Spacer(minLength: 0)
                 }
@@ -1186,7 +1186,7 @@ struct BudgetDashboardView: View {
                 sectionHeader("Goals", systemImage: "target")
                 Spacer()
                 if budgetPro {
-                    Button { addingGoal = true } label: { Image(systemName: "plus.circle.fill").foregroundStyle(Color.appAccent) }
+                    Button { addingGoal = true } label: { Image(systemName: "plus.circle.fill").foregroundStyle(Color.appAccentText) }
                 }
             }
             if !budgetPro {
@@ -1212,7 +1212,7 @@ struct BudgetDashboardView: View {
             ZStack {
                 ProgressRing(fraction: g.progress, tint: g.isComplete ? .appAccent : .appAmber, lineWidth: 6)
                     .frame(width: 50, height: 50)
-                Image(systemName: g.goalKind.systemImage).font(.subheadline).foregroundStyle(Color.appAccent)
+                Image(systemName: g.goalKind.systemImage).font(.subheadline).foregroundStyle(Color.appAccentText)
             }
             VStack(alignment: .leading, spacing: 3) {
                 Text(g.title).font(.subheadline.weight(.semibold))
@@ -1236,7 +1236,7 @@ struct BudgetDashboardView: View {
             sectionHeader("Categories", systemImage: "square.grid.2x2.fill")
             if store.visibleRows.isEmpty {
                 VStack(spacing: 12) {
-                    Image(systemName: "chart.bar.fill").font(.largeTitle).foregroundStyle(Color.appAccent)
+                    Image(systemName: "chart.bar.fill").font(.largeTitle).foregroundStyle(Color.appAccentText)
                     Text("No budgets yet").font(.headline)
                     Text("Let us build a budget from your last 90 days of spending — review it before saving.")
                         .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
@@ -1449,7 +1449,7 @@ struct BudgetSuggestionsSheet: View {
                 if loading { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
                 else if rows.isEmpty {
                     VStack(spacing: 10) {
-                        Image(systemName: "wand.and.stars").font(.largeTitle).foregroundStyle(Color.appAccent)
+                        Image(systemName: "wand.and.stars").font(.largeTitle).foregroundStyle(Color.appAccentText)
                         Text("Not enough history yet").font(.headline)
                         Text("Once you have a month of spending, we'll suggest budgets from your averages.")
                             .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
@@ -1459,7 +1459,7 @@ struct BudgetSuggestionsSheet: View {
                         Section {
                             ForEach(rows) { r in
                                 HStack(spacing: 12) {
-                                    Image(systemName: r.key.systemImage).foregroundStyle(Color.appAccent)
+                                    Image(systemName: r.key.systemImage).foregroundStyle(Color.appAccentText)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(r.key.title).font(.subheadline.weight(.semibold))
                                         Text("You spent \(currency.string(from: NSNumber(value: r.basis)) ?? "$0") last month")
@@ -1467,7 +1467,7 @@ struct BudgetSuggestionsSheet: View {
                                     }
                                     Spacer()
                                     Text(currency.string(from: NSNumber(value: r.suggested)) ?? "$0")
-                                        .font(.subheadline.weight(.bold)).foregroundStyle(Color.appAccent)
+                                        .font(.subheadline.weight(.bold)).foregroundStyle(Color.appAccentText)
                                 }
                             }
                         } header: { Text("Suggested \(store.scope.editableScope.title) budgets") }
@@ -1521,7 +1521,7 @@ struct AutoBudgetSheet: View {
                     ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if rows.isEmpty {
                     VStack(spacing: 10) {
-                        Image(systemName: "wand.and.stars").font(.largeTitle).foregroundStyle(Color.appAccent)
+                        Image(systemName: "wand.and.stars").font(.largeTitle).foregroundStyle(Color.appAccentText)
                         Text("Not enough history yet").font(.headline)
                         Text("Once you have spending history, we'll build a budget from your 90-day averages.")
                             .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
@@ -1531,7 +1531,7 @@ struct AutoBudgetSheet: View {
                         Section {
                             ForEach(rows) { r in
                                 HStack(spacing: 12) {
-                                    Image(systemName: r.key.systemImage).foregroundStyle(Color.appAccent)
+                                    Image(systemName: r.key.systemImage).foregroundStyle(Color.appAccentText)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(r.key.title).font(.subheadline.weight(.semibold))
                                         Text("~\(currency.string(from: NSNumber(value: r.basis)) ?? "$0")/mo over 90 days")
@@ -1542,7 +1542,7 @@ struct AutoBudgetSheet: View {
                                         Text("kept").font(.caption2).foregroundStyle(.secondary)
                                     }
                                     Text(currency.string(from: NSNumber(value: r.suggested)) ?? "$0")
-                                        .font(.subheadline.weight(.bold)).foregroundStyle(Color.appAccent)
+                                        .font(.subheadline.weight(.bold)).foregroundStyle(Color.appAccentText)
                                 }
                             }
                         } header: { Text("Recommended \(store.scope.editableScope.title) budget") }

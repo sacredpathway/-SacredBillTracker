@@ -25,7 +25,7 @@ struct DailyFocusCenterView: View {
     @EnvironmentObject private var todoStore: TodoStore
     @StateObject private var quotes = QuoteService.shared
 
-    @AppStorage("sbt.focusplus.favorites.v1") private var favoritesCSV: String = ""
+    // Legacy quote favorites remain in their original key; lessons use versioned IDs.
 
     // Sheets
     @State private var newSchedule = false
@@ -40,11 +40,11 @@ struct DailyFocusCenterView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                quoteCard
+                FinancialEducationView()
                 scheduleSection
                 todoSection
                 scheduleBuddyCard
-                if !favoriteQuotes.isEmpty { favoritesCard }
+
                 Text("Schedule Buddy provides general suggestions only and is not professional financial advice.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -84,44 +84,6 @@ struct DailyFocusCenterView: View {
                     .environmentObject(todoStore)
             }
         }
-    }
-
-    // MARK: - Quote
-
-    private var quoteCard: some View {
-        let q = quotes.quote
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Label("Today's Focus", systemImage: "quote.opening")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Color.appAccentText)
-                Spacer()
-                Button {
-                    toggleFavoriteLine(q.text)
-                } label: {
-                    Image(systemName: isFavorite(q.text) ? "star.fill" : "star")
-                        .font(.subheadline)
-                        .foregroundStyle(Color.appAccentText)
-                }
-                .buttonStyle(.plain)
-            }
-            Text(q.text)
-                .font(.body.weight(.semibold))
-                .fixedSize(horizontal: false, vertical: true)
-            if !q.author.trimmingCharacters(in: .whitespaces).isEmpty {
-                Text("— \(q.author)").font(.caption).foregroundStyle(.secondary)
-            }
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.appAccent.opacity(0.22))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.appAccent.opacity(0.45), lineWidth: 1.5)
-        )
     }
 
     // MARK: - Schedule section (today only)
@@ -312,52 +274,6 @@ struct DailyFocusCenterView: View {
             out.append("No urgent bills today — consider logging any income earned this week.")
         }
         return out
-    }
-
-    // MARK: - Favorites
-
-    private var favoritesCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label("Saved Favorites", systemImage: "star.fill")
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(Color.appAccentText)
-            ForEach(favoriteQuotes, id: \.self) { line in
-                HStack(alignment: .top, spacing: 8) {
-                    Text("“\(line)”")
-                        .font(.footnote)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer()
-                    Button {
-                        toggleFavoriteLine(line)
-                    } label: {
-                        Image(systemName: "star.slash")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.vertical, 4)
-                Divider()
-            }
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.appCard, in: RoundedRectangle(cornerRadius: 16))
-    }
-
-    private var favoriteQuotes: [String] {
-        favoritesCSV.components(separatedBy: "\n")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
-    }
-
-    private func isFavorite(_ line: String) -> Bool { favoriteQuotes.contains(line) }
-
-    private func toggleFavoriteLine(_ line: String) {
-        var lines = favoriteQuotes
-        if let i = lines.firstIndex(of: line) { lines.remove(at: i) }
-        else { lines.insert(line, at: 0) }
-        favoritesCSV = lines.joined(separator: "\n")
     }
 
     // MARK: - Section header

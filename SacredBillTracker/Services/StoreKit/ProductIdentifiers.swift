@@ -11,6 +11,22 @@
 
 import Foundation
 
+enum ReceiptJarReleaseGate {
+    #if DEBUG || SBT_STAGING_ACCEPTANCE || SBT_RECEIPT_JAR_PRODUCTION_ENABLED
+    static let isEnabled = true
+    #else
+    static let isEnabled = false
+    #endif
+
+    static func filterStoreKitProducts(_ productIDs: [String], enabled: Bool = isEnabled) -> [String] {
+        enabled ? productIDs : productIDs.filter { $0 != ProductID.receiptJarLifetime }
+    }
+
+    static func allowsEntitlement(productID: String, enabled: Bool = isEnabled) -> Bool {
+        productID != ProductID.receiptJarLifetime || enabled
+    }
+}
+
 enum ProductID {
     /// Sacred Bill Tracker Pro — billed monthly. Auto-renewing.
     static let proMonthly = "com.sacredbilltracker.app.pro.monthly"
@@ -41,6 +57,11 @@ enum ProductID {
     /// AutoTrack product IDs (for entitlement checks).
     static let autoTrack: Set<String> = [autoTrackMonthly, autoTrackYearly]
 
+    /// Receipt Jar — one-time non-consumable purchase. Target App Store
+    /// Connect price: $49.99. This must be created and approved separately
+    /// from the existing subscription groups before the next release.
+    static let receiptJarLifetime = "com.sacredbilltracker.app.receiptjar.lifetime"
+
     // MARK: - 3-Tier Plans (Essential / Business / Unlimited)
     //
     // One subscription group ("Sacred Bill Tracker Plans") so StoreKit
@@ -60,10 +81,17 @@ enum ProductID {
     /// Configuration.storekit uses its own id "30010001" for simulator tests).
     static let plansGroupID = "22184614"
 
-    /// All product IDs to request from StoreKit on launch.
-    static let all: [String] = [proMonthly, proYearly, focusPlusMonthly,
-                                autoTrackMonthly, autoTrackYearly,
-                                essentialMonthly, businessMonthly, unlimitedMonthly]
+    /// All product IDs that may be compiled into product-aware code.
+    static let allKnown: [String] = [proMonthly, proYearly, focusPlusMonthly,
+                                     autoTrackMonthly, autoTrackYearly,
+                                     essentialMonthly, businessMonthly, unlimitedMonthly,
+                                     receiptJarLifetime]
+
+    /// Product IDs to request from StoreKit in this binary. Receipt Jar is
+    /// compile-time disabled in production until its backend contract is live.
+    static var all: [String] {
+        ReceiptJarReleaseGate.filterStoreKitProducts(allKnown)
+    }
 
     /// The subscription group all Pro tiers belong to. Configured in
     /// App Store Connect; StoreKit uses this for upgrade / downgrade paths.

@@ -66,9 +66,9 @@ enum PlanTier: String, Codable, CaseIterable, Comparable, Identifiable {
     var priceDisplay: String {
         switch self {
         case .free:      return "Free"
-        case .essential: return "$4.99/mo"
-        case .business:  return "$9.99/mo"
-        case .unlimited: return "$14.99/mo"
+        case .essential: return "Price available from Apple"
+        case .business:  return "Price available from Apple"
+        case .unlimited: return "Price available from Apple"
         }
     }
 

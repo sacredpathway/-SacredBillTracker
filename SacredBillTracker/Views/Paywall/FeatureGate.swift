@@ -20,7 +20,7 @@ struct UpgradePromptCard: View {
         VStack(spacing: 12) {
             Image(systemName: iconName)
                 .font(.system(size: 30))
-                .foregroundStyle(Color.appAccent)
+                .foregroundStyle(Color.appAccentText)
             Text(feature.upsellTitle)
                 .font(.headline)
                 .multilineTextAlignment(.center)
@@ -112,7 +112,7 @@ struct InlineUpsellBanner: View {
                 showPaywall = true
             } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: "sparkles").foregroundStyle(Color.appAccent)
+                    Image(systemName: "sparkles").foregroundStyle(Color.appAccentText)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(feature.upsellTitle).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                         Text("Upgrade to \(feature.requiredTier.displayName)")

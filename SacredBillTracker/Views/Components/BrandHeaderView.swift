@@ -27,7 +27,7 @@ struct BrandHeaderView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font((compact ? Font.headline : Font.title3).bold())
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                 Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.72))

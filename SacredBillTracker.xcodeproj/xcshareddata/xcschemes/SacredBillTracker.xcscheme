@@ -28,6 +28,26 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "TSTTGT01TSTTGT01TSTTGT01"
+               BuildableName = "SacredBillTrackerTests.xctest"
+               BlueprintName = "SacredBillTrackerTests"
+               ReferencedContainer = "container:SacredBillTracker.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "535CBBF56D389B3EC598BF5C"
+               BuildableName = "SacredBillTrackerUITests.xctest"
+               BlueprintName = "SacredBillTrackerUITests"
+               ReferencedContainer = "container:SacredBillTracker.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -50,9 +70,6 @@
             ReferencedContainer = "container:SacredBillTracker.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <StoreKitConfigurationFileReference
-         identifier = "../../SacredBillTracker/Configuration.storekit">
-      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

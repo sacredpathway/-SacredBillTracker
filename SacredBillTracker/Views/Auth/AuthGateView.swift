@@ -72,7 +72,7 @@ struct AuthGateView: View {
                         } label: {
                             Text("Sign In")
                                 .font(.body.weight(.semibold))
-                                .foregroundStyle(Color.appAccent)
+                                .foregroundStyle(Color.appAccentText)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
                                 .background(
@@ -115,7 +115,7 @@ struct AuthGateView: View {
                         if let error = auth.lastError {
                             Text(error)
                                 .font(.footnote)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.appDangerText)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 32)
                                 .padding(.top, 4)

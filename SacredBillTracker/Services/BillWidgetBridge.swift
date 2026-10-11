@@ -67,10 +67,7 @@ enum BillWidgetBridge {
             return d >= today && d <= endOfWeek
         }.count
 
-        let monthlyTotalDecimal = live
-            .filter { $0.isDueThisMonth }
-            .reduce(Decimal(0)) { $0 + $1.amount }
-        let monthlyTotal = (monthlyTotalDecimal as NSDecimalNumber).doubleValue
+        let monthlyTotal = (BillTotalsCalculator.monthlyTotals(from: live).totalBills as NSDecimalNumber).doubleValue
 
         return WidgetBillSnapshot(
             generatedAt: now,
@@ -106,17 +103,20 @@ enum IncomeWidgetBridge {
         let month = cal.dateInterval(of: .month, for: today)
         let week = cal.dateInterval(of: .weekOfYear, for: today)
 
+        // Bucket by `incomeDate` (== weekEnd) so a legacy week that straddles
+        // a month boundary lands in exactly one month — matching IncomeStore.
+        // `entryDate` remains the *display* date on the widget rows below.
         let monthlyIncome = entries
             .filter { entry in
                 guard let month else { return false }
-                return month.contains(entry.entryDate)
+                return month.contains(entry.incomeDate)
             }
             .reduce(Decimal(0)) { $0 + $1.amount }
 
         let weeklyIncome = entries
             .filter { entry in
                 guard let week else { return false }
-                return week.contains(entry.entryDate)
+                return week.contains(entry.incomeDate)
             }
             .reduce(Decimal(0)) { $0 + $1.amount }
 

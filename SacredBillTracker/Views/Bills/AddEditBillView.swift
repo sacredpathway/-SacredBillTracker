@@ -170,7 +170,7 @@ struct AddEditBillView: View {
                     Toggle(isOn: $isShared) {
                         HStack(spacing: 12) {
                             Image(systemName: "person.2.fill")
-                                .foregroundStyle(Color.appHousehold)
+                                .foregroundStyle(Color.appHouseholdText)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Share with partner")
                                 Text("Visible in the Shared Bills tab")

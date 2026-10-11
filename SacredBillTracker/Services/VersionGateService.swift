@@ -54,8 +54,14 @@ final class VersionGateService: ObservableObject {
 
     /// Anon key (publishable) — same one used elsewhere. Read-only RLS
     /// on `app_version_config` lets unauthenticated reads work.
+    #if SBT_STAGING_ACCEPTANCE || SBT_ISOLATED_VALIDATION
+    private let supabaseURL = SupabaseConfig.url
+    private let anonKey = SupabaseConfig.anonKey
+    #else
     private let supabaseURL = URL(string: "https://zziauybwemoiqfpidiur.supabase.co")!
     private let anonKey = "sb_publishable_PhYldjkyyE4DhJQJVjeM4Q_u02pyXVH"
+
+    #endif
 
     private let cacheDefaultsKey = "sbt.versionGate.cachedConfig.v1"
 
@@ -157,7 +163,7 @@ final class VersionGateService: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.timeoutInterval = 10
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await SupabaseConfig.networkSession.data(for: request)
 
         guard let http = response as? HTTPURLResponse,
               (200...299).contains(http.statusCode) else {

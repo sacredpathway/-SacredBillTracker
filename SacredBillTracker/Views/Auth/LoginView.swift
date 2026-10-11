@@ -69,7 +69,7 @@ struct LoginView: View {
                             } label: {
                                 Text("Forgot password?")
                                     .font(.caption.weight(.semibold))
-                                    .foregroundStyle(Color.appAccent)
+                                    .foregroundStyle(Color.appAccentText)
                             }
                             .buttonStyle(.plain)
                         }
@@ -86,7 +86,7 @@ struct LoginView: View {
                     if let err = displayedError {
                         Text(err)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.appDangerText)
                     }
 
                     Button {
@@ -120,7 +120,7 @@ struct LoginView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
             }
         }
         .toolbarBackground(Color.appSacredBlack, for: .navigationBar)

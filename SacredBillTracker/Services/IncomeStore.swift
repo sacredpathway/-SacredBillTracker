@@ -62,11 +62,24 @@ final class IncomeStore: ObservableObject {
         }
     }
 
+    /// Profile-scoped, owner-scoped income.
+    ///
+    /// This used to bail out with `[]` whenever `profileContext.ownerID` was
+    /// nil — which is also true for the whole cold-launch window while
+    /// `AuthService.bootstrap()` awaits the Supabase session. Every monthly
+    /// total therefore rendered $0 for a beat on every launch.
+    ///
+    /// Ownership is now decided by `ManagedProfileContext.canRead`, which
+    /// distinguishes "not resolved yet" from "signed out". Strict filtering
+    /// after auth resolves is unchanged.
     var profileEntries: [WeeklyIncome] {
-        guard profileContext.ownerID != nil else { return [] }
+        let lastKnownOwnerID = SessionOwnerCache.lastKnownOwnerID
         return entries.filter {
-            profileContext.owns(ownerID: $0.ownerUserID)
-            && profileContext.includes(profileID: $0.profileID)
+            profileContext.canReadIncome(
+                rowOwnerID: $0.ownerUserID,
+                rowProfileID: $0.profileID,
+                lastKnownOwnerID: lastKnownOwnerID
+            )
         }
     }
 
@@ -280,27 +293,27 @@ final class IncomeStore: ObservableObject {
 
     // MARK: - Totals
 
-    /// Sum of entries whose week-start falls inside the user's current
+    /// Sum of entries whose income date falls inside the user's current
     /// Mon→Sun week. (Matches `WeeklyIncome.currentWeekBounds`.)
     var thisWeekTotal: Decimal {
         let (start, end) = WeeklyIncome.currentWeekBounds()
         return profileEntries
-            .filter { $0.weekStart >= start && $0.weekStart <= end }
+            .filter { $0.incomeDate >= start && $0.incomeDate <= end }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
 
-    /// Sum of entries whose week-start is within the last 30 days
+    /// Sum of entries whose income date is within the last 30 days
     /// (inclusive of today).
     var last30DaysTotal: Decimal {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         guard let start = cal.date(byAdding: .day, value: -30, to: today) else { return 0 }
         return profileEntries
-            .filter { $0.weekStart >= start }
+            .filter { $0.incomeDate >= start }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
 
-    /// Sum of entries whose week-start falls inside the calendar month
+    /// Sum of entries whose income date falls inside the calendar month
     /// containing "now". Used by the v1.7 Share Bill Summary so the
     /// shared text can show a true "This Month" income figure.
     var thisMonthTotal: Decimal {
@@ -308,8 +321,8 @@ final class IncomeStore: ObservableObject {
         let now = Date()
         return profileEntries
             .filter {
-                cal.component(.month, from: $0.weekStart) == cal.component(.month, from: now)
-                && cal.component(.year,  from: $0.weekStart) == cal.component(.year,  from: now)
+                cal.component(.month, from: $0.incomeDate) == cal.component(.month, from: now)
+                && cal.component(.year,  from: $0.incomeDate) == cal.component(.year,  from: now)
             }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
@@ -318,12 +331,12 @@ final class IncomeStore: ObservableObject {
         profileEntries.reduce(Decimal(0)) { $0 + $1.amount }
     }
 
-    /// All entries that fall (by `weekStart`) inside the given closed range.
+    /// All entries whose income date falls inside the given closed range.
     func entries(in range: ClosedRange<Date>) -> [WeeklyIncome] {
-        profileEntries.filter { range.contains($0.weekStart) }
+        profileEntries.filter { range.contains($0.incomeDate) }
     }
 
-    /// Sum entries whose `weekStart` is in `range`.
+    /// Sum entries whose income date is in `range`.
     func total(in range: ClosedRange<Date>) -> Decimal {
         entries(in: range).reduce(Decimal(0)) { $0 + $1.amount }
     }
@@ -333,8 +346,8 @@ final class IncomeStore: ObservableObject {
     func monthlyBreakdown() -> [(month: Date, total: Decimal)] {
         let cal = Calendar.current
         let grouped = Dictionary(grouping: profileEntries) { entry -> Date in
-            let comps = cal.dateComponents([.year, .month], from: entry.weekStart)
-            return cal.date(from: comps) ?? entry.weekStart
+            let comps = cal.dateComponents([.year, .month], from: entry.incomeDate)
+            return cal.date(from: comps) ?? entry.incomeDate
         }
         return grouped
             .map { (month: $0.key, total: $0.value.reduce(Decimal(0)) { $0 + $1.amount }) }
@@ -344,10 +357,10 @@ final class IncomeStore: ObservableObject {
     /// Monthly breakdown restricted to a date range.
     func monthlyBreakdown(in range: ClosedRange<Date>) -> [(month: Date, total: Decimal)] {
         let cal = Calendar.current
-        let scoped = profileEntries.filter { range.contains($0.weekStart) }
+        let scoped = profileEntries.filter { range.contains($0.incomeDate) }
         let grouped = Dictionary(grouping: scoped) { entry -> Date in
-            let comps = cal.dateComponents([.year, .month], from: entry.weekStart)
-            return cal.date(from: comps) ?? entry.weekStart
+            let comps = cal.dateComponents([.year, .month], from: entry.incomeDate)
+            return cal.date(from: comps) ?? entry.incomeDate
         }
         return grouped
             .map { (month: $0.key, total: $0.value.reduce(Decimal(0)) { $0 + $1.amount }) }
@@ -359,7 +372,7 @@ final class IncomeStore: ObservableObject {
     /// Sum entries of a given type inside a closed range.
     func total(in range: ClosedRange<Date>, type: IncomeType) -> Decimal {
         profileEntries
-            .filter { range.contains($0.weekStart) && $0.type == type }
+            .filter { range.contains($0.incomeDate) && $0.type == type }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
 
@@ -396,7 +409,7 @@ final class IncomeStore: ObservableObject {
     /// Total within a date range for a tab. `nil` = All.
     func total(in range: ClosedRange<Date>, usage: AccountUsageType?) -> Decimal {
         entries(usage: usage)
-            .filter { range.contains($0.weekStart) }
+            .filter { range.contains($0.incomeDate) }
             .reduce(Decimal(0)) { $0 + $1.amount }
     }
 

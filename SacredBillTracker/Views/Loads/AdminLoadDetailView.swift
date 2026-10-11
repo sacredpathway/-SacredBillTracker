@@ -158,7 +158,7 @@ struct AdminLoadDetailView: View {
                             }
                         }
                         .listRowBackground(Color.red.opacity(0.15))
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.appDangerText)
                     }
                 }
             }

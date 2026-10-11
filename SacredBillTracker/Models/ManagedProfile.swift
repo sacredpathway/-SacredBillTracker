@@ -149,10 +149,29 @@ enum ManagedProfileSelection: Equatable, Hashable {
     }
 }
 
+/// Whether we actually know who the account owner is yet.
+///
+/// `currentUserID == nil` is ambiguous on its own — it means both "the
+/// Supabase session hasn't come back yet" and "nobody is signed in". Income
+/// ownership has to tell those apart, so the context carries the answer.
+enum ManagedProfileOwnerState: Equatable {
+    /// `AuthService.bootstrap()` has not finished. Owner unknown.
+    case unresolved
+    /// Auth resolved, and there is no signed-in user.
+    case signedOut
+    /// Auth resolved to this owner.
+    case signedIn(UUID)
+}
+
 struct ManagedProfileContext: Equatable {
     var ownerID: UUID?
     var selection: ManagedProfileSelection
     var defaultProfileID: UUID?
+
+    /// `false` only during the cold-launch session-restore window.
+    /// Defaults to `true` so every existing construction site keeps its
+    /// current (strict) behavior unchanged.
+    var isOwnerResolved: Bool = true
 
     var selectedProfileID: UUID? { selection.selectedProfileID }
 
@@ -160,9 +179,36 @@ struct ManagedProfileContext: Equatable {
         selectedProfileID ?? defaultProfileID
     }
 
+    var ownerState: ManagedProfileOwnerState {
+        guard isOwnerResolved else { return .unresolved }
+        guard let ownerID else { return .signedOut }
+        return .signedIn(ownerID)
+    }
+
     func owns(ownerID rowOwnerID: UUID?) -> Bool {
         guard let ownerID else { return false }
         return rowOwnerID == ownerID || rowOwnerID == nil
+    }
+
+    /// Read permission for an owner-stamped row, aware of the restore window.
+    ///
+    /// - `.unresolved`: allow unowned legacy/local rows, plus rows belonging to
+    ///   `lastKnownOwnerID` (whoever was signed in when the app last ran). This
+    ///   is what stops monthly income reading $0 on cold launch.
+    /// - `.signedOut`: allow **only** unowned rows. `signOut()` clears
+    ///   `lastKnownOwnerID`, so the previous user's rows stay hidden.
+    /// - `.signedIn`: unchanged strict rule. Never made more permissive.
+    func canRead(rowOwnerID: UUID?, lastKnownOwnerID: UUID?) -> Bool {
+        switch ownerState {
+        case .unresolved:
+            if rowOwnerID == nil { return true }
+            guard let lastKnownOwnerID else { return false }
+            return rowOwnerID == lastKnownOwnerID
+        case .signedOut:
+            return rowOwnerID == nil
+        case .signedIn:
+            return owns(ownerID: rowOwnerID)
+        }
     }
 
     func includes(profileID: UUID?) -> Bool {
@@ -173,5 +219,30 @@ struct ManagedProfileContext: Equatable {
             if profileID == selectedID { return true }
             return profileID == nil && defaultProfileID == selectedID
         }
+    }
+
+    /// Full income-row visibility: ownership **and** profile partition,
+    /// aware of the cold-launch restore window.
+    ///
+    /// The profile check has to be skipped while `.unresolved`. Before auth
+    /// resolves, `ManagedProfileStore` holds only the device-local default
+    /// profile, so `normalizedSelection()` collapses to `.profile(localID)`.
+    /// An income row saved during a previous signed-in session carries a
+    /// *server* profile ID, which is neither `localID` nor `nil` — so
+    /// `includes(profileID:)` would reject it and monthly income would read
+    /// $0 anyway, even with the ownership fix in place.
+    ///
+    /// Ownership is still enforced in every state. This only relaxes the
+    /// partition, never the owner.
+    func canReadIncome(
+        rowOwnerID: UUID?,
+        rowProfileID: UUID?,
+        lastKnownOwnerID: UUID?
+    ) -> Bool {
+        guard canRead(rowOwnerID: rowOwnerID, lastKnownOwnerID: lastKnownOwnerID) else {
+            return false
+        }
+        if case .unresolved = ownerState { return true }
+        return includes(profileID: rowProfileID)
     }
 }

@@ -1,3 +1,4 @@
+import StoreKit
 //
 //  SettingsView.swift
 //  SacredBillTracker
@@ -14,6 +15,7 @@ struct SettingsView: View {
     @EnvironmentObject private var auth: AuthService
     @EnvironmentObject private var subs: SubscriptionManager
 
+    @State private var showPurchasePreferences = false
     #if DEBUG
     @State private var showResetConfirm = false
     #endif
@@ -23,6 +25,7 @@ struct SettingsView: View {
     @State private var showPaywall = false
     @State private var paywallReason: String?
     @State private var showAutoTrackPaywall = false
+    @State private var showBillPDFPreview = false
 
     // Income-tracking preferences (v1.2.2). Persist via AppStorage so
     // every income-aware view (Dashboard, AddEditIncomeView,
@@ -45,24 +48,27 @@ struct SettingsView: View {
                         Text(authStatusText)
                             .foregroundStyle(authStatusColor)
                     }
-                    if notifications.authorizationStatus != .authorized {
+                    if notifications.authorizationStatus == .notDetermined {
                         Button {
                             Task { _ = await notifications.requestAuthorization() }
                         } label: {
                             Label("Enable Notifications", systemImage: "bell")
                         }
+                    } else if notifications.authorizationStatus == .denied {
+                        Text("Notifications are off. You can enable them in iOS Settings when you’re ready.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .accessibilityLabel("Notifications are disabled in iOS Settings")
                     }
-                    Stepper(value: Binding(
+                    Picker("Bill reminder", selection: Binding(
                         get: { notifications.leadTimeDays },
                         set: { notifications.leadTimeDays = $0
                                Task { await notifications.rescheduleAll(for: store.allStoredBills) } }
-                    ), in: 0...14) {
-                        HStack {
-                            Text("Remind")
-                            Spacer()
-                            Text("\(notifications.leadTimeDays) day\(notifications.leadTimeDays == 1 ? "" : "s") before")
-                                .foregroundStyle(.secondary)
-                        }
+                    )) {
+                        Text("On the due date").tag(0)
+                        Text("1 day before").tag(1)
+                        Text("3 days before").tag(3)
+                        Text("7 days before").tag(7)
                     }
                 }
 
@@ -70,7 +76,7 @@ struct SettingsView: View {
                     if subs.effectiveTier > .free {
                         HStack {
                             Label("Current plan", systemImage: "checkmark.seal.fill")
-                                .foregroundStyle(Color.appAccent)
+                                .foregroundStyle(Color.appAccentText)
                             Spacer()
                             Text(subs.effectiveTier.displayName)
                                 .foregroundStyle(.secondary)
@@ -113,7 +119,7 @@ struct SettingsView: View {
                 } header: {
                     HStack {
                         Image(systemName: "sparkle")
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                         Text("Subscription")
                     }
                 } footer: {
@@ -130,7 +136,7 @@ struct SettingsView: View {
                     if subs.hasAutoTrack {
                         HStack {
                             Label("AutoTrack Premium", systemImage: "building.columns.fill")
-                                .foregroundStyle(Color.appAccent)
+                                .foregroundStyle(Color.appAccentText)
                             Spacer()
                             Text("Active").foregroundStyle(.secondary)
                         }
@@ -167,12 +173,39 @@ struct SettingsView: View {
                 } header: {
                     HStack {
                         Image(systemName: "building.columns")
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                         Text("AutoTrack Premium")
                     }
                 } footer: {
                     Text("Premium financial automation. Secure connection powered by Plaid; you stay in control before any suggested bill is confirmed.")
                         .font(.footnote)
+                }
+
+                if ReceiptJarReleaseGate.isEnabled {
+                    Section {
+                        NavigationLink {
+                            ReceiptJarView()
+                                .environmentObject(subs)
+                                .environmentObject(store)
+                        } label: {
+                            HStack {
+                                Label("Receipt Jar", systemImage: "shippingbox.fill")
+                                Spacer()
+                                Text(subs.hasReceiptJar ? "Unlocked" : "$49.99")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(subs.hasReceiptJar ? Color.appAccent : .secondary)
+                            }
+                        }
+                    } header: {
+                        HStack {
+                            Image(systemName: "receipt.fill")
+                                .foregroundStyle(Color.appAccentText)
+                            Text("Receipts")
+                        }
+                    } footer: {
+                        Text("One-time premium add-on for receipt photos, PDFs, manual entries, OCR review, search, bill links, and approved email receipt discovery.")
+                            .font(.footnote)
+                    }
                 }
 
                 Section {
@@ -211,7 +244,7 @@ struct SettingsView: View {
                 } header: {
                     HStack {
                         Image(systemName: "person.3.sequence.fill")
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                         Text("Profiles")
                     }
                 } footer: {
@@ -247,7 +280,7 @@ struct SettingsView: View {
                 } header: {
                     HStack {
                         Image(systemName: "person.2.circle.fill")
-                            .foregroundStyle(Color.appHousehold)
+                            .foregroundStyle(Color.appHouseholdText)
                         Text("Partner")
                     }
                 } footer: {
@@ -282,7 +315,7 @@ struct SettingsView: View {
                 } header: {
                     HStack {
                         Image(systemName: "chart.line.uptrend.xyaxis")
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                         Text("Financial")
                     }
                 } footer: {
@@ -312,7 +345,7 @@ struct SettingsView: View {
                 } header: {
                     HStack {
                         Image(systemName: "calendar.badge.clock")
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                         Text("Income Tracking")
                     }
                 } footer: {
@@ -327,19 +360,7 @@ struct SettingsView: View {
                     // picks the destination in the share sheet.
                     // v1.7 — Now includes an Income Summary section
                     // sourced from `IncomeStore` aggregates.
-                    ShareLink(
-                        item: BillShareService.makeSummary(
-                            bills: store.bills,
-                            income: BillShareService.IncomeAggregates(
-                                thisWeek:   incomeStore.thisWeekTotal,
-                                last30Days: incomeStore.last30DaysTotal,
-                                thisMonth:  incomeStore.thisMonthTotal,
-                                allTime:    incomeStore.allTimeTotal
-                            )
-                        ),
-                        subject: Text("Sacred Bill Tracker Summary"),
-                        message: Text("My current bill summary")
-                    ) {
+                    Button { showBillPDFPreview = true } label: {
                         Label("Share Bill Summary", systemImage: "square.and.arrow.up")
                     }
                     .disabled(store.bills.filter { $0.deletedAt == nil }.isEmpty)
@@ -419,7 +440,7 @@ struct SettingsView: View {
                 } header: {
                     HStack {
                         Image(systemName: "person.crop.circle")
-                            .foregroundStyle(Color.appHousehold)
+                            .foregroundStyle(Color.appHouseholdText)
                         Text("Account")
                     }
                 }
@@ -441,7 +462,7 @@ struct SettingsView: View {
                 } header: {
                     HStack {
                         Image(systemName: "paintbrush.fill")
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                         Text("Appearance")
                     }
                 } footer: {
@@ -450,6 +471,8 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    HelpCenterSettingsLink()
+
                     NavigationLink {
                         EarnRewardsView()
                     } label: {
@@ -457,10 +480,34 @@ struct SettingsView: View {
                             .foregroundStyle(Color.appAccentText)
                     }
                 } header: {
-                    Text("Referrals")
+                    Text("Help and referrals")
                 } footer: {
-                    Text("Give $5, get $5 when friends subscribe with your code.")
+                    Text("Learn every major feature, then share Sacred Bill Tracker with people who need it.")
                 }
+
+                Section("Subscription and privacy") {
+                    Button("Purchases, offers and recovery") { showPurchasePreferences = true }
+                        .sheet(isPresented: $showPurchasePreferences) {
+                            NavigationStack {
+                                SBTAccountPreferences()
+                                    .toolbar {
+                                        ToolbarItem(placement: .topBarTrailing) {
+                                            Button("Done") { showPurchasePreferences = false }
+                                        }
+                                    }
+                            }
+                        }
+                }
+
+                #if DEBUG
+                if ProcessInfo.processInfo.environment["SBT_STAGING_UI"] == "1" {
+                    Section("Development validation") {
+                        NavigationLink("Premium and email staging") {
+                            SBTStagingPreferences { await subs.openManageSubscriptions() }
+                        }
+                    }
+                }
+                #endif
 
                 Section("About") {
                     HStack {
@@ -481,7 +528,7 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    Link(destination: URL(string: "https://www.sacredpathway.org/sacred-bill-tracker-privacy")!) {
+                    Link(destination: URL(string: "https://www.sacredpathwayllc.com/sacred-bill-tracker/privacy-policy")!) {
                         HStack {
                             Label("Privacy Policy", systemImage: "hand.raised")
                             Spacer()
@@ -569,6 +616,9 @@ struct SettingsView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
             }
+            .sheet(isPresented: $showBillPDFPreview) {
+                BillPDFPreviewView(bills: store.bills)
+            }
             .alert(
                 "Couldn't delete your account",
                 isPresented: Binding(
@@ -647,4 +697,229 @@ struct SettingsView: View {
         .environmentObject(NotificationManager.shared)
         .environmentObject(AuthService.shared)
         .environmentObject(SubscriptionManager())
+}
+
+#if DEBUG
+/// Development-only surface. No entitlement override, price simulation, or email transport.
+private struct SBTStagingPreferences: View {
+    let manage: () async -> Void
+    @State private var endpoint = ""
+    @State private var token = ""
+    @State private var email = ""
+    @State private var consent = false
+    @State private var busy = false
+    @State private var message = ""
+    var body: some View {
+        Form {
+            Section {
+                Text("Staging validation").font(.title2.bold())
+                Text("No production emails, discounts, or Premium grants are enabled here.")
+                Button("Continue to Apple Subscription Management") {
+                    Task { await manage() }
+                }
+                .accessibilityHint("Opens Apple's subscription controls without completing this form")
+            }
+            Section("Local service connection") {
+                TextField("HTTPS development endpoint", text: $endpoint)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                SecureField("Local test account token", text: $token)
+                Text("Use a dedicated development account. Credentials are kept only in this screen's memory.")
+                    .font(.footnote)
+            }
+            Section("Premium retention") {
+                Text("Before you go…").font(.headline)
+                Text("We'd love to keep helping you stay ahead of your bills.")
+                Button("Check offer availability") {
+                    perform("retention", [:])
+                }.disabled(busy)
+                Text("A discount must be configured and verified by the store. Lifetime access requires verified server eligibility and approved terms. Neither is available from this test screen.")
+                    .font(.footnote)
+                Text("Lifetime Premium does not automatically cancel an existing App Store or Google Play subscription. Manage or cancel it through Apple to avoid renewal charges.")
+                    .font(.footnote)
+            }
+            Section("Email preferences") {
+                Text("Get helpful bill reminders & Sacred Bill Tracker updates").font(.headline)
+                Text("Receive budgeting tips, product updates, special offers, and occasional Sacred Bill Tracker news by email.")
+                TextField("Email address", text: $email)
+                    .keyboardType(.emailAddress).textInputAutocapitalization(.never).autocorrectionDisabled()
+                Toggle("Yes, send me Sacred Bill Tracker emails", isOn: $consent)
+                Button("Record test opt-in") {
+                    perform("marketing/opt-in", ["email": email.trimmingCharacters(in: .whitespacesAndNewlines),
+                        "consent": consent, "source": "ios_settings", "version": "sbt-marketing-v1-draft"])
+                }.disabled(busy || !consent || email.isEmpty)
+                Button("Opt out of marketing") { perform("marketing/opt-out", [:]) }
+                    .disabled(busy)
+                Text("Marketing is optional. Opting out does not remove Premium, delete your account, or disable app reminders.")
+                    .font(.footnote)
+                Link("Privacy Policy", destination: URL(string: "https://www.sacredpathwayllc.com/sacred-bill-tracker/privacy-policy")!)
+            }
+            if !message.isEmpty { Section { Text(message).accessibilityLabel(message) } }
+        }
+        .navigationTitle("Premium & email")
+    }
+    private func perform(_ path: String, _ body: [String: Any]) {
+        guard !busy, let url = URL(string: endpoint), url.scheme == "https",
+              url.host != nil, url.user == nil, url.password == nil,
+              url.query == nil, url.fragment == nil, !token.isEmpty else {
+            message = "Enter a dedicated HTTPS development service and test account token."
+            return
+        }
+        busy = true
+        Task { @MainActor in
+            defer { busy = false }
+            do {
+                var request = URLRequest(url: url.appendingPathComponent(path))
+                request.httpMethod = "POST"
+                request.timeoutInterval = 10
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                request.httpBody = try JSONSerialization.data(withJSONObject: body)
+                let config = URLSessionConfiguration.ephemeral
+                config.httpShouldSetCookies = false
+                config.urlCache = nil
+                let session = URLSession(configuration: config, delegate: SBTStagingRedirectGuard(), delegateQueue: nil)
+                defer { session.invalidateAndCancel() }
+                let (data,response) = try await session.data(for: request)
+                guard let response = response as? HTTPURLResponse, response.statusCode == 200,
+                      let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                    message = "Request was not accepted. Your subscription and reminders are unchanged."
+                    return
+                }
+                if path == "retention" {
+                    message = "No store-backed retention offer is configured. You can continue directly to Apple Subscription Management."
+                } else if json["status"] as? String == "confirmation_required" {
+                    message = "Test consent request saved as pending. This staging service sends no confirmation or marketing email."
+                } else if json["status"] as? String == "suppressed" {
+                    consent = false
+                    message = "Marketing suppressed for this test account."
+                } else { message = "Unrecognized response; no success assumed." }
+            } catch { message = "Service unavailable. Subscription management remains available above." }
+        }
+    }
+}
+private final class SBTStagingRedirectGuard: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+    func urlSession(_ session: URLSession, task: URLSessionTask,
+                    willPerformHTTPRedirection response: HTTPURLResponse,
+                    newRequest request: URLRequest,
+                    completionHandler: @escaping (URLRequest?) -> Void) {
+        completionHandler(nil)
+    }
+}
+#endif
+
+
+/// Normal subscription controls stay available even when account services are offline.
+struct SBTAccountPreferences: View {
+    @EnvironmentObject private var tiers: TierEntitlementManager
+    @EnvironmentObject private var subs: SubscriptionManager
+    @EnvironmentObject private var auth: AuthService
+    @StateObject private var account = SBTAccountIntegration()
+    #if DEBUG && canImport(Supabase)
+    @ObservedObject private var sandboxSession = SBTSandboxSession.shared
+    @State private var sandboxEmail = ""
+    @State private var sandboxPassword = ""
+    #endif
+    @State private var redeem = false
+    @State private var redemptionMessage = ""
+    @State private var emailConsent = false
+    @State private var reason = "Prefer not to say"
+    @AppStorage(AnalyticsPrivacy.consentKey) private var analyticsConsent = false
+    var body: some View {
+        Form {
+            Section("Apple purchases") {
+                Text("Current plan: \(tiers.activeTier.displayName)")
+                Button("Redeem an Apple offer code") { redeem = true }
+                Text("Apple checks eligibility and displays the offer terms. Access changes only after StoreKit verifies a transaction.")
+                    .font(.footnote)
+                Button("Restore Apple purchases") {
+                    Task { await tiers.restore(); await subs.refreshEntitlements() }
+                }
+                Button("Manage or cancel Apple subscriptions") { Task { await tiers.manageSubscriptions() } }
+                    .accessibilityHint("Opens Apple's subscription controls immediately")
+                if !redemptionMessage.isEmpty { Text(redemptionMessage).accessibilityLabel(redemptionMessage) }
+            }
+            #if DEBUG && canImport(Supabase)
+            Section("Sandbox account testing") {
+                Text("Real authentication and SAVE20 validation are deferred. No test account has been created.")
+                TextField("Dedicated test email", text: $sandboxEmail)
+                    .textContentType(.username).textInputAutocapitalization(.never).autocorrectionDisabled()
+                SecureField("Test account password", text: $sandboxPassword).textContentType(.password)
+                Button("Sign in to sandbox") {
+                    let email = sandboxEmail, password = sandboxPassword
+                    sandboxPassword = ""
+                    Task { await sandboxSession.signIn(email: email, password: password) }
+                }.disabled(!sandboxSession.isConfigured || sandboxSession.busy || sandboxEmail.isEmpty || sandboxPassword.isEmpty)
+                Button("Refresh sandbox session") { Task { await sandboxSession.refresh() } }.disabled(!sandboxSession.isConfigured || sandboxSession.busy)
+                Button("Sign out of sandbox") { account.clear(); Task { await sandboxSession.signOut() } }.disabled(!sandboxSession.isConfigured || sandboxSession.busy)
+                Text(sandboxSession.message)
+            }
+            #endif
+            Section("Account recovery") {
+                Text("Sign in to the same Sacred Bill Tracker account on each device, then restore your purchases. Purchases without an account binding require ownership review before account benefits can be linked.")
+                Button("Check account benefits") { Task { await account.refresh() } }.disabled(account.busy)
+                if !account.message.isEmpty { Text(account.message) }
+                ForEach(account.snapshot?.subscriptions ?? [], id: \.original_transaction_id) { subscription in
+                    Text("Sandbox subscription: \(subscription.tier(at: Date()).displayName). This test record does not unlock production benefits.")
+                }
+                if let lifetime = account.snapshot?.lifetime {
+                    Text("Sandbox lifetime record: \(lifetime.tier). This test record does not unlock production benefits.")
+                }
+            }
+            Section("Before you go") {
+                Text("Managing or canceling your subscription never requires answering these questions.")
+                Picker("Optional cancellation reason", selection: $reason) {
+                    ForEach(["Prefer not to say", "Cost", "Not using enough", "Missing features", "Technical issue"], id: \.self) { Text($0) }
+                }
+                Text("No verified retention offer is currently available.")
+                Text(SBTAccountConnection.lifetimeWarning)
+                    .font(.body).fixedSize(horizontal: false, vertical: true)
+            }
+            Section("Email preferences") {
+                Text("Marketing email sending is off. Account and purchase access do not require marketing consent.")
+                Toggle("Send me product updates and offers by email", isOn: $emailConsent)
+                    .disabled(!account.isConfigured)
+                Button("Save email opt-in") {
+                    Task { await account.optIn(email: auth.currentUserEmail ?? "", consent: emailConsent) }
+                }.disabled(!emailConsent || account.busy || !account.isConfigured)
+                Button("Opt out of marketing email") {
+                    emailConsent = false
+                    Task { await account.optOut() }
+                }.disabled(account.busy || !account.isConfigured)
+                if let marketing = account.snapshot?.marketing {
+                    Text("Saved email preference: \(marketing.state)")
+                    if marketing.suppressed { Text("Delivery is suppressed.") }
+                }
+                Text("Opt-in is separate from analytics. Preferences are confirmed by the account service; an unavailable service never enrolls you.").font(.footnote)
+            }
+            Section("Analytics privacy") {
+                Toggle("Share feature usage events", isOn: $analyticsConsent)
+                Text("Optional usage events exclude bill names, amounts, income, balances, notes, and email addresses. Marketing consent is separate.").font(.footnote)
+                Link("Privacy Policy", destination: URL(string: "https://www.sacredpathwayllc.com/sacred-bill-tracker/privacy-policy")!)
+            }
+        }
+        .navigationTitle("Purchases and privacy")
+        .onAppear { AnalyticsService.shared.track(.retentionStarted, source: "retention") }
+        .onChange(of: auth.currentUserID) { _, _ in account.clear(); emailConsent = false }
+        .onDisappear {
+            account.clear(); emailConsent = false
+            #if DEBUG && canImport(Supabase)
+            sandboxPassword = ""
+            #endif
+        }
+        #if DEBUG && canImport(Supabase)
+        .onChange(of: sandboxSession.revision) { _, _ in account.clear() }
+        #endif
+        .offerCodeRedemption(isPresented: $redeem) { result in
+            Task { @MainActor in
+                await tiers.refreshFromStoreKit()
+                await subs.refreshEntitlements()
+                switch result {
+                case .success:
+                    redemptionMessage = "Apple's redemption sheet closed. Current verified plan: \(tiers.activeTier.displayName)."
+                case .failure:
+                    redemptionMessage = "Apple could not complete redemption. Check the code and eligibility in Apple's sheet, or try again later."
+                }
+            }
+        }
+    }
 }

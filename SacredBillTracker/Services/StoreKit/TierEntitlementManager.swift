@@ -2,18 +2,13 @@
 //  TierEntitlementManager.swift
 //  SacredBillTracker
 //
-//  Source of truth for the 3-tier plan (Essential / Business / Unlimited).
-//  Computes the active tier from StoreKit `Transaction.currentEntitlements`
-//  (local, authoritative for the device) and PROMOTES from the backend
-//  `current_subscription_tier` RPC (cross-device / webhook-updated). It only
-//  ever promotes from the backend — it never demotes a valid local
-//  StoreKit entitlement (mirrors the AutoTrack pattern in SubscriptionManager).
-//
-//  Additive: does not replace SubscriptionManager. Inject both as
-//  @EnvironmentObject. Feature gating throughout the app reads `activeTier`.
+//  Three-tier presentation over the shared verified StoreKit/backend snapshot.
+//  SubscriptionManager and this manager consume the same account-scoped policy;
+//  a backend scalar cannot bypass expiry, revocation or the offline time limit.
 //
 
 import Foundation
+import Combine
 import StoreKit
 #if canImport(UIKit)
 import UIKit
@@ -33,6 +28,7 @@ final class TierEntitlementManager: ObservableObject {
     @Published var lastError: String?
     @Published var lastPurchaseSucceeded = false
 
+    private var identityRevision = 0
     private var listener: Task<Void, Never>?
 
     // MARK: Convenience gating
@@ -52,7 +48,21 @@ final class TierEntitlementManager: ObservableObject {
 
     // MARK: Lifecycle
 
-    init() {}
+    private var entitlementObservation: AnyCancellable?
+    private var accountObservation: AnyCancellable?
+    private var rewardObservation: AnyCancellable?
+    init() {
+        accountObservation = SBTVerifiedEntitlementStore.shared.$accountTier.sink { [weak self] tier in
+            self?.activeTier = max(tier, SBTVerifiedEntitlementStore.shared.rewardTier,
+                SBTVerifiedEntitlementStore.shared.productIDs.map(PlanTier.from(productID:)).max() ?? .free)
+        }
+        rewardObservation = SBTVerifiedEntitlementStore.shared.$rewardTier.sink { [weak self] tier in
+            self?.activeTier = max(tier, SBTVerifiedEntitlementStore.shared.accountTier, SBTVerifiedEntitlementStore.shared.productIDs.map(PlanTier.from(productID:)).max() ?? .free)
+        }
+        entitlementObservation = SBTVerifiedEntitlementStore.shared.$productIDs.sink { [weak self] ids in
+            self?.activeTier = max(SBTVerifiedEntitlementStore.shared.rewardTier, SBTVerifiedEntitlementStore.shared.accountTier, ids.map(PlanTier.from(productID:)).max() ?? .free)
+        }
+    }
 
     func start() async {
         await loadProducts()
@@ -74,37 +84,15 @@ final class TierEntitlementManager: ObservableObject {
         }
     }
 
-    /// Compute tier from local StoreKit entitlements (authoritative for lapse).
+    /// Both existing managers consume the same account-bound verified snapshot.
     func refreshFromStoreKit() async {
-        var best: PlanTier = .free
-        for await result in Transaction.currentEntitlements {
-            guard case .verified(let txn) = result else { continue }
-            if txn.revocationDate != nil { continue }
-            if let exp = txn.expirationDate, exp < Date() { continue }
-            let tier = PlanTier.from(productID: txn.productID)
-            if tier > best { best = tier }
-        }
-        // Local entitlements are authoritative downward: set directly.
-        activeTier = best
+        await SBTVerifiedEntitlementStore.shared.refreshFromApple()
+        lastError = SBTVerifiedEntitlementStore.shared.verificationMessage
+        activeTier = max(SBTVerifiedEntitlementStore.shared.rewardTier, SBTVerifiedEntitlementStore.shared.accountTier, SBTVerifiedEntitlementStore.shared.productIDs.map(PlanTier.from(productID:)).max() ?? .free)
     }
 
-    /// Promote (never demote) from the backend cross-device tier.
     func refreshFromBackend() async {
-        #if canImport(Supabase)
-        do {
-            // current_subscription_tier() returns a scalar text; decode as String.
-            let tierString: String = try await SupabaseConfig.client
-                .rpc("current_subscription_tier")
-                .execute()
-                .value
-            let backendTier = PlanTier.from(backend: tierString)
-            if backendTier > activeTier { activeTier = backendTier }
-        } catch {
-            #if DEBUG
-            print("[Tier] current_subscription_tier failed: \(error)")
-            #endif
-        }
-        #endif
+        await refreshFromStoreKit()
     }
 
     // MARK: Purchase / upgrade / downgrade / restore
@@ -118,8 +106,14 @@ final class TierEntitlementManager: ObservableObject {
         }
         await AnalyticsService.shared.log(.planSelected, tier: tier.rawValue, source: "paywall")
         do {
+            let authenticatedID = await AuthService.shared.verifiedPurchaseAccountID()
+            // An explicit caller token must refer to this live authenticated session.
+            if let requested = appAccountToken, requested != authenticatedID {
+                lastError = "Sign in to the purchasing Sacred Bill Tracker account and try again."
+                return false
+            }
             var options: Set<Product.PurchaseOption> = []
-            if let token = appAccountToken { options.insert(.appAccountToken(token)) }
+            if let token = authenticatedID { options.insert(.appAccountToken(token)) }
             let result = try await product.purchase(options: options)
             switch result {
             case .success(let verification):
@@ -127,13 +121,27 @@ final class TierEntitlementManager: ObservableObject {
                     let purchased = PlanTier.from(productID: txn.productID)
                     let previous = activeTier
                     await txn.finish()
-                    await refreshFromStoreKit()
                     await syncPurchaseToBackend(txn)
+                    await refreshFromStoreKit()
                     await AnalyticsService.shared.log(
                         purchased > previous ? .upgrade : (purchased < previous ? .downgrade : .purchase),
                         tier: purchased.rawValue, source: "paywall")
-                    lastPurchaseSucceeded = true
-                    return true
+                    await recordPurchaseAttribution(
+                        transaction: txn,
+                        product: product,
+                        tier: purchased,
+                        source: "three_tier_paywall"
+                    )
+                    let granted = SBTPostPurchaseAccessPolicy.grantsPurchasedPlan(
+                        purchased: purchased,
+                        active: activeTier
+                    )
+                    lastPurchaseSucceeded = granted
+                    if !granted {
+                        lastError = SBTVerifiedEntitlementStore.shared.verificationMessage
+                            ?? "Your purchase was verified, but access has not finished syncing. Restore purchases or try again in a moment."
+                    }
+                    return granted
                 }
                 return false
             case .userCancelled:
@@ -161,6 +169,7 @@ final class TierEntitlementManager: ObservableObject {
     }
 
     func manageSubscriptions() async {
+        AnalyticsService.shared.track(.subscriptionManagementOpened, source: "settings")
         #if os(iOS)
         guard let scene = UIApplication.shared.connectedScenes
             .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return }
@@ -170,7 +179,21 @@ final class TierEntitlementManager: ObservableObject {
     }
 
     private func syncPurchaseToBackend(_ txn: StoreKit.Transaction) async {
+        #if DEBUG && canImport(Supabase)
+        // Xcode fixtures never call a hosted service. Sandbox transactions never
+        // fall through to production verification/referral writes in DEBUG.
+        if txn.environment == .xcode { return }
+        if txn.environment == .sandbox {
+            guard let session = try? await SBTSandboxSession.shared.verifiedSession(), txn.appAccountToken == session.owner else { return }
+            let sandbox = SBTAccountIntegration()
+            await sandbox.verifySubscription(originalTransactionID: String(txn.originalID))
+            return
+        }
+        #endif
         #if canImport(Supabase)
+        guard txn.environment == .production,
+              let owner = await AuthService.shared.verifiedPurchaseAccountID(),
+              txn.appAccountToken == owner else { return }
         struct Body: Encodable {
             let platform: String
             let product_id: String
@@ -202,13 +225,63 @@ final class TierEntitlementManager: ObservableObject {
         listener = Task.detached { [weak self] in
             for await update in Transaction.updates {
                 guard case .verified(let txn) = update else { continue }
+                await SBTVerifiedEntitlementStore.shared.invalidateVerifiedStoreKitTransaction(txn)
                 await txn.finish()
+                await self?.syncPurchaseToBackend(txn)
                 await self?.refreshFromStoreKit()
+                guard ProductID.tierPlans.contains(txn.productID),
+                      let self,
+                      let product = await self.productForAttribution(id: txn.productID) else { continue }
+                await self.recordPurchaseAttribution(
+                    transaction: txn,
+                    product: product,
+                    tier: PlanTier.from(productID: txn.productID),
+                    source: "transaction_listener"
+                )
             }
         }
     }
 
+    private func productForAttribution(id: String) async -> Product? {
+        if let loaded = planProducts[id] { return loaded }
+        return try? await Product.products(for: [id]).first
+    }
+
+    private func recordPurchaseAttribution(
+        transaction: StoreKit.Transaction,
+        product: Product,
+        tier: PlanTier,
+        source: String
+    ) async {
+        let outcome = await PurchaseAttributionService.shared.recordVerifiedSubscriptionPurchase(
+            transaction: transaction,
+            product: product,
+            tier: tier.rawValue,
+            source: source
+        )
+        if case .deferred(let reason) = outcome {
+            #if DEBUG
+            print("[AppsFlyer][Tier] Attribution deferred for \(transaction.id): \(reason)")
+            #endif
+        }
+    }
+
     func clearForSignedOutUser() {
+        identityRevision += 1
         activeTier = .free
+    }
+}
+
+enum SBTPostPurchaseAccessPolicy {
+    static func grantsPurchasedPlan(purchased: PlanTier, active: PlanTier) -> Bool {
+        active >= purchased
+    }
+}
+
+/// Call only after StoreKit cryptographic verification. No offer-code/lifetime fallback.
+enum SBTVerifiedTransactionTier {
+    static func resolve(product: String, expiry: Date?, revoked: Bool, upgraded: Bool, now: Date = Date()) -> PlanTier {
+        guard !revoked, !upgraded, let expiry, expiry > now else { return .free }
+        return PlanTier.from(productID: product)
     }
 }

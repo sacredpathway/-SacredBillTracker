@@ -8,19 +8,66 @@
 import Foundation
 import UserNotifications
 
+enum BillReminderPlanner {
+    static let allowedLeadTimeDays = [0, 1, 3, 7]
+
+    static func normalizedLeadTime(_ days: Int) -> Int {
+        allowedLeadTimeDays.contains(days) ? days : 3
+    }
+
+    static func triggerDate(
+        dueDate: Date,
+        leadTimeDays: Int,
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> Date? {
+        guard let base = calendar.date(
+            byAdding: .day,
+            value: -normalizedLeadTime(leadTimeDays),
+            to: dueDate
+        ) else { return nil }
+        var components = calendar.dateComponents([.year, .month, .day], from: base)
+        components.hour = 9
+        components.minute = 0
+        guard let date = calendar.date(from: components), date > now else { return nil }
+        return date
+    }
+
+    /// Stable identifiers mean rescheduling replaces an existing request
+    /// instead of creating a duplicate for the same bill reminder.
+    static func reminderIdentifier(for billID: UUID) -> String { billID.uuidString }
+
+    static func cancellationIdentifiers(for billID: UUID) -> [String] {
+        [
+            reminderIdentifier(for: billID),
+            PaydownPlanService.NotificationKey.firstID(for: billID),
+            PaydownPlanService.NotificationKey.secondID(for: billID)
+        ]
+    }
+}
+
 @MainActor
 final class NotificationManager: ObservableObject {
 
     static let shared = NotificationManager()
 
     @Published var authorizationStatus: UNAuthorizationStatus = .notDetermined
-    @Published var leadTimeDays: Int = 2 {
-        didSet { UserDefaults.standard.set(leadTimeDays, forKey: "sacred.lead.time.days") }
+    @Published var leadTimeDays: Int = 3 {
+        didSet {
+            let normalized = BillReminderPlanner.normalizedLeadTime(leadTimeDays)
+            if normalized != leadTimeDays { leadTimeDays = normalized; return }
+            UserDefaults.standard.set(normalized, forKey: "sacred.lead.time.days")
+        }
     }
 
     private init() {
         let stored = UserDefaults.standard.integer(forKey: "sacred.lead.time.days")
-        self.leadTimeDays = stored == 0 ? 2 : stored
+        // A missing key historically read as zero, so distinguish it from the
+        // newly-supported "on due date" option. Existing unsupported values
+        // (including the old default of 2) migrate safely to 3 days.
+        self.leadTimeDays = UserDefaults.standard.object(forKey: "sacred.lead.time.days") == nil
+            ? 3
+            : BillReminderPlanner.normalizedLeadTime(stored)
         Task { await refreshStatus() }
     }
 
@@ -59,18 +106,17 @@ final class NotificationManager: ObservableObject {
         guard !bill.isPaid else { return }
 
         let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        authorizationStatus = settings.authorizationStatus
+        guard settings.authorizationStatus == .authorized
+                || settings.authorizationStatus == .provisional else { return }
 
-        // Build trigger date: X days before due, at 9:00 AM local.
         let calendar = Calendar.current
-        guard
-            let base = calendar.date(byAdding: .day, value: -leadTimeDays, to: bill.dueDate),
-            var components = Optional(calendar.dateComponents([.year, .month, .day], from: base))
-        else { return }
-        components.hour = 9
-        components.minute = 0
-
-        if let triggerDate = calendar.date(from: components),
-           triggerDate > Date() {
+        if let triggerDate = BillReminderPlanner.triggerDate(
+            dueDate: bill.dueDate,
+            leadTimeDays: leadTimeDays,
+            calendar: calendar
+        ) {
 
             let content = UNMutableNotificationContent()
             content.title = "Upcoming Bill: \(bill.name)"
@@ -82,7 +128,11 @@ final class NotificationManager: ObservableObject {
                 dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate),
                 repeats: false
             )
-            let request = UNNotificationRequest(identifier: bill.id.uuidString, content: content, trigger: trigger)
+            let request = UNNotificationRequest(
+                identifier: BillReminderPlanner.reminderIdentifier(for: bill.id),
+                content: content,
+                trigger: trigger
+            )
             try? await center.add(request)
         }
 
@@ -168,11 +218,7 @@ final class NotificationManager: ObservableObject {
         // scheduled for this bill so toggling the plan off in the
         // editor actually removes them.
         UNUserNotificationCenter.current()
-            .removePendingNotificationRequests(withIdentifiers: [
-                billId.uuidString,
-                PaydownPlanService.NotificationKey.firstID(for: billId),
-                PaydownPlanService.NotificationKey.secondID(for: billId)
-            ])
+            .removePendingNotificationRequests(withIdentifiers: BillReminderPlanner.cancellationIdentifiers(for: billId))
     }
 
     // MARK: - Sacred Focus productivity reminders

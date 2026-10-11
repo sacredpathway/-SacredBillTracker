@@ -1,0 +1,6 @@
+// Development acceptance only. Supply staging public configuration through the launch scheme.
+#include "Secrets.example.xcconfig"
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) DEBUG SBT_STAGING_ACCEPTANCE
+SKIP_INSTALL = YES
+SBT_LOCAL_VALIDATION_ONLY = NO
+SUPPORTED_PLATFORMS = iphoneos iphonesimulator

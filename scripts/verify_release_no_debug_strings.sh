@@ -20,6 +20,24 @@
 #  Does NOT modify the app, its features, or its branding — read-only.
 #
 set -eu
+case " ${SWIFT_ACTIVE_COMPILATION_CONDITIONS:-} ${OTHER_SWIFT_FLAGS:-} " in
+  *SBT_STAGING_ACCEPTANCE*)
+    if [ "${CONFIGURATION:-}" != "Debug" ] || [ "${ACTION:-}" != "build" ] || [ "${DEPLOYMENT_POSTPROCESSING:-NO}" = "YES" ]; then
+      echo "error: Staging acceptance forbids Release/archive/install builds."
+      exit 1
+    fi
+    ;;
+esac
+
+# The committed template permits simulator-only structural validation without
+# production analytics credentials. Never let that temporary configuration
+# participate in an install/archive or device build.
+if [ "${SBT_LOCAL_VALIDATION_ONLY:-NO}" = "YES" ]; then
+    if [ "${ACTION:-}" != "build" ] || [ "${PLATFORM_NAME:-}" != "iphonesimulator" ] || [ "${DEPLOYMENT_POSTPROCESSING:-NO}" = "YES" ]; then
+        echo "error: Local validation configuration is simulator-build-only; archive/install/device builds are prohibited."
+        exit 1
+    fi
+fi
 
 # Force a byte-safe locale. `strings -a` on a Mach-O binary emits bytes
 # that are not valid UTF-8; under a UTF-8 locale BSD sed/grep abort with

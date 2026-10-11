@@ -48,7 +48,8 @@ final class ManagedProfileStore: ObservableObject {
         ManagedProfileContext(
             ownerID: currentOwnerID,
             selection: normalizedSelection(),
-            defaultProfileID: defaultProfile?.id
+            defaultProfileID: defaultProfile?.id,
+            isOwnerResolved: AuthService.shared.hasResolvedSession
         )
     }
 

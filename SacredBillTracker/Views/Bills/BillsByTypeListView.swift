@@ -76,11 +76,10 @@ struct BillsByTypeListView: View {
     }
 
     /// All bills of the chosen type due this month, sorted by due date.
-    /// Reuses the existing `isDueThisMonth` helper on `Bill` so this
-    /// matches the Dashboard's Personal/Business "This Month" totals.
+    /// Uses the shared month filter so it matches the Dashboard's
+    /// Personal/Business "This Month" totals.
     private var filtered: [Bill] {
-        store.bills
-            .filter { $0.type == type && $0.isDueThisMonth }
+        BillTotalsCalculator.bills(from: store.bills.filter { $0.type == type })
             .sorted { $0.dueDate < $1.dueDate }
     }
 }

@@ -40,7 +40,7 @@ struct BillRowView: View {
                             Label("Shared by Partner", systemImage: "person.2.fill")
                                 .labelStyle(.iconOnly)
                                 .font(.caption2)
-                                .foregroundStyle(Color.appHousehold)
+                                .foregroundStyle(Color.appHouseholdText)
                                 .accessibilityLabel("Shared by partner")
                         }
                     }

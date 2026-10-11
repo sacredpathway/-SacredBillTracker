@@ -105,7 +105,7 @@ private struct TrashRow: View {
             } label: {
                 Image(systemName: "arrow.uturn.backward.circle.fill")
                     .font(.title3)
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Restore \(bill.name)")

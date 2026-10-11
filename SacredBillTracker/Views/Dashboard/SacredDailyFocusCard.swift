@@ -30,7 +30,7 @@ private enum SacredFocusDestination: String, Identifiable {
 
 struct SacredDailyFocusCard: View {
 
-    let quote: MotivationalQuote
+    let quote: FinancialLesson
 
     @EnvironmentObject private var subs: SubscriptionManager
     @EnvironmentObject private var store: BillStore
@@ -43,6 +43,8 @@ struct SacredDailyFocusCard: View {
     /// One state covers both modes so the card is the SINGLE entry
     /// point and there is no second dashboard card.
     @State private var showFocusCenter = false
+    @State private var showEducation = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showPaywall = false
     @State private var destination: SacredFocusDestination?
     @State private var quickNoteText = ""
@@ -54,6 +56,8 @@ struct SacredDailyFocusCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: isExpanded ? 14 : 0) {
             focusHeader
+            Button("Explore Financial Education") { showEducation = true }
+                .font(.subheadline).foregroundStyle(.white).padding(.top, 8)
 
             if isExpanded {
                 VStack(spacing: 8) {
@@ -102,6 +106,12 @@ struct SacredDailyFocusCard: View {
                 .stroke(Color.appAccent.opacity(0.30), lineWidth: 0.5)
         )
         .accessibilityElement(children: .contain)
+        .sheet(isPresented: $showEducation) {
+            NavigationStack {
+                ScrollView { FinancialEducationView().padding() }
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showEducation = false } } }
+            }
+        }
         .sheet(isPresented: $showFocusCenter) {
             NavigationStack {
                 DailyFocusCenterView()
@@ -153,18 +163,18 @@ struct SacredDailyFocusCard: View {
                         .shadow(color: Color.appLime.opacity(0.25), radius: 6, y: 0)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) {
-                            Text("Sacred Focus")
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Financial Education")
                                 .font(.subheadline.weight(.bold))
-                                .foregroundStyle(Color.appAccent)
-                                .lineLimit(1)
-                            focusPlusBadge
+                                .foregroundStyle(Color.appAccentText)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if isExpanded { focusPlusBadge }
                         }
 
                         Text(quote.text)
                             .font(.footnote.weight(.medium))
                             .foregroundStyle(.white)
-                            .lineLimit(2)
+                            .lineLimit(isExpanded ? nil : 4)
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
 
@@ -179,7 +189,7 @@ struct SacredDailyFocusCard: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Sacred Focus. \(quote.text).")
+            .accessibilityLabel("Financial Education. \(quote.text).")
             .accessibilityHint(isExpanded ? "Collapses Sacred Focus." : "Expands Sacred Focus.")
 
             Spacer(minLength: 6)
@@ -187,11 +197,11 @@ struct SacredDailyFocusCard: View {
             if isExpanded {
                 ShareLink(
                     item: shareText,
-                    subject: Text("Quote from Sacred Bill Tracker")
+                    subject: Text("Financial Education — Sacred Bill Tracker")
                 ) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.appAccent)
+                        .foregroundStyle(Color.appAccentText)
                         .frame(width: 38, height: 38)
                         .background(
                             Circle().fill(Color.appAccent.opacity(0.15))
@@ -199,7 +209,7 @@ struct SacredDailyFocusCard: View {
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Share today's quote")
+                .accessibilityLabel("Share today's money lesson")
             }
 
             Button {
@@ -207,7 +217,7 @@ struct SacredDailyFocusCard: View {
             } label: {
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                     .font(.subheadline.weight(.bold))
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                     .frame(width: 34, height: 34)
                     .background(Circle().fill(Color.appAccent.opacity(0.12)))
                     .contentShape(Circle())
@@ -283,7 +293,7 @@ struct SacredDailyFocusCard: View {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: systemImage)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                     .frame(width: 26, height: 26)
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -343,7 +353,7 @@ struct SacredDailyFocusCard: View {
     }
 
     private func toggleExpanded() {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+        withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.85)) {
             isExpanded.toggle()
         }
     }
@@ -363,7 +373,7 @@ struct SacredDailyFocusCard: View {
         let title = lines.first ?? "Untitled Note"
         let body = lines.dropFirst().joined(separator: "\n")
 
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+        withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.85)) {
             noteStore.add(FocusNote(title: title, body: body))
             quickNoteText = ""
         }
@@ -488,7 +498,7 @@ struct SacredDailyFocusCard: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(Capsule().fill(Color.appLime.opacity(0.30)))
-            .foregroundStyle(Color.appLime)
+            .foregroundStyle(Color.appLimeText)
         } else {
             HStack(spacing: 3) {
                 Image(systemName: "lock.fill")
@@ -499,7 +509,7 @@ struct SacredDailyFocusCard: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(Capsule().fill(Color.appAccent.opacity(0.22)))
-            .foregroundStyle(Color.appAccent)
+            .foregroundStyle(Color.appAccentText)
         }
     }
 
@@ -529,17 +539,7 @@ struct SacredDailyFocusCard: View {
     }
 
     private var shareText: String {
-        var parts: [String] = ["“\(quote.text)”"]
-        let author = quote.author.trimmingCharacters(in: .whitespaces)
-        if !author.isEmpty {
-            parts.append("— \(author)")
-        }
-        parts.append("")
-        parts.append("Sent from Sacred Bill Tracker")
-        if !Self.appStoreURL.isEmpty {
-            parts.append(Self.appStoreURL)
-        }
-        return parts.joined(separator: "\n")
+        return quote.shareText
     }
 }
 
@@ -554,7 +554,7 @@ private extension String {
 
 struct DailyFocusDetailView: View {
 
-    let quote: MotivationalQuote
+    let quote: FinancialLesson
 
     @Environment(\.dismiss) private var dismiss
 
@@ -602,9 +602,9 @@ struct DailyFocusDetailView: View {
 
                     // Full quote.
                     VStack(alignment: .leading, spacing: 10) {
-                        Image(systemName: "quote.opening")
+                        Image(systemName: "book")
                             .font(.title2.weight(.bold))
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                         Text(quote.text)
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(.primary)
@@ -631,7 +631,7 @@ struct DailyFocusDetailView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Label("Today's Money Focus", systemImage: "target")
                             .font(.subheadline.weight(.bold))
-                            .foregroundStyle(Color.appHousehold)
+                            .foregroundStyle(Color.appHouseholdText)
                         Text(moneyFocus)
                             .font(.body)
                             .foregroundStyle(.primary)
@@ -647,9 +647,9 @@ struct DailyFocusDetailView: View {
                     // Share button.
                     ShareLink(
                         item: shareText,
-                        subject: Text("Quote from Sacred Bill Tracker")
+                        subject: Text("Financial Education — Sacred Bill Tracker")
                     ) {
-                        Label("Share Quote", systemImage: "square.and.arrow.up")
+                        Label("Share Lesson", systemImage: "square.and.arrow.up")
                             .font(.subheadline.weight(.semibold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
@@ -657,7 +657,7 @@ struct DailyFocusDetailView: View {
                                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                                     .fill(Color.appAccent.opacity(0.18))
                             )
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                     }
                     .buttonStyle(.plain)
                 }
@@ -698,26 +698,13 @@ struct DailyFocusDetailView: View {
     }
 
     private var shareText: String {
-        var parts: [String] = ["“\(quote.text)”"]
-        let author = quote.author.trimmingCharacters(in: .whitespaces)
-        if !author.isEmpty {
-            parts.append("— \(author)")
-        }
-        parts.append("")
-        parts.append("Sent from Sacred Bill Tracker")
-        if !Self.appStoreURL.isEmpty {
-            parts.append(Self.appStoreURL)
-        }
-        return parts.joined(separator: "\n")
+        return quote.shareText
     }
 }
 
 #Preview {
     SacredDailyFocusCard(
-        quote: MotivationalQuote(
-            text: "Rooted in what matters — pay yourself first.",
-            author: "Sacred Bill Tracker"
-        )
+        quote: FinancialEducation.lesson(day: 0)
     )
     .environmentObject(SubscriptionManager())
     .padding()

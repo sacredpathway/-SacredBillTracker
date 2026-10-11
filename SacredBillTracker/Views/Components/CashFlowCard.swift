@@ -3,7 +3,7 @@
 //  SacredBillTracker
 //
 //  "Cash flow" summary surfaced on the Dashboard. Shows the core monthly
-//  picture — due, paid, remaining, next 7 days — and what's left over.
+//  picture — total bills, paid, remaining, next 7 days — and what's left over.
 //
 
 import SwiftUI
@@ -35,7 +35,7 @@ struct CashFlowCard: View {
             HStack(spacing: 8) {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.headline)
-                    .foregroundStyle(Color.appAccent)
+                    .foregroundStyle(Color.appAccentText)
                 Text("Cash flow")
                     .font(.headline)
                 Spacer()
@@ -65,7 +65,7 @@ struct CashFlowCard: View {
                 HStack(spacing: 6) {
                     Text("\(Int(progress * 100))% covered")
                         .font(.caption.monospacedDigit())
-                        .foregroundStyle(Color.appAccent)
+                        .foregroundStyle(Color.appAccentText)
                     Text("•")
                         .foregroundStyle(.secondary)
                     Text("\(flow.unpaidCount) unpaid")
@@ -77,7 +77,7 @@ struct CashFlowCard: View {
             // Grid of 4 metrics
             let cols = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
             LazyVGrid(columns: cols, spacing: 10) {
-                metric(label: "Due",       value: fmt(flow.dueThisMonth),       tint: .appAccent)
+                metric(label: "Total Bills", value: fmt(flow.dueThisMonth),     tint: .appAccent)
                 metric(label: "Paid",      value: fmt(flow.paidThisMonth),      tint: .appLime)
                 metric(label: "Remaining", value: fmt(flow.remainingThisMonth), tint: .appAmber)
                 metric(label: "Next 7d",   value: fmt(flow.nextSevenDays),      tint: .appHousehold)

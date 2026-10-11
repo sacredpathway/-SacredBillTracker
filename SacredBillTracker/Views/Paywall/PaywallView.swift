@@ -137,7 +137,7 @@ struct PaywallView: View {
                             .frame(width: 36, height: 36)
                         Image(systemName: feature.icon)
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(Color.appAccent)
+                            .foregroundStyle(Color.appAccentText)
                     }
                     VStack(alignment: .leading, spacing: 2) {
                         Text(feature.title)
@@ -277,12 +277,12 @@ struct PaywallView: View {
                 Task { await subs.restorePurchases() }
             }
             .font(.footnote.weight(.medium))
-            .foregroundStyle(Color.appAccent)
+            .foregroundStyle(Color.appAccentText)
 
             HStack(spacing: 6) {
                 Link("Terms", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
                 Text("·")
-                Link("Privacy", destination: URL(string: "https://www.sacredpathway.org/sacred-bill-tracker-privacy")!)
+                Link("Privacy", destination: URL(string: "https://www.sacredpathwayllc.com/sacred-bill-tracker/privacy-policy")!)
             }
             .font(.caption2)
             .foregroundStyle(.secondary)
@@ -463,7 +463,7 @@ struct AutoTrackPaywallView: View {
             }.padding(.top, 8)
             Text("Automate your bill tracking")
                 .font(.largeTitle.weight(.bold)).multilineTextAlignment(.center)
-            Text("AutoTrack Premium connects your bank securely through Plaid and automatically finds recurring bills and spending activity.")
+            Text("AutoTrack Premium connects your bank securely through Plaid to import activity, organize accounts, and refresh your bank income.")
                 .font(.subheadline).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center).padding(.horizontal, 8)
         }
@@ -476,7 +476,7 @@ struct AutoTrackPaywallView: View {
                      "Recurring bill & subscription detection",
                      "Suggested bill-payment matching"], id: \.self) { line in
                 HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.appAccent)
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.appAccentText)
                     Text(line).font(.subheadline)
                     Spacer(minLength: 0)
                 }
@@ -552,7 +552,7 @@ struct AutoTrackPaywallView: View {
             .opacity(selectedProduct == nil && !subs.isLoadingProducts ? 0.6 : 1)
 
             Button("Restore Purchase") { Task { await subs.restorePurchases() } }
-                .font(.footnote.weight(.medium)).foregroundStyle(Color.appAccent)
+                .font(.footnote.weight(.medium)).foregroundStyle(Color.appAccentText)
         }
     }
 
@@ -569,7 +569,7 @@ struct AutoTrackPaywallView: View {
         HStack(spacing: 6) {
             Link("Terms", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
             Text("·")
-            Link("Privacy", destination: URL(string: "https://www.sacredpathway.org/sacred-bill-tracker-privacy")!)
+            Link("Privacy", destination: URL(string: "https://www.sacredpathwayllc.com/sacred-bill-tracker/privacy-policy")!)
         }
         .font(.caption2).foregroundStyle(.secondary)
     }
@@ -842,9 +842,9 @@ struct AutoTrackConnectView: View {
         ScrollView {
             VStack(spacing: 20) {
                 Image(systemName: "building.columns.fill")
-                    .font(.system(size: 40)).foregroundStyle(Color.appAccent)
+                    .font(.system(size: 40)).foregroundStyle(Color.appAccentText)
                 Text("Connect your banks").font(.title2.bold())
-                Text("Securely connect one or more accounts through Plaid. Deposits flow into your income, and spending is scanned for recurring bills.")
+                Text("Securely connect one or more accounts through Plaid. Import deposits into your income and keep your bank accounts organized.")
                     .font(.subheadline).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center).padding(.horizontal)
 
@@ -855,7 +855,7 @@ struct AutoTrackConnectView: View {
                         .multilineTextAlignment(.center).padding(.horizontal)
                 }
                 if let errorText {
-                    Text(errorText).font(.footnote).foregroundStyle(.red)
+                    Text(errorText).font(.footnote).foregroundStyle(Color.appDangerText)
                         .multilineTextAlignment(.center).padding(.horizontal)
                 }
 
@@ -877,7 +877,7 @@ struct AutoTrackConnectView: View {
 
                 if phase == .presenting {
                     Button("I finished in Plaid — import now") { Task { await finalize() } }
-                        .font(.footnote.weight(.medium)).foregroundStyle(Color.appAccent)
+                        .font(.footnote.weight(.medium)).foregroundStyle(Color.appAccentText)
                 }
             }
             .padding()
@@ -926,7 +926,7 @@ struct AutoTrackConnectView: View {
                 ForEach(connected) { item in
                     HStack(alignment: .top, spacing: 12) {
                         Image(systemName: "building.columns.fill")
-                            .foregroundStyle(Color.appAccent).font(.title3)
+                            .foregroundStyle(Color.appAccentText).font(.title3)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(item.institution_name ?? "Bank").font(.subheadline.weight(.semibold))
                             if let names = item.account_names, !names.isEmpty {
@@ -945,7 +945,7 @@ struct AutoTrackConnectView: View {
                             Button {
                                 pendingDisconnect = item
                             } label: {
-                                Image(systemName: "trash").foregroundStyle(.red)
+                                Image(systemName: "trash").foregroundStyle(Color.appDangerText)
                             }
                             .buttonStyle(.plain)
                             .accessibilityLabel("Disconnect \(item.institution_name ?? "bank")")
@@ -960,7 +960,7 @@ struct AutoTrackConnectView: View {
                     showUsageManager = true
                 } label: {
                     HStack(spacing: 12) {
-                        Image(systemName: "slider.horizontal.3").foregroundStyle(Color.appAccent)
+                        Image(systemName: "slider.horizontal.3").foregroundStyle(Color.appAccentText)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Manage account types").font(.subheadline.weight(.semibold))
                             Text(usageSummary).font(.caption).foregroundStyle(.secondary)
@@ -1122,7 +1122,7 @@ struct AccountUsageOverrideView: View {
                 }
 
                 if let errorText {
-                    Text(errorText).font(.footnote).foregroundStyle(.red)
+                    Text(errorText).font(.footnote).foregroundStyle(Color.appDangerText)
                         .multilineTextAlignment(.leading)
                 }
             }
@@ -1162,7 +1162,7 @@ struct AccountUsageOverrideView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 Image(systemName: acct.usage.systemImage)
-                    .foregroundStyle(Color.appAccent).font(.title3)
+                    .foregroundStyle(Color.appAccentText).font(.title3)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(acct.maskedName).font(.subheadline.weight(.semibold)).lineLimit(1)
                     Text(acct.institution_name ?? "Bank")
@@ -1196,7 +1196,7 @@ struct AccountUsageOverrideView: View {
                     Task { await skip(acct) }
                 }
                 .font(.caption.weight(.medium))
-                .foregroundStyle(Color.appAccent)
+                .foregroundStyle(Color.appAccentText)
             }
         }
         .padding(14)

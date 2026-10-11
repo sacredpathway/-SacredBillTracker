@@ -16,6 +16,7 @@ struct BillDetailView: View {
     // Sacred Bill Tracker is never mistaken for processing the payment.
     @State private var showLeaveAppConfirm = false
     @State private var pendingPayURL: URL?
+    @State private var showPDFPreview = false
 
     let bill: Bill
 
@@ -51,12 +52,17 @@ struct BillDetailView: View {
         .navigationTitle(b.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button { showPDFPreview = true } label: { Image(systemName: "square.and.arrow.up") }
+                    .accessibilityLabel("Create PDF bill report")
                 Button("Edit") { showEdit = true }
             }
         }
         .sheet(isPresented: $showEdit) {
             AddEditBillView(mode: .edit(b))
+        }
+        .sheet(isPresented: $showPDFPreview) {
+            BillPDFPreviewView(bills: [b])
         }
     }
 

@@ -50,7 +50,7 @@ enum BillCategory: String, Codable, CaseIterable, Identifiable {
         case .insurance: return "Insurance"
         case .groceries: return "Groceries"
         case .subscriptions: return "Subscriptions"
-        case .transportation: return "Transportation"
+        case .transportation: return "Auto & Travel"
         case .medical: return "Medical"
         case .tithe: return "Tithe / Giving"
         case .childcare: return "Childcare"
